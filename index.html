@@ -26,7 +26,7 @@
     <!-- Main Container UI -->
     <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
         
-        <!-- KOLOM KIRI: Status Survival & Kontrol -->
+        <!-- KOLOM KIRI -->
         <section class="lg:col-span-4 glass-card p-6 rounded-2xl shadow-2xl flex flex-col justify-between">
             <div>
                 <div class="text-center mb-6">
@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <!-- Panel Status Survival -->
+                <!-- Status Vital -->
                 <div class="bg-[#0d1117]/80 p-4 rounded-xl border border-gray-800 space-y-3">
                     <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">❤️ Status Vital Survivor</h3>
                     <div>
@@ -61,7 +61,7 @@
                         <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barHunger" class="bg-amber-500 h-full w-full"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Kehausan (Minum di Sungai/Danau)</span> <span id="statThirst">100%</span></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Kehausan (Minum di Sungai)</span> <span id="statThirst">100%</span></div>
                         <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barThirst" class="bg-blue-500 h-full w-full"></div></div>
                     </div>
                     <div>
@@ -73,22 +73,20 @@
             <div class="text-center text-[10px] text-gray-500 mt-4">GitHub: Hunter Open World Sandbox &bull; Supabase</div>
         </section>
 
-        <!-- KOLOM KANAN: Panduan & Klasemen -->
+        <!-- KOLOM KANAN -->
         <section class="lg:col-span-8 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Panduan Kontrol & Survival -->
                 <div class="glass-card p-5 rounded-2xl shadow-xl">
                     <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🎮 Panduan Aksi Survival</h3>
                     <div class="space-y-2 text-xs text-gray-300">
                         <div>🖱️ <b>Gerak & Lihat</b>: WASD + Mouse (Klik canvas untuk kunci kursor).</div>
                         <div>🗡️ <b>Ganti Alat</b>: Tekan <span class="text-amber-400">[1] Kapak</span> | <span class="text-blue-400">[2] Ganco</span> | <span class="text-emerald-400">[3] Senapan</span>.</div>
-                        <div>🥩 <b>Makan Daging</b>: Tekan <span class="text-amber-400">[E]</span> untuk memulihkan kelaparan.</div>
-                        <div>💧 <b>Minum Air</b>: Dekati Sungai/Danau lalu tekan <span class="text-blue-400">[F]</span>.</div>
-                        <div>💤 <b>Tidur/Istirahat</b>: Tekan <span class="text-emerald-400">[Z]</span> untuk memulihkan energi.</div>
+                        <div>🥩 <b>Makan Daging</b>: Tekan <span class="text-amber-400">[E]</span> untuk pulihkan lapar.</div>
+                        <div>💧 <b>Minum Air</b>: Dekati Sungai lalu tekan <span class="text-blue-400">[F]</span>.</div>
+                        <div>💤 <b>Tidur</b>: Tekan <span class="text-emerald-400">[Z]</span> untuk pulihkan energi.</div>
                     </div>
                 </div>
 
-                <!-- Inventaris -->
                 <div class="glass-card p-5 rounded-2xl shadow-xl">
                     <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🎒 Ransel Sumber Daya</h3>
                     <div class="grid grid-cols-3 gap-3 text-center">
@@ -111,7 +109,7 @@
                 </div>
             </div>
 
-            <!-- Klasemen Global -->
+            <!-- Klasemen -->
             <div class="glass-card p-5 rounded-2xl shadow-xl">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">🏆 Leaderboard Penjelajah Dunia</h3>
@@ -136,7 +134,7 @@
         </section>
     </main>
 
-    <!-- MODAL GAME OPEN WORLD -->
+    <!-- MODAL GAME -->
     <div id="gameModal" class="fixed inset-0 bg-black z-50 hidden flex flex-col items-center justify-center">
         <div id="gameWrapper" class="relative w-full h-full bg-[#161b22] flex flex-col overflow-hidden">
             <div class="bg-[#0d1117] px-6 py-3 flex justify-between items-center border-b border-gray-800 z-10 text-xs">
@@ -168,7 +166,6 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sc2lid2loZnplaHFjZGF3cmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTcwNTEsImV4cCI6MjEwMzY5MzA1MX0.faKWNZqTLE6nEH6nPw0L4uFepTy6ZvqrZDy2BaHcWxs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Status Survival
         let health = 100, hunger = 100, thirst = 100, energy = 100;
         let woodCount = 0, stoneCount = 0, meatCount = 0, score = 0;
         let currentTool = 'axe';
@@ -282,7 +279,6 @@
             `;
 
             scene = new THREE.Scene();
-            // Langit Terang (Sky Blue) & Fog Ringan agar Cerah
             scene.background = new THREE.Color(0x87CEEB);
             scene.fog = new THREE.FogExp2(0x87CEEB, 0.0035);
 
@@ -294,7 +290,6 @@
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
 
-            // Pencahayaan Siang Hari yang Terang (Hemisphere + Directional Sun)
             const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9);
             hemiLight.position.set(0, 200, 0);
             scene.add(hemiLight);
@@ -303,7 +298,7 @@
             sunLight.position.set(100, 200, 100);
             scene.add(sunLight);
 
-            // --- TAMBAHKAN GUNUNG-GUNUNG DI LATAR BELAKANG ---
+            // Gunung-gunung latar belakang
             for (let i = 0; i < 18; i++) {
                 const mGeo = new THREE.ConeGeometry(80 + Math.random() * 50, 100 + Math.random() * 60, 4);
                 const mMat = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.9, flatShading: true });
@@ -314,7 +309,7 @@
                 scene.add(mountain);
             }
 
-            // --- TAMBAHKAN AWAN-AWAN DI LANGIT ---
+            // Awan-awan langit
             for (let i = 0; i < 25; i++) {
                 const cloudGroup = new THREE.Group();
                 const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
@@ -327,7 +322,7 @@
                 scene.add(cloudGroup);
             }
 
-            // Terrain Luas
+            // Terrain
             const terrainGeo = new THREE.PlaneGeometry(500, 500, 100, 100);
             terrainGeo.rotateX(-Math.PI / 2);
             const pos = terrainGeo.attributes.position;
@@ -337,14 +332,14 @@
             terrainGeo.computeVertexNormals();
             scene.add(new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({ color: 0x2e8b57, roughness: 0.85, flatShading: true })));
 
-            // Sungai / Danau
+            // Sungai
             const waterGeo = new THREE.PlaneGeometry(16, 500);
             waterGeo.rotateX(-Math.PI / 2);
             const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.1, transparent: true, opacity: 0.85 }));
             water.position.set(0, -0.4, 0);
             scene.add(water);
 
-            // Laut di Ujung Peta
+            // Laut
             const oceanGeo = new THREE.PlaneGeometry(800, 800);
             oceanGeo.rotateX(-Math.PI / 2);
             const ocean = new THREE.Mesh(oceanGeo, new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2 }));
@@ -353,7 +348,7 @@
 
             solidObjects = []; worldTrees = []; worldStones = []; animals = [];
 
-            // Spawn Hutan Rimbun
+            // Pohon
             for (let i = 0; i < 80; i++) {
                 let tx = (Math.random() - 0.5) * 400;
                 let tz = (Math.random() - 0.5) * 400;
@@ -374,7 +369,7 @@
                 solidObjects.push({ mesh: treeGroup, radius: 1.5, type: 'tree' });
             }
 
-            // Spawn Batu Tambang
+            // Batu
             for (let i = 0; i < 40; i++) {
                 let bx = (Math.random() - 0.5) * 400;
                 let bz = (Math.random() - 0.5) * 400;
@@ -389,12 +384,11 @@
                 solidObjects.push({ mesh: stone, radius: 1.8, type: 'stone' });
             }
 
-            // Spawn Hewan Detail
+            // Hewan
             for (let i = 0; i < 12; i++) {
                 spawnRealisticAnimal();
             }
 
-            // Senjata di Tangan
             toolMeshGroup = new THREE.Group();
             updateToolMesh();
             camera.add(toolMeshGroup);
@@ -476,7 +470,7 @@
                     thirst = 100;
                     alert('Segar! Kamu minum air sungai.');
                 } else {
-                    alert('Kamu terlalu jauh dari sumber air (Sungai/Danau).');
+                    alert('Kamu terlalu jauh dari sumber air.');
                 }
             }
 
@@ -611,7 +605,7 @@
             if (document.fullscreenElement) document.exitFullscreen();
             document.getElementById('gameModal').classList.add('hidden');
 
-            const playerName = document.getElementById('playerName'].value.trim() || 'NomadExplorer';
+            const playerName = document.getElementById('playerName').value.trim() || 'NomadExplorer';
             await supabaseClient.from('leaderboard').insert([{
                 player_name: playerName,
                 score: score,
