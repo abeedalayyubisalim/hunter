@@ -7,66 +7,163 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass-card { background: rgba(22, 27, 34, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(48, 54, 61, 0.7); }
+        * { scrollbar-width: thin; scrollbar-color: #f59e0b55 #0d1117; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b88; }
+
+        body {
+            background:
+                radial-gradient(circle at 15% -10%, rgba(245,158,11,0.10) 0%, transparent 45%),
+                radial-gradient(circle at 100% 110%, rgba(16,185,129,0.08) 0%, transparent 50%),
+                #0d1117;
+            background-attachment: fixed;
+            color: #c9d1d9;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: radial-gradient(rgba(245,158,11,0.35) 1px, transparent 1px);
+            background-size: 28px 28px;
+            opacity: .05;
+            pointer-events: none;
+            z-index: 0;
+        }
+        h1, h2, h3, .font-display { font-family: 'Rajdhani', 'Inter', sans-serif; letter-spacing: .04em; }
+
+        .glass-card {
+            background: linear-gradient(180deg, rgba(22,27,34,0.92), rgba(15,19,25,0.88));
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(48, 54, 61, 0.7);
+            position: relative;
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(245, 158, 11, 0.35);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.65), 0 0 0 1px rgba(245,158,11,0.05);
+        }
+
+        .title-glow { text-shadow: 0 0 20px rgba(245,158,11,0.5), 0 0 2px rgba(245,158,11,0.7); }
+
+        .btn-glow { position: relative; overflow: hidden; }
+        .btn-glow::after {
+            content: '';
+            position: absolute; top: 0; left: -75%; width: 50%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-20deg);
+            transition: left .6s ease;
+        }
+        .btn-glow:hover::after { left: 130%; }
+
+        .stat-bar { position: relative; overflow: hidden; transition: width .5s cubic-bezier(.4,0,.2,1); }
+        .stat-bar::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shine 2.6s linear infinite;
+        }
+        @keyframes shine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .resource-card { transition: transform .2s ease, border-color .2s ease, background-color .2s ease; }
+        .resource-card:hover { transform: translateY(-3px); border-color: rgba(245,158,11,0.45); background-color: #12161d; }
+
+        .hud-pill { background: rgba(13,17,23,0.72); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); }
+        .hud-bar { height: 5px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.08); }
+        .hud-bar > div { height: 100%; transition: width .4s ease; }
+
+        #crosshairDot { transition: transform .12s ease, border-color .12s ease, background-color .12s ease; }
+        #crosshairDot.hit { transform: translate(-50%,-50%) scale(1.7); border-color: #ef4444; background: rgba(239,68,68,0.35); }
+
+        #vignette {
+            position: absolute; inset: 0; pointer-events: none;
+            box-shadow: inset 0 0 0 0 rgba(220,38,38,0);
+            transition: box-shadow .6s ease;
+            z-index: 15;
+        }
+
+        @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%,0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-32px); } }
+        .pop-text { position: absolute; left: 50%; animation: floatUp 1.1s ease-out forwards; pointer-events: none; font-weight: 800; z-index: 20; text-shadow: 0 2px 6px rgba(0,0,0,0.8); }
+
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.55); } 50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); } }
+        .connected-dot { animation: pulseGlow 2s infinite; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in-up { animation: fadeInUp .5s ease both; }
+
+        @keyframes toastIn { from { opacity: 0; transform: translateX(40px) scale(.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+        .toast { animation: toastIn .3s ease forwards; }
+        .toast.out { animation: toastOut .3s ease forwards; }
     </style>
 </head>
 <body class="min-h-screen p-4 flex flex-col justify-between">
+    <div id="toastContainer" class="fixed top-4 right-4 z-[60] flex flex-col gap-2 items-end pointer-events-none"></div>
 
     <!-- Top Header -->
-    <header class="flex justify-between items-center max-w-7xl mx-auto w-full mb-4 px-4">
-        <div class="flex items-center space-x-2">
-            <span class="text-xl">🌍</span>
-            <h1 class="text-xl font-black tracking-wider text-amber-500">HUNTER 3D: OPEN WORLD SANDBOX</h1>
+    <header class="relative z-10 flex justify-between items-center max-w-7xl mx-auto w-full mb-4 px-4 fade-in-up">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]">🌍</span>
+            <div>
+                <h1 class="text-xl font-black tracking-wider text-amber-500 title-glow font-display">HUNTER 3D: OPEN WORLD SANDBOX</h1>
+                <p class="text-[10px] text-gray-500 tracking-widest uppercase -mt-0.5">Survival &bull; Crafting &bull; Exploration</p>
+            </div>
         </div>
-        <div class="text-xs text-gray-400">Supabase: <span class="text-emerald-400 font-semibold">Connected</span></div>
+        <div class="flex items-center gap-2 text-xs text-gray-400 hud-pill px-3 py-1.5 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 connected-dot"></span>
+            Supabase: <span class="text-emerald-400 font-semibold">Connected</span>
+        </div>
     </header>
 
     <!-- Main Container UI -->
-    <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
-        
+    <main class="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+
         <!-- KOLOM KIRI -->
-        <section class="lg:col-span-4 glass-card p-6 rounded-2xl shadow-2xl flex flex-col justify-between">
+        <section class="lg:col-span-4 glass-card p-6 rounded-2xl shadow-2xl flex flex-col justify-between fade-in-up">
             <div>
                 <div class="text-center mb-6">
-                    <h2 class="text-2xl font-black text-amber-500 uppercase tracking-widest">WILDERNESS</h2>
-                    <p class="text-xs text-gray-400 mt-1">Siang Hari Cerah & Pegunungan Luas</p>
+                    <h2 class="text-2xl font-black text-amber-500 uppercase tracking-widest title-glow font-display">WILDERNESS</h2>
+                    <p class="text-xs text-gray-400 mt-1">☀️ Siang Hari Cerah &bull; 🏔️ Pegunungan Luas &bull; 🌊 Sungai & Laut</p>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nama Survivor</label>
-                    <input type="text" id="playerName" value="NomadExplorer" class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Nama Survivor</label>
+                    <input type="text" id="playerName" value="NomadExplorer" class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 transition">
                 </div>
 
                 <div class="space-y-2 mb-6">
-                    <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                    <button onclick="startGame()" class="btn-glow w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-900/40 transition duration-200 flex items-center justify-center space-x-2 hover:scale-[1.02] active:scale-[0.98]">
                         <span>☀️ Masuk ke Dunia Terang</span>
                     </button>
                     <div class="flex space-x-2">
-                        <button onclick="saveGame()" class="w-1/2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded-lg">💾 Save Game</button>
-                        <button onclick="loadGame()" class="w-1/2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold py-2 rounded-lg">📂 Load Game</button>
+                        <button onclick="saveGame()" class="btn-glow w-1/2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-xs font-bold py-2 rounded-lg transition hover:scale-[1.02] active:scale-[0.98]">💾 Save Game</button>
+                        <button onclick="loadGame()" class="btn-glow w-1/2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white text-xs font-bold py-2 rounded-lg transition hover:scale-[1.02] active:scale-[0.98]">📂 Load Game</button>
                     </div>
                 </div>
 
                 <!-- Status Vital -->
                 <div class="bg-[#0d1117]/80 p-4 rounded-xl border border-gray-800 space-y-3">
-                    <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">❤️ Status Vital Survivor</h3>
+                    <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">❤️ Status Vital Survivor</h3>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Kesehatan</span> <span id="statHealth">100%</span></div>
-                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barHealth" class="bg-red-500 h-full w-full"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Kesehatan</span> <span id="statHealth" class="font-semibold">100%</span></div>
+                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barHealth" class="stat-bar h-full w-full bg-gradient-to-r from-red-600 to-red-400"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Kelaparan (Makan Daging)</span> <span id="statHunger">100%</span></div>
-                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barHunger" class="bg-amber-500 h-full w-full"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Kelaparan (Makan Daging)</span> <span id="statHunger" class="font-semibold">100%</span></div>
+                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barHunger" class="stat-bar h-full w-full bg-gradient-to-r from-amber-600 to-amber-400"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Kehausan (Minum di Sungai)</span> <span id="statThirst">100%</span></div>
-                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barThirst" class="bg-blue-500 h-full w-full"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Kehausan (Minum di Sungai)</span> <span id="statThirst" class="font-semibold">100%</span></div>
+                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barThirst" class="stat-bar h-full w-full bg-gradient-to-r from-blue-600 to-blue-400"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Energi (Tidur/Istirahat)</span> <span id="statEnergy">100%</span></div>
-                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barEnergy" class="bg-emerald-500 h-full w-full"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Energi (Tidur/Istirahat)</span> <span id="statEnergy" class="font-semibold">100%</span></div>
+                        <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="barEnergy" class="stat-bar h-full w-full bg-gradient-to-r from-emerald-600 to-emerald-400"></div></div>
                     </div>
                 </div>
             </div>
@@ -74,36 +171,36 @@
         </section>
 
         <!-- KOLOM KANAN -->
-        <section class="lg:col-span-8 space-y-6">
+        <section class="lg:col-span-8 space-y-6 fade-in-up">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="glass-card p-5 rounded-2xl shadow-xl">
-                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🎮 Panduan Aksi Survival</h3>
-                    <div class="space-y-2 text-xs text-gray-300">
-                        <div>🖱️ <b>Gerak & Lihat</b>: WASD + Mouse (Klik canvas untuk kunci kursor).</div>
-                        <div>🗡️ <b>Ganti Alat</b>: Tekan <span class="text-amber-400">[1] Kapak</span> | <span class="text-blue-400">[2] Ganco</span> | <span class="text-emerald-400">[3] Senapan</span>.</div>
-                        <div>🥩 <b>Makan Daging</b>: Tekan <span class="text-amber-400">[E]</span> untuk pulihkan lapar.</div>
-                        <div>💧 <b>Minum Air</b>: Dekati Sungai lalu tekan <span class="text-blue-400">[F]</span>.</div>
-                        <div>💤 <b>Tidur</b>: Tekan <span class="text-emerald-400">[Z]</span> untuk pulihkan energi.</div>
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3 font-display">🎮 Panduan Aksi Survival</h3>
+                    <div class="space-y-2.5 text-xs text-gray-300">
+                        <div class="flex items-start gap-2"><span>🖱️</span><span><b class="text-gray-100">Gerak & Lihat</b>: WASD + Mouse (Klik canvas untuk kunci kursor).</span></div>
+                        <div class="flex items-start gap-2"><span>🗡️</span><span><b class="text-gray-100">Ganti Alat</b>: <span class="text-amber-400 font-mono bg-amber-500/10 px-1 rounded">[1]</span> Kapak &bull; <span class="text-blue-400 font-mono bg-blue-500/10 px-1 rounded">[2]</span> Ganco &bull; <span class="text-emerald-400 font-mono bg-emerald-500/10 px-1 rounded">[3]</span> Senapan.</span></div>
+                        <div class="flex items-start gap-2"><span>🥩</span><span><b class="text-gray-100">Makan Daging</b>: Tekan <span class="text-amber-400 font-mono bg-amber-500/10 px-1 rounded">[E]</span> untuk pulihkan lapar.</span></div>
+                        <div class="flex items-start gap-2"><span>💧</span><span><b class="text-gray-100">Minum Air</b>: Dekati Sungai lalu tekan <span class="text-blue-400 font-mono bg-blue-500/10 px-1 rounded">[F]</span>.</span></div>
+                        <div class="flex items-start gap-2"><span>💤</span><span><b class="text-gray-100">Tidur</b>: Tekan <span class="text-emerald-400 font-mono bg-emerald-500/10 px-1 rounded">[Z]</span> untuk pulihkan energi.</span></div>
                     </div>
                 </div>
 
                 <div class="glass-card p-5 rounded-2xl shadow-xl">
-                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🎒 Ransel Sumber Daya</h3>
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3 font-display">🎒 Ransel Sumber Daya</h3>
                     <div class="grid grid-cols-3 gap-3 text-center">
-                        <div class="bg-[#0d1117] p-3 rounded-xl border border-gray-800">
+                        <div class="resource-card bg-[#0d1117] p-3 rounded-xl border border-gray-800">
                             <div class="text-xl mb-1">🪵</div>
-                            <div class="text-[10px] text-gray-400">Kayu</div>
-                            <div id="invWood" class="text-sm font-bold text-emerald-400">0</div>
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wide">Kayu</div>
+                            <div id="invWood" class="text-lg font-bold text-emerald-400 font-display">0</div>
                         </div>
-                        <div class="bg-[#0d1117] p-3 rounded-xl border border-gray-800">
+                        <div class="resource-card bg-[#0d1117] p-3 rounded-xl border border-gray-800">
                             <div class="text-xl mb-1">🪨</div>
-                            <div class="text-[10px] text-gray-400">Batu</div>
-                            <div id="invStone" class="text-sm font-bold text-blue-400">0</div>
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wide">Batu</div>
+                            <div id="invStone" class="text-lg font-bold text-blue-400 font-display">0</div>
                         </div>
-                        <div class="bg-[#0d1117] p-3 rounded-xl border border-gray-800">
+                        <div class="resource-card bg-[#0d1117] p-3 rounded-xl border border-gray-800">
                             <div class="text-xl mb-1">🥩</div>
-                            <div class="text-[10px] text-gray-400">Daging</div>
-                            <div id="invMeat" class="text-sm font-bold text-amber-400">0</div>
+                            <div class="text-[10px] text-gray-400 uppercase tracking-wide">Daging</div>
+                            <div id="invMeat" class="text-lg font-bold text-amber-400 font-display">0</div>
                         </div>
                     </div>
                 </div>
@@ -112,8 +209,8 @@
             <!-- Klasemen -->
             <div class="glass-card p-5 rounded-2xl shadow-xl">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">🏆 Leaderboard Penjelajah Dunia</h3>
-                    <button onclick="loadLeaderboard()" class="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-lg text-gray-300">🔄 Refresh</button>
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider font-display">🏆 Leaderboard Penjelajah Dunia</h3>
+                    <button onclick="loadLeaderboard()" class="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg text-gray-300 transition hover:text-amber-400">🔄 Refresh</button>
                 </div>
                 <div class="overflow-x-auto max-h-40 overflow-y-auto">
                     <table class="w-full text-left text-xs">
@@ -137,26 +234,64 @@
     <!-- MODAL GAME -->
     <div id="gameModal" class="fixed inset-0 bg-black z-50 hidden flex flex-col items-center justify-center">
         <div id="gameWrapper" class="relative w-full h-full bg-[#161b22] flex flex-col overflow-hidden">
-            <div class="bg-[#0d1117] px-6 py-3 flex justify-between items-center border-b border-gray-800 z-10 text-xs">
-                <div class="flex space-x-4">
-                    <div>Penjelajah: <span id="gamePlayerName" class="font-bold text-amber-400">-</span></div>
-                    <div>Alat: <span id="activeToolName" class="font-bold text-emerald-400">Kapak 🪓</span></div>
-                    <div>Lapar: <span id="ingameHunger" class="font-bold text-amber-400">100%</span></div>
-                    <div>Haus: <span id="ingameThirst" class="font-bold text-blue-400">100%</span></div>
-                    <div>Energi: <span id="ingameEnergy" class="font-bold text-emerald-400">100%</span></div>
+            <div id="loadingOverlay" class="absolute inset-0 bg-[#0d1117] z-30 flex flex-col items-center justify-center gap-4">
+                <div class="text-4xl animate-bounce">🏹</div>
+                <div class="text-amber-400 font-display text-sm tracking-widest uppercase">Membangun Dunia...</div>
+                <div class="w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden"><div class="h-full w-1/3 bg-gradient-to-r from-amber-500 to-emerald-400 animate-pulse"></div></div>
+            </div>
+
+            <div class="bg-gradient-to-b from-[#0d1117] to-[#0d1117]/95 px-4 sm:px-6 py-2.5 flex flex-wrap gap-2 justify-between items-center border-b border-gray-800/80 z-10 text-xs">
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="hud-pill rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                        <span class="text-amber-400">🧭</span><span id="gamePlayerName" class="font-bold text-gray-100">-</span>
+                    </div>
+                    <div class="hud-pill rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                        <span>🛠️</span><span id="activeToolName" class="font-bold text-emerald-400">Kapak 🪓</span>
+                    </div>
+                    <div class="hud-pill rounded-lg px-3 py-1.5 flex items-center gap-2 min-w-[92px]">
+                        <span>🥩</span>
+                        <div class="flex-1">
+                            <div class="hud-bar"><div id="hudHunger" class="bg-gradient-to-r from-amber-600 to-amber-400" style="width:100%"></div></div>
+                        </div>
+                        <span id="ingameHunger" class="font-bold text-amber-400 w-8 text-right">100%</span>
+                    </div>
+                    <div class="hud-pill rounded-lg px-3 py-1.5 flex items-center gap-2 min-w-[92px]">
+                        <span>💧</span>
+                        <div class="flex-1">
+                            <div class="hud-bar"><div id="hudThirst" class="bg-gradient-to-r from-blue-600 to-blue-400" style="width:100%"></div></div>
+                        </div>
+                        <span id="ingameThirst" class="font-bold text-blue-400 w-8 text-right">100%</span>
+                    </div>
+                    <div class="hud-pill rounded-lg px-3 py-1.5 flex items-center gap-2 min-w-[92px]">
+                        <span>⚡</span>
+                        <div class="flex-1">
+                            <div class="hud-bar"><div id="hudEnergy" class="bg-gradient-to-r from-emerald-600 to-emerald-400" style="width:100%"></div></div>
+                        </div>
+                        <span id="ingameEnergy" class="font-bold text-emerald-400 w-8 text-right">100%</span>
+                    </div>
+                    <div class="hud-pill rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                        <span>🏆</span><span id="ingameScore" class="font-bold text-white">0</span>
+                    </div>
                 </div>
                 <div class="flex space-x-2">
-                    <button onclick="toggleFullScreen()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded">⛶ Fullscreen</button>
-                    <button onclick="exitGame()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded">Keluar & Simpan</button>
+                    <button onclick="toggleFullScreen()" class="btn-glow bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition hover:scale-[1.03] active:scale-95">⛶ Fullscreen</button>
+                    <button onclick="exitGame()" class="btn-glow bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg transition hover:scale-[1.03] active:scale-95">🚪 Keluar & Simpan</button>
                 </div>
             </div>
             <!-- Canvas Container -->
-            <div id="canvasContainer" class="w-full flex-grow relative cursor-crosshair bg-[#87CEEB]">
+            <div id="canvasContainer" class="w-full flex-grow relative cursor-none bg-[#87CEEB] overflow-hidden">
+                <div id="vignette"></div>
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                    <div class="w-4 h-4 border-2 border-amber-400 rounded-full opacity-80 flex items-center justify-center text-[10px] text-amber-400">+</div>
+                    <div id="crosshairDot" class="w-4 h-4 border-2 border-amber-300 rounded-full opacity-90 flex items-center justify-center text-[10px] text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+                        <span class="block w-0.5 h-0.5 bg-amber-300 rounded-full"></span>
+                    </div>
                 </div>
-                <div id="interactionHint" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 px-4 py-2 rounded-xl text-xs text-white border border-gray-700 hidden z-10">
+                <div id="hitMarkerLayer" class="absolute inset-0 pointer-events-none z-20"></div>
+                <div id="interactionHint" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 hud-pill px-4 py-2 rounded-xl text-xs text-white border border-gray-700 hidden z-10 shadow-lg">
                     Tekan <span id="hintKey" class="text-amber-400 font-bold">F</span> untuk <span id="hintText">Minum Air</span>
+                </div>
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 z-10 hud-pill px-3 py-1 rounded-full text-[10px] text-gray-300 tracking-wide hidden md:block">
+                    🖱️ Klik untuk kunci kursor &bull; [1][2][3] Ganti Alat &bull; [E][F][Z] Aksi
                 </div>
             </div>
         </div>
@@ -177,12 +312,61 @@
         let cameraRotationY = 0, cameraRotationX = 0;
 
         let solidObjects = [], worldTrees = [], worldStones = [], animals = [];
-        let toolMeshGroup;
+        let toolMeshGroup, skyDome, sunSprite, sunLight;
+        let waterMesh, oceanMesh, waterTime = 0;
+        let particleSystems = [];
+        let swingProgress = 0, swinging = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             loadLeaderboard();
             setInterval(survivalDrain, 3000);
         });
+
+        function showToast(message, kind = 'info') {
+            const palette = {
+                info:    { bg: 'border-gray-700', icon: 'ℹ️', text: 'text-gray-200' },
+                success: { bg: 'border-emerald-600/60', icon: '✅', text: 'text-emerald-300' },
+                food:    { bg: 'border-amber-600/60', icon: '🥩', text: 'text-amber-300' },
+                water:   { bg: 'border-blue-600/60', icon: '💧', text: 'text-blue-300' },
+                sleep:   { bg: 'border-purple-600/60', icon: '💤', text: 'text-purple-300' },
+                warn:    { bg: 'border-red-600/60', icon: '⚠️', text: 'text-red-300' },
+            };
+            const p = palette[kind] || palette.info;
+            const el = document.createElement('div');
+            el.className = `toast hud-pill border ${p.bg} rounded-xl px-4 py-2.5 text-xs font-semibold ${p.text} shadow-lg flex items-center gap-2`;
+            el.innerHTML = `<span>${p.icon}</span><span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(el);
+            setTimeout(() => {
+                el.classList.add('out');
+                setTimeout(() => el.remove(), 320);
+            }, 2600);
+        }
+
+        function flashVignette(color) {
+            const v = document.getElementById('vignette');
+            if (!v) return;
+            v.style.boxShadow = `inset 0 0 140px 20px ${color}`;
+            setTimeout(() => { v.style.boxShadow = 'inset 0 0 0 0 rgba(220,38,38,0)'; }, 400);
+        }
+
+        function popText(text, color) {
+            const layer = document.getElementById('hitMarkerLayer');
+            if (!layer) return;
+            const el = document.createElement('div');
+            el.className = 'pop-text text-sm';
+            el.style.color = color;
+            el.style.top = '46%';
+            el.textContent = text;
+            layer.appendChild(el);
+            setTimeout(() => el.remove(), 1100);
+        }
+
+        function flashCrosshair() {
+            const c = document.getElementById('crosshairDot');
+            if (!c) return;
+            c.classList.add('hit');
+            setTimeout(() => c.classList.remove('hit'), 140);
+        }
 
         async function loadLeaderboard() {
             const tbody = document.getElementById('leaderboardTableBody');
@@ -198,10 +382,13 @@
             }
 
             tbody.innerHTML = '';
+            const medals = ['🥇', '🥈', '🥉'];
             data.forEach((row, index) => {
+                const rankLabel = medals[index] ? `${medals[index]} #${index + 1}` : `#${index + 1}`;
+                const rowGlow = index === 0 ? 'bg-amber-500/5' : '';
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-800/30">
-                        <td class="py-2.5 font-bold text-amber-500">#${index + 1}</td>
+                    <tr class="hover:bg-gray-800/30 transition-colors ${rowGlow}">
+                        <td class="py-2.5 font-bold text-amber-500">${rankLabel}</td>
                         <td class="py-2.5 font-semibold text-white">${row.player_name}</td>
                         <td class="py-2.5 text-emerald-400 font-bold">${row.score} pts</td>
                         <td class="py-2.5 text-blue-400">${row.kills || 0} berburu</td>
@@ -212,17 +399,20 @@
 
         function survivalDrain() {
             if (!gameActive) return;
+            const prevHealth = health;
             hunger = Math.max(0, hunger - 1);
             thirst = Math.max(0, thirst - 1.5);
             energy = Math.max(0, energy - 0.5);
 
             if (hunger === 0 || thirst === 0) health = Math.max(0, health - 2);
 
+            if (health < prevHealth) flashVignette('rgba(220,38,38,0.55)');
+
             document.getElementById('statHealth').innerText = health + '%';
             document.getElementById('statHunger').innerText = hunger + '%';
             document.getElementById('statThirst').innerText = thirst + '%';
             document.getElementById('statEnergy').innerText = energy + '%';
-            
+
             document.getElementById('barHealth').style.width = health + '%';
             document.getElementById('barHunger').style.width = hunger + '%';
             document.getElementById('barThirst').style.width = thirst + '%';
@@ -231,12 +421,24 @@
             document.getElementById('ingameHunger').innerText = hunger + '%';
             document.getElementById('ingameThirst').innerText = thirst + '%';
             document.getElementById('ingameEnergy').innerText = energy + '%';
+            const hudHunger = document.getElementById('hudHunger');
+            const hudThirst = document.getElementById('hudThirst');
+            const hudEnergy = document.getElementById('hudEnergy');
+            if (hudHunger) hudHunger.style.width = hunger + '%';
+            if (hudThirst) hudThirst.style.width = thirst + '%';
+            if (hudEnergy) hudEnergy.style.width = energy + '%';
+
+            const vig = document.getElementById('vignette');
+            if (vig) {
+                const low = Math.min(hunger, thirst, energy, health);
+                vig.style.boxShadow = low < 25 ? 'inset 0 0 130px 10px rgba(220,38,38,0.35)' : 'inset 0 0 0 0 rgba(220,38,38,0)';
+            }
         }
 
         function saveGame() {
             const data = { health, hunger, thirst, energy, woodCount, stoneCount, meatCount, score };
             localStorage.setItem('hunter_sandbox_save', JSON.stringify(data));
-            alert('Progress game berhasil disimpan!');
+            showToast('Progress game berhasil disimpan!', 'success');
         }
 
         function loadGame() {
@@ -246,7 +448,11 @@
                 health = d.health; hunger = d.hunger; thirst = d.thirst; energy = d.energy;
                 woodCount = d.woodCount; stoneCount = d.stoneCount; meatCount = d.meatCount; score = d.score;
                 updateUI();
-                alert('Progress game dimuat!');
+                document.getElementById('statHealth').innerText = health + '%';
+                document.getElementById('barHealth').style.width = health + '%';
+                showToast('Progress game dimuat!', 'success');
+            } else {
+                showToast('Belum ada progress tersimpan.', 'warn');
             }
         }
 
@@ -254,16 +460,21 @@
             document.getElementById('invWood').innerText = woodCount;
             document.getElementById('invStone').innerText = stoneCount;
             document.getElementById('invMeat').innerText = meatCount;
+            const scoreEl = document.getElementById('ingameScore');
+            if (scoreEl) scoreEl.innerText = score;
         }
 
         function startGame() {
             const name = document.getElementById('playerName').value.trim() || 'NomadExplorer';
             document.getElementById('gamePlayerName').innerText = name;
             document.getElementById('gameModal').classList.remove('hidden');
-            
+            const loading = document.getElementById('loadingOverlay');
+            if (loading) loading.classList.remove('hidden');
+
             // Tunggu modal selesai dirender DOM agar lebar/tinggi wadah tidak 0
             setTimeout(() => {
                 initThreeJS();
+                setTimeout(() => { if (loading) loading.classList.add('hidden'); }, 200);
             }, 50);
 
             updateUI();
@@ -279,17 +490,26 @@
         function initThreeJS() {
             const container = document.getElementById('canvasContainer');
             container.innerHTML = `
+                <div id="vignette"></div>
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                    <div class="w-4 h-4 border-2 border-amber-400 rounded-full opacity-80 flex items-center justify-center text-[10px] text-amber-400">+</div>
+                    <div id="crosshairDot" class="w-4 h-4 border-2 border-amber-300 rounded-full opacity-90 flex items-center justify-center text-[10px] text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+                        <span class="block w-0.5 h-0.5 bg-amber-300 rounded-full"></span>
+                    </div>
                 </div>
-                <div id="interactionHint" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 px-4 py-2 rounded-xl text-xs text-white border border-gray-700 hidden z-10">
+                <div id="hitMarkerLayer" class="absolute inset-0 pointer-events-none z-20"></div>
+                <div id="interactionHint" class="absolute bottom-10 left-1/2 transform -translate-x-1/2 hud-pill px-4 py-2 rounded-xl text-xs text-white border border-gray-700 hidden z-10 shadow-lg">
                     Tekan <span id="hintKey" class="text-amber-400 font-bold">F</span> untuk <span id="hintText">Minum Air</span>
+                </div>
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 z-10 hud-pill px-3 py-1 rounded-full text-[10px] text-gray-300 tracking-wide hidden md:block">
+                    🖱️ Klik untuk kunci kursor &bull; [1][2][3] Ganti Alat &bull; [E][F][Z] Aksi
                 </div>
             `;
 
+            const SKY_TOP = 0x2f7fd6, SKY_HORIZON = 0xbfe4f5, FOG_COLOR = 0xcfe9f7;
+
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB); // Langit Cerah
-            scene.fog = new THREE.FogExp2(0x87CEEB, 0.0035);
+            scene.background = new THREE.Color(SKY_HORIZON);
+            scene.fog = new THREE.FogExp2(FOG_COLOR, 0.0032);
 
             const width = container.clientWidth || window.innerWidth;
             const height = container.clientHeight || window.innerHeight;
@@ -300,82 +520,113 @@
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.08;
             container.appendChild(renderer.domElement);
 
+            // Langit gradient (sky dome) + kabut menyatu dengan horizon
+            skyDome = createSkyDome(SKY_TOP, SKY_HORIZON);
+            scene.add(skyDome);
+            scene.add(createSunSprite());
+
             // Pencahayaan Terang Siang Hari
-            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x5b7a4f, 1.05);
             hemiLight.position.set(0, 200, 0);
             scene.add(hemiLight);
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-            sunLight.position.set(100, 300, 100);
+            sunLight = new THREE.DirectionalLight(0xfff2d6, 1.6);
+            sunLight.position.set(120, 180, 90);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.set(2048, 2048);
+            sunLight.shadow.camera.near = 10;
+            sunLight.shadow.camera.far = 500;
+            sunLight.shadow.camera.left = -140;
+            sunLight.shadow.camera.right = 140;
+            sunLight.shadow.camera.top = 140;
+            sunLight.shadow.camera.bottom = -140;
+            sunLight.shadow.bias = -0.0015;
             scene.add(sunLight);
+            scene.add(sunLight.target);
 
-            // Gunung-gunung di latar belakang
-            for (let i = 0; i < 20; i++) {
-                const mGeo = new THREE.ConeGeometry(90 + Math.random() * 60, 120 + Math.random() * 80, 4);
-                const mMat = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.9, flatShading: true });
+            // Gunung-gunung di latar belakang (dengan puncak salju)
+            for (let i = 0; i < 22; i++) {
+                const baseR = 90 + Math.random() * 60, h = 120 + Math.random() * 90;
+                const shade = 0x3f4b5c + Math.floor(Math.random() * 3) * 0x0a0a0a;
+                const mGeo = new THREE.ConeGeometry(baseR, h, 4);
+                const mMat = new THREE.MeshStandardMaterial({ color: shade, roughness: 0.9, flatShading: true });
                 const mountain = new THREE.Mesh(mGeo, mMat);
-                const angle = (i / 20) * Math.PI * 2;
-                const dist = 400;
-                mountain.position.set(Math.cos(angle) * dist, 50, Math.sin(angle) * dist);
+                const angle = (i / 22) * Math.PI * 2 + Math.random() * 0.1;
+                const dist = 380 + Math.random() * 60;
+                mountain.position.set(Math.cos(angle) * dist, h / 2 - 6, Math.sin(angle) * dist);
                 scene.add(mountain);
+
+                if (h > 175) {
+                    const cap = new THREE.Mesh(new THREE.ConeGeometry(baseR * 0.32, h * 0.28, 4), new THREE.MeshStandardMaterial({ color: 0xf4f8fb, roughness: 0.7, flatShading: true }));
+                    cap.position.set(mountain.position.x, mountain.position.y + h / 2 - h * 0.1, mountain.position.z);
+                    cap.rotation.y = mountain.rotation.y;
+                    scene.add(cap);
+                }
             }
 
             // Awan-awan putih di langit
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 26; i++) {
                 const cloudGroup = new THREE.Group();
-                const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
-                for (let c = 0; c < 5; c++) {
-                    const puff = new THREE.Mesh(new THREE.SphereGeometry(12 + Math.random() * 8, 7, 7), cloudMat);
-                    puff.position.set((Math.random() - 0.5) * 25, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 25);
+                const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 + Math.random() * 0.15, fog: true });
+                const puffs = 4 + Math.floor(Math.random() * 3);
+                for (let c = 0; c < puffs; c++) {
+                    const puff = new THREE.Mesh(new THREE.SphereGeometry(11 + Math.random() * 9, 7, 7), cloudMat);
+                    puff.position.set((Math.random() - 0.5) * 26, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 26);
                     cloudGroup.add(puff);
                 }
-                cloudGroup.position.set((Math.random() - 0.5) * 500, 160 + Math.random() * 50, (Math.random() - 0.5) * 500);
+                cloudGroup.position.set((Math.random() - 0.5) * 500, 150 + Math.random() * 55, (Math.random() - 0.5) * 500);
+                cloudGroup.scale.setScalar(0.8 + Math.random() * 0.6);
                 scene.add(cloudGroup);
             }
 
-            // Terrain Rumput
-            const terrainGeo = new THREE.PlaneGeometry(500, 500, 100, 100);
+            // Terrain Rumput dengan variasi warna berdasarkan ketinggian
+            const terrainGeo = new THREE.PlaneGeometry(500, 500, 130, 130);
             terrainGeo.rotateX(-Math.PI / 2);
             const pos = terrainGeo.attributes.position;
             for (let i = 0; i < pos.count; i++) {
                 pos.setY(i, getWorldHeight(pos.getX(i), pos.getZ(i)));
             }
             terrainGeo.computeVertexNormals();
-            scene.add(new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({ color: 0x2e8b57, roughness: 0.85, flatShading: true })));
+            colorizeTerrain(terrainGeo);
+            const terrainMesh = new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }));
+            terrainMesh.receiveShadow = true;
+            scene.add(terrainMesh);
 
-            // Sungai
-            const waterGeo = new THREE.PlaneGeometry(16, 500);
+            // Sungai (dengan animasi kilau)
+            const waterGeo = new THREE.PlaneGeometry(16, 500, 1, 40);
             waterGeo.rotateX(-Math.PI / 2);
-            const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.1, transparent: true, opacity: 0.85 }));
-            water.position.set(0, -0.4, 0);
-            scene.add(water);
+            waterMesh = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: 0x1ea7e6, roughness: 0.15, metalness: 0.25, transparent: true, opacity: 0.85 }));
+            waterMesh.position.set(0, -0.35, 0);
+            scene.add(waterMesh);
 
             // Laut di Ujung Peta
-            const oceanGeo = new THREE.PlaneGeometry(800, 800);
+            const oceanGeo = new THREE.PlaneGeometry(800, 800, 1, 1);
             oceanGeo.rotateX(-Math.PI / 2);
-            const ocean = new THREE.Mesh(oceanGeo, new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2 }));
-            ocean.position.set(260, -1.5, 0);
-            scene.add(ocean);
+            oceanMesh = new THREE.Mesh(oceanGeo, new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.2, metalness: 0.15 }));
+            oceanMesh.position.set(260, -1.5, 0);
+            scene.add(oceanMesh);
 
             solidObjects = []; worldTrees = []; worldStones = []; animals = [];
+            particleSystems = []; swinging = false; swingProgress = 0; waterTime = 0;
 
             // Pohon
-            for (let i = 0; i < 80; i++) {
+            for (let i = 0; i < 90; i++) {
                 let tx = (Math.random() - 0.5) * 400;
                 let tz = (Math.random() - 0.5) * 400;
                 if (Math.abs(tx) < 12) continue;
                 let ty = getWorldHeight(tx, tz);
                 if (ty < 0) continue;
 
-                const treeGroup = new THREE.Group();
-                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.2, 7), new THREE.MeshStandardMaterial({ color: 0x5c4033 }));
-                trunk.position.y = 3.5;
-                const leaves = new THREE.Mesh(new THREE.ConeGeometry(3.5, 8, 6), new THREE.MeshStandardMaterial({ color: 0x15803d }));
-                leaves.position.y = 8;
-                treeGroup.add(trunk); treeGroup.add(leaves);
+                const treeGroup = createTree();
                 treeGroup.position.set(tx, ty, tz);
+                treeGroup.rotation.y = Math.random() * Math.PI * 2;
                 scene.add(treeGroup);
 
                 worldTrees.push(treeGroup);
@@ -383,13 +634,13 @@
             }
 
             // Batu
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 45; i++) {
                 let bx = (Math.random() - 0.5) * 400;
                 let bz = (Math.random() - 0.5) * 400;
                 let by = getWorldHeight(bx, bz);
                 if (by < 0) continue;
 
-                const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(1.8, 0), new THREE.MeshStandardMaterial({ color: 0x9ca3af }));
+                const stone = createRock();
                 stone.position.set(bx, by + 1, bz);
                 scene.add(stone);
 
@@ -419,23 +670,163 @@
             animateThree();
         }
 
+        function createSkyDome(topColor, horizonColor) {
+            const geo = new THREE.SphereGeometry(700, 24, 16);
+            const top = new THREE.Color(topColor), bottom = new THREE.Color(horizonColor);
+            const colors = [];
+            const posAttr = geo.attributes.position;
+            for (let i = 0; i < posAttr.count; i++) {
+                const y = posAttr.getY(i);
+                const t = THREE.MathUtils.clamp((y + 60) / 700, 0, 1);
+                const c = bottom.clone().lerp(top, Math.pow(t, 0.55));
+                colors.push(c.r, c.g, c.b);
+            }
+            geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            const mat = new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false });
+            return new THREE.Mesh(geo, mat);
+        }
+
+        function createSunSprite() {
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+            grad.addColorStop(0, 'rgba(255,250,220,1)');
+            grad.addColorStop(0.25, 'rgba(255,232,150,0.9)');
+            grad.addColorStop(1, 'rgba(255,200,80,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 256, 256);
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+            sunSprite = new THREE.Sprite(mat);
+            sunSprite.scale.set(160, 160, 1);
+            sunSprite.position.set(300, 260, 220);
+            return sunSprite;
+        }
+
+        function colorizeTerrain(geo) {
+            const posAttr = geo.attributes.position;
+            const colors = [];
+            const sand = new THREE.Color(0xd8c98a), grass1 = new THREE.Color(0x3f9a4a), grass2 = new THREE.Color(0x2e7d3f), rock = new THREE.Color(0x8a7f6d), snow = new THREE.Color(0xf3f6f8);
+            for (let i = 0; i < posAttr.count; i++) {
+                const h = posAttr.getY(i);
+                let c;
+                if (h < -0.6) c = sand;
+                else if (h < 6) c = grass1.clone().lerp(grass2, Math.min(1, h / 6) * 0.6 + Math.random() * 0.15);
+                else if (h < 13) c = grass2.clone().lerp(rock, (h - 6) / 7);
+                else c = rock.clone().lerp(snow, Math.min(1, (h - 13) / 6));
+                colors.push(c.r, c.g, c.b);
+            }
+            geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        }
+
+        function createTree() {
+            const treeGroup = new THREE.Group();
+            const trunkH = 6 + Math.random() * 2.5;
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.55 + Math.random() * 0.25, 1.1 + Math.random() * 0.3, trunkH, 7),
+                new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.95 })
+            );
+            trunk.position.y = trunkH / 2;
+            trunk.castShadow = true; trunk.receiveShadow = true;
+            treeGroup.add(trunk);
+
+            const greenShades = [0x1f7a3d, 0x15803d, 0x27923f, 0x2f6b2f];
+            const tiers = 2 + Math.floor(Math.random() * 2);
+            for (let t = 0; t < tiers; t++) {
+                const size = 3.6 - t * 0.7 + Math.random() * 0.4;
+                const leafH = 6 - t * 1.1;
+                const leaves = new THREE.Mesh(
+                    new THREE.ConeGeometry(size, leafH, 6 + Math.floor(Math.random() * 2)),
+                    new THREE.MeshStandardMaterial({ color: greenShades[Math.floor(Math.random() * greenShades.length)], roughness: 0.85, flatShading: true })
+                );
+                leaves.position.y = trunkH - 0.5 + t * (leafH * 0.55);
+                leaves.castShadow = true;
+                treeGroup.add(leaves);
+            }
+            const s = 0.85 + Math.random() * 0.35;
+            treeGroup.scale.set(s, s, s);
+            return treeGroup;
+        }
+
+        function createRock() {
+            const grayShades = [0x9ca3af, 0x8b93a1, 0x76807a, 0xa8a094];
+            const rock = new THREE.Mesh(
+                new THREE.DodecahedronGeometry(1.5 + Math.random() * 0.7, 0),
+                new THREE.MeshStandardMaterial({ color: grayShades[Math.floor(Math.random() * grayShades.length)], roughness: 0.95, flatShading: true })
+            );
+            rock.scale.set(0.8 + Math.random() * 0.5, 0.6 + Math.random() * 0.5, 0.8 + Math.random() * 0.5);
+            rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            rock.castShadow = true; rock.receiveShadow = true;
+            return rock;
+        }
+
         function spawnRealisticAnimal() {
             const animalGroup = new THREE.Group();
             const isDeer = Math.random() > 0.5;
+            const furColor = isDeer ? 0xb45309 : 0xc2410c;
+            const bellyColor = isDeer ? 0xe7c9a3 : 0xf3d9b8;
+            const bodyMat = new THREE.MeshStandardMaterial({ color: furColor, roughness: 0.8 });
+            const bellyMat = new THREE.MeshStandardMaterial({ color: bellyColor, roughness: 0.85 });
 
-            const body = new THREE.Mesh(
-                new THREE.BoxGeometry(isDeer ? 1.6 : 2.0, 1.0, 2.4),
-                new THREE.MeshStandardMaterial({ color: isDeer ? 0xb45309 : 0xea580c })
-            );
-            body.position.y = 0.8;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(isDeer ? 1.5 : 1.9, 0.95, 2.3), bodyMat);
+            body.position.y = 1.0;
+            body.castShadow = true; body.receiveShadow = true;
             animalGroup.add(body);
 
-            const head = new THREE.Mesh(
-                new THREE.BoxGeometry(0.6, 0.6, 0.9),
-                new THREE.MeshStandardMaterial({ color: isDeer ? 0xb45309 : 0xea580c })
-            );
-            head.position.set(0, 1.5, 1.1);
+            const belly = new THREE.Mesh(new THREE.BoxGeometry(isDeer ? 1.0 : 1.3, 0.5, 2.0), bellyMat);
+            belly.position.set(0, 0.65, 0);
+            animalGroup.add(belly);
+
+            const neck = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.7, 0.6), bodyMat);
+            neck.position.set(0, 1.35, 1.15);
+            neck.rotation.x = -0.4;
+            neck.castShadow = true;
+            animalGroup.add(neck);
+
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.85), bodyMat);
+            head.position.set(0, 1.75, 1.55);
+            head.castShadow = true;
             animalGroup.add(head);
+
+            const snout = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.3, 0.4), new THREE.MeshStandardMaterial({ color: 0x2b2118, roughness: 0.9 }));
+            snout.position.set(0, 1.65, 1.95);
+            animalGroup.add(snout);
+
+            [-0.16, 0.16].forEach(ex => {
+                const ear = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.32, 4), bodyMat);
+                ear.position.set(ex, 2.05, 1.4);
+                ear.rotation.x = -0.3;
+                animalGroup.add(ear);
+                const eye = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), new THREE.MeshStandardMaterial({ color: 0x18130f }));
+                eye.position.set(ex, 1.8, 1.92);
+                animalGroup.add(eye);
+            });
+
+            if (isDeer) {
+                [-0.18, 0.18].forEach(ax => {
+                    const antler = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.5, 4), new THREE.MeshStandardMaterial({ color: 0xd6c3a1 }));
+                    antler.position.set(ax, 2.25, 1.35);
+                    antler.rotation.x = -0.5;
+                    animalGroup.add(antler);
+                });
+            }
+
+            const legGeo = new THREE.CylinderGeometry(0.11, 0.09, 0.95, 6);
+            const legPositions = [[-0.5, 0.48, 0.75], [0.5, 0.48, 0.75], [-0.5, 0.48, -0.75], [0.5, 0.48, -0.75]];
+            const legs = [];
+            legPositions.forEach(p => {
+                const leg = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.9 }));
+                leg.position.set(p[0], p[1], p[2]);
+                leg.castShadow = true;
+                animalGroup.add(leg);
+                legs.push(leg);
+            });
+
+            const tail = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.4, 5), bodyMat);
+            tail.position.set(0, 1.2, -1.2);
+            tail.rotation.x = Math.PI * 0.75;
+            animalGroup.add(tail);
 
             let x = (Math.random() - 0.5) * 400;
             let z = (Math.random() - 0.5) * 400;
@@ -443,22 +834,84 @@
             if (y < 0) y = 0;
 
             animalGroup.position.set(x, y, z);
-            animalGroup.userData = { speed: 0.04 + Math.random() * 0.03, direction: Math.random() * Math.PI * 2 };
-            
+            animalGroup.userData = { speed: 0.04 + Math.random() * 0.03, direction: Math.random() * Math.PI * 2, legs, legPhase: Math.random() * Math.PI * 2 };
+
             scene.add(animalGroup);
             animals.push(animalGroup);
             solidObjects.push({ mesh: animalGroup, radius: 1.5, type: 'animal' });
         }
 
         function updateToolMesh() {
-            while(toolMeshGroup.children.length > 0) { toolMeshGroup.remove(toolMeshGroup.children[0]); }
-            const mat = new THREE.MeshStandardMaterial({ color: currentTool === 'axe' ? 0xd97706 : currentTool === 'pickaxe' ? 0x60a5fa : 0x374151 });
-            const item = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 1.8), mat);
-            item.position.set(0.4, -0.4, -1);
-            toolMeshGroup.add(item);
+            while (toolMeshGroup.children.length > 0) { toolMeshGroup.remove(toolMeshGroup.children[0]); }
+            const handleMat = new THREE.MeshStandardMaterial({ color: 0x6b4a2b, roughness: 0.85 });
+            const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.4, 6), handleMat);
+            handle.rotation.x = Math.PI / 2.6;
+            toolMeshGroup.add(handle);
+
+            const headMat = new THREE.MeshStandardMaterial({ color: currentTool === 'axe' ? 0xd1d5db : currentTool === 'pickaxe' ? 0x94a3b8 : 0x374151, metalness: 0.6, roughness: 0.35 });
+            let headMesh;
+            if (currentTool === 'axe') {
+                headMesh = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.4, 4), headMat);
+                headMesh.rotation.z = Math.PI / 2;
+                headMesh.position.set(0.14, 0, -0.55);
+            } else if (currentTool === 'pickaxe') {
+                headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 0.1), headMat);
+                headMesh.position.set(0, 0, -0.62);
+            } else {
+                headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.9), new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.7, roughness: 0.3 }));
+                headMesh.position.set(0, 0, -0.9);
+            }
+            toolMeshGroup.add(headMesh);
+            toolMeshGroup.position.set(0.42, -0.42, -0.9);
+            toolMeshGroup.rotation.set(0, 0, 0);
 
             let name = currentTool === 'axe' ? 'Kapak 🪓' : currentTool === 'pickaxe' ? 'Ganco ⛏️' : 'Senapan 🎯';
             document.getElementById('activeToolName').innerText = name;
+        }
+
+        function triggerSwing() {
+            if (swinging) return;
+            swinging = true;
+            swingProgress = 0;
+        }
+
+        function spawnHitParticles(position, colorHex, count = 12) {
+            const geo = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const velocities = [];
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = position.x;
+                positions[i * 3 + 1] = position.y;
+                positions[i * 3 + 2] = position.z;
+                velocities.push(new THREE.Vector3((Math.random() - 0.5) * 0.14, Math.random() * 0.14 + 0.03, (Math.random() - 0.5) * 0.14));
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const mat = new THREE.PointsMaterial({ color: colorHex, size: 0.18, transparent: true, opacity: 1, depthWrite: false });
+            const points = new THREE.Points(geo, mat);
+            scene.add(points);
+            particleSystems.push({ points, velocities, life: 0, maxLife: 40 });
+        }
+
+        function updateParticles() {
+            for (let i = particleSystems.length - 1; i >= 0; i--) {
+                const p = particleSystems[i];
+                p.life++;
+                const posAttr = p.points.geometry.attributes.position;
+                for (let j = 0; j < p.velocities.length; j++) {
+                    posAttr.array[j * 3] += p.velocities[j].x;
+                    posAttr.array[j * 3 + 1] += p.velocities[j].y;
+                    posAttr.array[j * 3 + 2] += p.velocities[j].z;
+                    p.velocities[j].y -= 0.006;
+                }
+                posAttr.needsUpdate = true;
+                p.points.material.opacity = Math.max(0, 1 - p.life / p.maxLife);
+                if (p.life >= p.maxLife) {
+                    scene.remove(p.points);
+                    p.points.geometry.dispose();
+                    p.points.material.dispose();
+                    particleSystems.splice(i, 1);
+                }
+            }
         }
 
         function onKeyDown(e) {
@@ -471,25 +924,32 @@
             if (e.key === '2') { currentTool = 'pickaxe'; updateToolMesh(); }
             if (e.key === '3') { currentTool = 'rifle'; updateToolMesh(); }
 
-            if ((e.key === 'e' || e.key === 'E') && meatCount > 0) {
-                meatCount--;
-                hunger = Math.min(100, hunger + 35);
-                updateUI();
-                alert('Makan daging berhasil! Kelaparan dipulihkan.');
+            if ((e.key === 'e' || e.key === 'E')) {
+                if (meatCount > 0) {
+                    meatCount--;
+                    hunger = Math.min(100, hunger + 35);
+                    updateUI();
+                    showToast('Makan daging berhasil! Kelaparan dipulihkan.', 'food');
+                    popText('+35 Lapar', '#f59e0b');
+                } else {
+                    showToast('Tidak ada daging di ransel.', 'warn');
+                }
             }
 
             if (e.key === 'f' || e.key === 'F') {
                 if (Math.abs(camera.position.x) < 12) {
                     thirst = 100;
-                    alert('Segar! Kamu minum air sungai.');
+                    showToast('Segar! Kamu minum air sungai.', 'water');
+                    popText('+Haus Pulih', '#38bdf8');
                 } else {
-                    alert('Kamu terlalu jauh dari sumber air.');
+                    showToast('Kamu terlalu jauh dari sumber air.', 'warn');
                 }
             }
 
             if (e.key === 'z' || e.key === 'Z') {
                 energy = 100;
-                alert('Kamu tidur sejenak. Energi pulih sepenuhnya!');
+                showToast('Kamu tidur sejenak. Energi pulih sepenuhnya!', 'sleep');
+                popText('+Energi Pulih', '#34d399');
             }
         }
 
@@ -513,16 +973,20 @@
         window.addEventListener('mousedown', (e) => {
             if (!gameActive || document.pointerLockElement !== document.getElementById('canvasContainer')) return;
             if (e.button === 0) {
+                triggerSwing();
                 raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
                 const intersects = raycaster.intersectObjects(scene.children, true);
 
                 if (intersects.length > 0) {
                     let hit = intersects[0].object;
                     let dist = intersects[0].distance;
+                    let hitPoint = intersects[0].point;
                     if (dist > 8) return;
 
                     let tree = worldTrees.find(t => t === hit || t.children.includes(hit));
                     if (tree && currentTool === 'axe') {
+                        spawnHitParticles(hitPoint, 0x8a6d4f, 10);
+                        flashCrosshair(); popText('+2 🪵', '#34d399');
                         scene.remove(tree);
                         worldTrees = worldTrees.filter(t => t !== tree);
                         solidObjects = solidObjects.filter(o => o.mesh !== tree);
@@ -532,6 +996,8 @@
 
                     let stone = worldStones.find(s => s === hit);
                     if (stone && currentTool === 'pickaxe') {
+                        spawnHitParticles(hitPoint, 0xb0b6bd, 10);
+                        flashCrosshair(); popText('+1 🪨', '#60a5fa');
                         scene.remove(stone);
                         worldStones = worldStones.filter(s => s !== stone);
                         solidObjects = solidObjects.filter(o => o.mesh !== stone);
@@ -541,6 +1007,9 @@
 
                     let animal = animals.find(a => a === hit || a.children.includes(hit));
                     if (animal && currentTool === 'rifle') {
+                        spawnHitParticles(hitPoint, 0xef4444, 16);
+                        flashCrosshair(); popText('+1 🥩 • +40', '#f87171');
+                        showToast('Berburu berhasil! +40 skor', 'success');
                         scene.remove(animal);
                         animals = animals.filter(a => a !== animal);
                         solidObjects = solidObjects.filter(o => o.mesh !== animal);
@@ -571,6 +1040,26 @@
         function animateThree() {
             if (!gameActive) return;
             animationFrameId = requestAnimationFrame(animateThree);
+
+            waterTime += 0.02;
+            if (waterMesh) {
+                waterMesh.position.y = -0.35 + Math.sin(waterTime) * 0.03;
+                waterMesh.material.opacity = 0.78 + Math.sin(waterTime * 1.3) * 0.06;
+            }
+            if (oceanMesh) oceanMesh.position.y = -1.5 + Math.sin(waterTime * 0.6) * 0.05;
+            if (sunSprite && camera) sunSprite.position.copy(camera.position).add(new THREE.Vector3(300, 200, 150));
+
+            if (swinging) {
+                swingProgress += 0.18;
+                const t = Math.sin(Math.min(swingProgress, Math.PI));
+                toolMeshGroup.rotation.x = -t * 1.1;
+                toolMeshGroup.position.z = -0.9 - t * 0.3;
+                if (swingProgress >= Math.PI) { swinging = false; swingProgress = 0; toolMeshGroup.rotation.x = 0; toolMeshGroup.position.z = -0.9; }
+            } else {
+                toolMeshGroup.position.y = -0.42 + Math.sin(waterTime * 1.6) * 0.01;
+            }
+
+            updateParticles();
 
             const speed = 0.18;
             const dir = new THREE.Vector3();
@@ -608,7 +1097,16 @@
                 a.position.z += Math.sin(a.userData.direction) * a.userData.speed;
                 let ty = getWorldHeight(a.position.x, a.position.z);
                 a.position.y = Math.max(0, ty);
+                a.rotation.y = -a.userData.direction + Math.PI / 2;
                 if (Math.random() < 0.02) a.userData.direction += (Math.random() - 0.5);
+
+                a.userData.legPhase += a.userData.speed * 2.2;
+                if (a.userData.legs) {
+                    a.userData.legs.forEach((leg, li) => {
+                        const offset = li % 2 === 0 ? 0 : Math.PI;
+                        leg.rotation.x = Math.sin(a.userData.legPhase + offset) * 0.5;
+                    });
+                }
             });
 
             renderer.render(scene, camera);
