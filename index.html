@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hunter - 3D Forest Hunting Game</title>
+    <title>Hunter 3D - Open World Survival</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -17,8 +17,8 @@
     <!-- Top Header -->
     <header class="flex justify-between items-center max-w-7xl mx-auto w-full mb-4 px-4">
         <div class="flex items-center space-x-2">
-            <span class="text-xl">🏹</span>
-            <h1 class="text-xl font-black tracking-wider text-amber-500">HUNTER 3D - ULTIMATE EDITION</h1>
+            <span class="text-xl">🏕️</span>
+            <h1 class="text-xl font-black tracking-wider text-amber-500">HUNTER 3D: OPEN WORLD SURVIVAL</h1>
         </div>
         <div class="text-xs text-gray-400">Supabase: <span class="text-emerald-400 font-semibold">Connected</span></div>
     </header>
@@ -26,92 +26,107 @@
     <!-- Main Container UI -->
     <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
         
-        <!-- KOLOM KIRI -->
+        <!-- KOLOM KIRI: Menu & Misi Camp -->
         <section class="lg:col-span-4 glass-card p-6 rounded-2xl shadow-2xl flex flex-col justify-between">
             <div>
                 <div class="text-center mb-6">
-                    <h2 class="text-2xl font-black text-amber-500 uppercase tracking-widest">HUNTER</h2>
-                    <p class="text-xs text-gray-400 mt-1">Terrain Berbukit & Hewan Animatif</p>
+                    <h2 class="text-2xl font-black text-amber-500 uppercase tracking-widest">SURVIVE & BUILD</h2>
+                    <p class="text-xs text-gray-400 mt-1">Open World Crafting & Hunting</p>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nama Pemburu</label>
-                    <input type="text" id="playerName" value="AlphaSniper" class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nama Pemain</label>
+                    <input type="text" id="playerName" value="SurvivalMaster" class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
                 </div>
 
-                <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 mb-6 flex items-center justify-center space-x-2">
-                    <span>🎯 Masuk ke Hutan Realistis</span>
-                </button>
+                <!-- Tombol & Load Progress -->
+                <div class="space-y-2 mb-6">
+                    <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                        <span>🌲 Masuk ke Open World</span>
+                    </button>
+                    <div class="flex space-x-2">
+                        <button onclick="saveProgress()" class="w-1/2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded-lg">💾 Save Progress</button>
+                        <button onclick="loadProgress()" class="w-1/2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold py-2 rounded-lg">📂 Load Progress</button>
+                    </div>
+                </div>
 
-                <div class="bg-[#0d1117]/60 p-4 rounded-xl border border-gray-800">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Top Skor Kamu</h3>
-                    <div id="localTopStats" class="space-y-1 text-xs text-gray-300">Memuat data...</div>
+                <!-- Info Misi Level 1 -->
+                <div class="bg-[#0d1117]/80 p-4 rounded-xl border border-amber-600/50 mb-4">
+                    <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">📜 Misi Level 1: Bangun Camp</h3>
+                    <p class="text-[11px] text-gray-300 mb-2">Kumpulkan material dari alam untuk mendirikan tempat tinggal pertamamu!</p>
+                    <div class="space-y-1 text-xs">
+                        <div class="flex justify-between"><span>Kayu (Tebang Pohon):</span> <span id="missionWood" class="font-bold text-emerald-400">0 / 10</span></div>
+                        <div class="flex justify-between"><span>Batu (Gunakan Ganco):</span> <span id="missionStone" class="font-bold text-blue-400">0 / 5</span></div>
+                    </div>
+                    <div id="campStatus" class="mt-2 text-center text-xs font-bold text-yellow-500">Status: Belum Dibangun ❌</div>
                 </div>
             </div>
-            <div class="mt-6 text-center text-[10px] text-gray-500">GitHub Repository: Hunter &bull; Supabase Database</div>
+            <div class="text-center text-[10px] text-gray-500">GitHub: Hunter Open World &bull; Supabase</div>
         </section>
 
-        <!-- KOLOM KANAN -->
+        <!-- KOLOM KANAN: Panduan Alat & Klasemen -->
         <section class="lg:col-span-8 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Panduan Senjata & Alat -->
                 <div class="glass-card p-5 rounded-2xl shadow-xl">
-                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🐗 Galeri Hewan Buruan</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-gray-800">
-                            <div class="text-2xl mb-1">🐇</div>
-                            <div class="text-xs font-semibold">Kelinci</div>
-                            <div class="text-[10px] text-gray-500">+10 Poin</div>
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🛠️ Alat & Senjata Survival</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="bg-[#0d1117] p-2.5 rounded-xl border border-gray-800 flex items-center justify-between">
+                            <div>🪓 <b>Kapak</b>: Digunakan untuk menebang <i>Pohon</i>.</div>
+                            <span class="text-emerald-400 font-bold">[Tombol 1]</span>
                         </div>
-                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-gray-800">
-                            <div class="text-2xl mb-1">🦌</div>
-                            <div class="text-xs font-semibold">Rusa</div>
-                            <div class="text-[10px] text-gray-500">+25 Poin</div>
+                        <div class="bg-[#0d1117] p-2.5 rounded-xl border border-gray-800 flex items-center justify-between">
+                            <div>⛏️ <b>Ganco</b>: Digunakan untuk menambang <i>Batu</i>.</div>
+                            <span class="text-blue-400 font-bold">[Tombol 2]</span>
                         </div>
-                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-gray-800">
-                            <div class="text-2xl mb-1">🐅</div>
-                            <div class="text-xs font-semibold">Harimau</div>
-                            <div class="text-[10px] text-gray-500">+50 Poin</div>
+                        <div class="bg-[#0d1117] p-2.5 rounded-xl border border-gray-800 flex items-center justify-between">
+                            <div>🎯 <b>Senapan</b>: Digunakan untuk berburu <i>Hewan</i>.</div>
+                            <span class="text-amber-400 font-bold">[Tombol 3]</span>
                         </div>
                     </div>
                 </div>
 
+                <!-- Inventaris Pemain -->
                 <div class="glass-card p-5 rounded-2xl shadow-xl">
-                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">⚔️ Galeri Senjata</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-emerald-800">
-                            <div class="text-2xl mb-1">🏹</div>
-                            <div class="text-xs font-semibold text-emerald-400">Panah</div>
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🎒 Inventaris Sumber Daya</h3>
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div class="bg-[#0d1117] p-3 rounded-xl border border-gray-800">
+                            <div class="text-xl mb-1">🪵</div>
+                            <div class="text-[10px] text-gray-400">Kayu</div>
+                            <div id="invWood" class="text-sm font-bold text-emerald-400">0</div>
                         </div>
-                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-blue-800">
-                            <div class="text-2xl mb-1">🎯</div>
-                            <div class="text-xs font-semibold text-blue-400">Sniper Camo</div>
+                        <div class="bg-[#0d1117] p-3 rounded-xl border border-gray-800">
+                            <div class="text-xl mb-1">🪨</div>
+                            <div class="text-[10px] text-gray-400">Batu</div>
+                            <div id="invStone" class="text-sm font-bold text-blue-400">0</div>
                         </div>
-                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-purple-800">
-                            <div class="text-2xl mb-1">⚡</div>
-                            <div class="text-xs font-semibold text-purple-400">Magical Bow</div>
+                        <div class="bg-[#0d1117] p-3 rounded-xl border border-gray-800">
+                            <div class="text-xl mb-1">🥩</div>
+                            <div class="text-[10px] text-gray-400">Daging</div>
+                            <div id="invMeat" class="text-sm font-bold text-amber-400">0</div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Klasemen Global Supabase -->
             <div class="glass-card p-5 rounded-2xl shadow-xl">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">🏆 Klasemen Global Pemburu</h3>
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">🏆 Klasemen Survival Global</h3>
                     <button onclick="loadLeaderboard()" class="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-lg text-gray-300">🔄 Refresh</button>
                 </div>
-                <div class="overflow-x-auto max-h-48 overflow-y-auto">
+                <div class="overflow-x-auto max-h-40 overflow-y-auto">
                     <table class="w-full text-left text-xs">
                         <thead>
                             <tr class="text-gray-500 border-b border-gray-800">
                                 <th class="pb-2 font-medium">Rank</th>
-                                <th class="pb-2 font-medium">Nama Pemburu</th>
+                                <th class="pb-2 font-medium">Nama Survivor</th>
                                 <th class="pb-2 font-medium">Score</th>
-                                <th class="pb-2 font-medium">Kills</th>
-                                <th class="pb-2 font-medium">Level</th>
+                                <th class="pb-2 font-medium">Camp Status</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboardTableBody" class="divide-y divide-gray-800/50">
-                            <tr><td colspan="5" class="py-3 text-center text-gray-500">Memuat data klasemen...</td></tr>
+                            <tr><td colspan="4" class="py-3 text-center text-gray-500">Memuat klasemen...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -119,16 +134,18 @@
         </section>
     </main>
 
-    <!-- MODAL GAME 3D FPS HUTAN -->
+    <!-- MODAL GAME 3D OPEN WORLD -->
     <div id="gameModal" class="fixed inset-0 bg-black z-50 hidden flex flex-col items-center justify-center">
         <div id="gameWrapper" class="relative w-full h-full bg-[#161b22] flex flex-col overflow-hidden">
             <div class="bg-[#0d1117] px-6 py-3 flex justify-between items-center border-b border-gray-800 z-10">
                 <div class="flex space-x-6 text-sm">
-                    <div>Pemburu: <span id="gamePlayerName" class="font-bold text-amber-400">-</span></div>
-                    <div>Skor: <span id="gameScore" class="font-bold text-emerald-400">0</span></div>
-                    <div>Buruan: <span id="gameKills" class="font-bold text-blue-400">0</span></div>
+                    <div>Survivor: <span id="gamePlayerName" class="font-bold text-amber-400">-</span></div>
+                    <div>Alat Aktif: <span id="activeToolName" class="font-bold text-emerald-400">Kapak 🪓</span></div>
+                    <div>Kayu: <span id="gameWood" class="font-bold text-emerald-400">0</span></div>
+                    <div>Batu: <span id="gameStone" class="font-bold text-blue-400">0</span></div>
+                    <div>Skor: <span id="gameScore" class="font-bold text-amber-400">0</span></div>
                 </div>
-                <div class="text-xs text-gray-400">[WASD] Jalan | [Mouse] Pandangan | [Klik] Tembak & Flash | [ESC] Keluar Kursor</div>
+                <div class="text-xs text-gray-400">[WASD] Jalan | [1/2/3] Ganti Alat | [Klik] Interaksi/Tembak | [ESC] Kursor</div>
                 <div class="flex space-x-2">
                     <button onclick="toggleFullScreen()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg">⛶ Fullscreen</button>
                     <button onclick="exitGame()" class="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-lg">Keluar & Simpan</button>
@@ -136,7 +153,7 @@
             </div>
             <div id="canvasContainer" class="w-full flex-grow relative cursor-crosshair">
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                    <div class="w-4 h-4 border-2 border-red-500 rounded-full opacity-80"></div>
+                    <div class="w-5 h-5 border-2 border-amber-400 rounded-full opacity-80 flex items-center justify-center text-[10px] text-amber-400">+</div>
                 </div>
             </div>
         </div>
@@ -147,21 +164,33 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sc2lid2loZnplaHFjZGF3cmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTcwNTEsImV4cCI6MjEwMzY5MzA1MX0.faKWNZqTLE6nEH6nPw0L4uFepTy6ZvqrZDy2BaHcWxs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // State Game & Inventaris
+        let woodCount = 0;
+        let stoneCount = 0;
+        let meatCount = 0;
         let currentScore = 0;
-        let currentKills = 0;
-        let scene, camera, renderer, animals = [], raycaster;
+        let currentTool = 'axe'; // 'axe' (Kapak), 'pickaxe' (Ganco), 'rifle' (Senapan)
+        let campBuilt = false;
+
+        let scene, camera, renderer, raycaster;
         let gameActive = false;
         let animationFrameId = null;
         let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
         let cameraRotationY = 0, cameraRotationX = 0;
-        let muzzleFlashMesh;
 
-        window.addEventListener('DOMContentLoaded', loadLeaderboard);
+        let solidObjects = []; // Untuk sistem collision (pohon, batu, hewan)
+        let worldTrees = [];
+        let worldStones = [];
+        let animals = [];
+        let toolMeshGroup;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLeaderboard();
+            loadProgress();
+        });
 
         async function loadLeaderboard() {
             const tbody = document.getElementById('leaderboardTableBody');
-            const localStats = document.getElementById('localTopStats');
-            
             const { data, error } = await supabaseClient
                 .from('leaderboard')
                 .select('*')
@@ -169,8 +198,7 @@
                 .limit(10);
 
             if (error || !data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-3 text-center text-gray-500">Belum ada data skor.</td></tr>`;
-                localStats.innerHTML = `<div class="text-gray-400">Belum ada riwayat.</div>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="py-3 text-center text-gray-500">Belum ada data survivor.</td></tr>`;
                 return;
             }
 
@@ -181,42 +209,76 @@
                         <td class="py-2.5 font-bold text-amber-500">#${index + 1}</td>
                         <td class="py-2.5 font-semibold text-white">${row.player_name}</td>
                         <td class="py-2.5 text-emerald-400 font-bold">${row.score} pt</td>
-                        <td class="py-2.5 text-blue-400">${row.kills || 0} kills</td>
-                        <td class="py-2.5 text-gray-400">Lv.${row.level || 1}</td>
+                        <td class="py-2.5 text-yellow-400">${row.level > 1 ? 'Camp Selesai 🏕️' : 'Membangun...'}</td>
                     </tr>
                 `;
             });
-            localStats.innerHTML = `<div class="flex justify-between font-semibold text-amber-400"><span>${data[0].player_name}</span><span>${data[0].score} pts</span></div>`;
+        }
+
+        // Simpan & Load Progress Lokal / Supabase
+        function saveProgress() {
+            const data = {
+                wood: woodCount,
+                stone: stoneCount,
+                meat: meatCount,
+                score: currentScore,
+                camp: campBuilt
+            };
+            localStorage.setItem('hunter_save_data', JSON.stringify(data));
+            alert('Progress berhasil disimpan secara lokal!');
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('hunter_save_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                woodCount = data.wood || 0;
+                stoneCount = data.stone || 0;
+                meatCount = data.meat || 0;
+                currentScore = data.score || 0;
+                campBuilt = data.camp || false;
+                updateUI();
+                alert('Progress berhasil dimuat kembali!');
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('invWood').innerText = woodCount;
+            document.getElementById('invStone').innerText = stoneCount;
+            document.getElementById('invMeat').innerText = meatCount;
+            document.getElementById('missionWood').innerText = `${woodCount} / 10`;
+            document.getElementById('missionStone').innerText = `${stoneCount} / 5`;
+
+            if (woodCount >= 10 && stoneCount >= 5) {
+                campBuilt = true;
+                document.getElementById('campStatus').innerHTML = 'Status: Camp Selesai Dibangun! 🏕️✨';
+                document.getElementById('campStatus').className = 'mt-2 text-center text-xs font-bold text-emerald-400';
+            }
         }
 
         function startGame() {
-            const name = document.getElementById('playerName').value.trim() || 'AlphaSniper';
+            const name = document.getElementById('playerName').value.trim() || 'SurvivorMaster';
             document.getElementById('gamePlayerName').innerText = name;
-            currentScore = 0;
-            currentKills = 0;
-            document.getElementById('gameScore').innerText = currentScore;
-            document.getElementById('gameKills').innerText = currentKills;
-
             document.getElementById('gameModal').classList.remove('hidden');
             initThreeJS();
+            updateUI();
         }
 
         function getTerrainHeight(x, z) {
-            // Membuat bukit alami dengan rumus matematika sinus/kosinus
-            return Math.sin(x * 0.05) * Math.cos(z * 0.05) * 2.5;
+            return Math.sin(x * 0.04) * Math.cos(z * 0.04) * 2.2;
         }
 
         function initThreeJS() {
             const container = document.getElementById('canvasContainer');
             container.innerHTML = `
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                    <div class="w-4 h-4 border-2 border-red-500 rounded-full opacity-80"></div>
+                    <div class="w-5 h-5 border-2 border-amber-400 rounded-full opacity-80 flex items-center justify-center text-[10px] text-amber-400">+</div>
                 </div>
             `;
 
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x050d05);
-            scene.fog = new THREE.FogExp2(0x050d05, 0.03);
+            scene.fog = new THREE.FogExp2(0x050d05, 0.025);
 
             camera = new THREE.PerspectiveCamera(65, container.clientWidth / container.clientHeight, 0.1, 1000);
             camera.position.set(0, getTerrainHeight(0, 0) + 2.2, 5);
@@ -233,71 +295,71 @@
             sunLight.position.set(30, 50, 20);
             scene.add(sunLight);
 
-            // Terrain Berbukit (Realistic Terrain pakai PlaneGeometry + Vertex Displacement)
-            const terrainGeo = new THREE.PlaneGeometry(250, 250, 60, 60);
+            // Terrain Berbukit
+            const terrainGeo = new THREE.PlaneGeometry(300, 300, 70, 70);
             terrainGeo.rotateX(-Math.PI / 2);
             const pos = terrainGeo.attributes.position;
             for (let i = 0; i < pos.count; i++) {
-                const px = pos.getX(i);
-                const pz = pos.getZ(i);
-                pos.setY(i, getTerrainHeight(px, pz));
+                pos.setY(i, getTerrainHeight(pos.getX(i), pos.getZ(i)));
             }
             terrainGeo.computeVertexNormals();
-            const terrainMat = new THREE.MeshStandardMaterial({ color: 0x13381a, roughness: 0.85, flatShading: true });
-            const terrain = new THREE.Mesh(terrainGeo, terrainMat);
-            scene.add(terrain);
+            const terrainMat = new THREE.MeshStandardMaterial({ color: 0x13381a, roughness: 0.9, flatShading: true });
+            scene.add(new THREE.Mesh(terrainGeo, terrainMat));
 
-            // Pohon-pohon realistis di atas bukit
-            for (let i = 0; i < 60; i++) {
-                const tx = (Math.random() - 0.5) * 180;
-                const tz = (Math.random() - 0.5) * 180;
-                if (Math.abs(tx) < 6 && Math.abs(tz) < 6) continue;
+            solidObjects = [];
+            worldTrees = [];
+            worldStones = [];
+            animals = [];
+
+            // Spawn Pohon (Bisa ditebang pakai Kapak)
+            for (let i = 0; i < 40; i++) {
+                const tx = (Math.random() - 0.5) * 200;
+                const tz = (Math.random() - 0.5) * 200;
+                if (Math.abs(tx) < 8 && Math.abs(tz) < 8) continue;
                 const ty = getTerrainHeight(tx, tz);
 
-                const trunkGeo = new THREE.CylinderGeometry(0.5, 0.9, 5);
-                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3b220d });
-                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-                trunk.position.set(tx, ty + 2.5, tz);
-                scene.add(trunk);
+                const treeGroup = new THREE.Group();
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 1, 6), new THREE.MeshStandardMaterial({ color: 0x3b220d }));
+                trunk.position.y = 3;
+                const leaves = new THREE.Mesh(new THREE.ConeGeometry(3, 7, 5), new THREE.MeshStandardMaterial({ color: 0x1b4d22 }));
+                leaves.position.y = 7;
+                
+                treeGroup.add(trunk);
+                treeGroup.add(leaves);
+                treeGroup.position.set(tx, ty, tz);
+                scene.add(treeGroup);
 
-                const leavesGeo = new THREE.ConeGeometry(3, 7, 5);
-                const leavesMat = new THREE.MeshStandardMaterial({ color: 0x1b4d22 });
-                const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-                leaves.position.set(tx, ty + 6.5, tz);
-                scene.add(leaves);
+                worldTrees.push(treeGroup);
+                solidObjects.push({ mesh: treeGroup, radius: 1.2, type: 'tree' });
             }
 
-            // Senjata Sniper & Muzzle Flash (Api Ujung Senapan)
-            const weaponGroup = new THREE.Group();
-            const bodyGeo = new THREE.BoxGeometry(0.22, 0.22, 2.2);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xb45309 });
-            const gunBody = new THREE.Mesh(bodyGeo, bodyMat);
-            gunBody.position.set(0.4, -0.4, -1);
-            
-            const scopeGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.7);
-            const scopeMat = new THREE.MeshStandardMaterial({ color: 0x1f2937 });
-            const scope = new THREE.Mesh(scopeGeo, scopeMat);
-            scope.rotation.x = Math.PI / 2;
-            scope.position.set(0.4, -0.2, -1);
+            // Spawn Batu (Bisa ditambang pakai Ganco)
+            for (let i = 0; i < 25; i++) {
+                const bx = (Math.random() - 0.5) * 200;
+                const bz = (Math.random() - 0.5) * 200;
+                if (Math.abs(bx) < 8 && Math.abs(bz) < 8) continue;
+                const by = getTerrainHeight(bx, bz);
 
-            // Api Moncong Senjata (Muzzle Flash) - diset invisible awalnya
-            const flashGeo = new THREE.ConeGeometry(0.25, 0.8, 6);
-            flashGeo.rotateX(Math.PI / 2);
-            const flashMat = new THREE.MeshBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0 });
-            muzzleFlashMesh = new THREE.Mesh(flashGeo, flashMat);
-            muzzleFlashMesh.position.set(0.4, -0.4, -2.2);
+                const stoneGeo = new THREE.DodecahedronGeometry(1.5, 0);
+                const stoneMat = new THREE.MeshStandardMaterial({ color: 0x6b7280, roughness: 0.8 });
+                const stone = new THREE.Mesh(stoneGeo, stoneMat);
+                stone.position.set(bx, by + 0.8, bz);
+                scene.add(stone);
 
-            weaponGroup.add(gunBody);
-            weaponGroup.add(scope);
-            weaponGroup.add(muzzleFlashMesh);
-            camera.add(weaponGroup);
-            scene.add(camera);
+                worldStones.push(stone);
+                solidObjects.push({ mesh: stone, radius: 1.5, type: 'stone' });
+            }
 
-            // Spawn Hewan Animatif
-            animals = [];
+            // Spawn Hewan (Bisa diburu pakai Senapan)
             for (let i = 0; i < 8; i++) {
                 spawnAnimal();
             }
+
+            // Model Alat di Tangan Player (FPS View)
+            toolMeshGroup = new THREE.Group();
+            updateToolMesh();
+            camera.add(toolMeshGroup);
+            scene.add(camera);
 
             raycaster = new THREE.Raycaster();
 
@@ -311,33 +373,42 @@
             animateThree();
         }
 
+        function updateToolMesh() {
+            while(toolMeshGroup.children.length > 0) { 
+                toolMeshGroup.remove(toolMeshGroup.children[0]); 
+            }
+
+            const toolMat = new THREE.MeshStandardMaterial({ color: currentTool === 'axe' ? 0xb45309 : currentTool === 'pickaxe' ? 0x3b82f6 : 0x1f2937 });
+            const handle = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 1.8), toolMat);
+            handle.position.set(0.4, -0.4, -1);
+            toolMeshGroup.add(handle);
+
+            let toolNameText = 'Kapak 🪓';
+            if (currentTool === 'pickaxe') toolNameText = 'Ganco ⛏️';
+            if (currentTool === 'rifle') toolNameText = 'Senapan 🎯';
+            document.getElementById('activeToolName').innerText = toolNameText;
+        }
+
         function spawnAnimal() {
             const animalGroup = new THREE.Group();
-            const isTiger = Math.random() > 0.6;
-            
-            // Badan Lebih Detail
-            const bodyGeo = new THREE.BoxGeometry(1.8, 1.1, 2.6);
-            const animalMat = new THREE.MeshStandardMaterial({ color: isTiger ? 0xc2410c : 0x78350f, roughness: 0.7 });
-            const body = new THREE.Mesh(bodyGeo, animalMat);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.1, 2.6), new THREE.MeshStandardMaterial({ color: 0x78350f }));
             body.position.y = 0.55;
-            animalGroup.add(body);
-
-            // Kepala Hewan
-            const headGeo = new THREE.BoxGeometry(0.7, 0.7, 0.8);
-            const head = new THREE.Mesh(headGeo, animalMat);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.8), new THREE.MeshStandardMaterial({ color: 0x78350f }));
             head.position.set(0, 1.2, 1.2);
+            
+            animalGroup.add(body);
             animalGroup.add(head);
 
-            const x = (Math.random() - 0.5) * 150;
-            const z = (Math.random() - 0.5) * 150 - 20;
+            const x = (Math.random() - 0.5) * 200;
+            const z = (Math.random() - 0.5) * 200;
             const y = getTerrainHeight(x, z);
 
             animalGroup.position.set(x, y, z);
-            // Simpan data kecepatan patroli hewan
-            animalGroup.userData = { speed: 0.04 + Math.random() * 0.04, direction: Math.random() * Math.PI * 2 };
+            animalGroup.userData = { speed: 0.03, direction: Math.random() * Math.PI * 2 };
             
             scene.add(animalGroup);
             animals.push(animalGroup);
+            solidObjects.push({ mesh: animalGroup, radius: 1.5, type: 'animal' });
         }
 
         function onKeyDown(e) {
@@ -345,6 +416,11 @@
             if (e.key === 's' || e.key === 'S') moveBackward = true;
             if (e.key === 'a' || e.key === 'A') moveLeft = true;
             if (e.key === 'd' || e.key === 'D') moveRight = true;
+
+            // Ganti Senjata / Alat
+            if (e.key === '1') { currentTool = 'axe'; updateToolMesh(); }
+            if (e.key === '2') { currentTool = 'pickaxe'; updateToolMesh(); }
+            if (e.key === '3') { currentTool = 'rifle'; updateToolMesh(); }
         }
 
         function onKeyUp(e) {
@@ -365,32 +441,57 @@
             camera.rotation.x = cameraRotationX;
         }
 
-        // Tembak & Animasi Muzzle Flash (Api Ujung Senapan)
+        // Aksi Interaksi Menggunakan Alat (Klik Kiri)
         window.addEventListener('mousedown', (e) => {
             if (!gameActive || document.pointerLockElement !== document.getElementById('canvasContainer')) return;
             if (e.button === 0) {
-                // Tampilkan api moncong senapan sekejap
-                muzzleFlashMesh.material.opacity = 1;
-                setTimeout(() => { muzzleFlashMesh.material.opacity = 0; }, 100);
-
                 raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
                 const intersects = raycaster.intersectObjects(scene.children, true);
 
-                for (let i = 0; i < intersects.length; i++) {
-                    let obj = intersects[i].object;
-                    let targetAnimal = animals.find(a => a === obj || a.children.includes(obj) || a.children.some(c => c.children.includes(obj)));
-                    
-                    if (targetAnimal) {
-                        scene.remove(targetAnimal);
-                        animals = animals.filter(a => a !== targetAnimal);
+                if (intersects.length > 0) {
+                    let hitObj = intersects[0].object;
+                    let distance = intersects[0].distance;
 
-                        currentScore += 35;
-                        currentKills += 1;
-                        document.getElementById('gameScore').innerText = currentScore;
-                        document.getElementById('gameKills').innerText = currentKills;
+                    if (distance > 8) return; // Jangkauan terlalu jauh
 
-                        setTimeout(spawnAnimal, 1200);
-                        break;
+                    // Cek apakah menebang pohon dengan KAPAK
+                    let treeTarget = worldTrees.find(t => t === hitObj || t.children.includes(hitObj));
+                    if (treeTarget && currentTool === 'axe') {
+                        scene.remove(treeTarget);
+                        worldTrees = worldTrees.filter(t => t !== treeTarget);
+                        solidObjects = solidObjects.filter(o => o.mesh !== treeTarget);
+                        woodCount += 2;
+                        currentScore += 10;
+                        updateUI();
+                        alert('Berhasil menebang pohon! +2 Kayu 🪵');
+                        return;
+                    }
+
+                    // Cek apakah menambang batu dengan GANCO
+                    let stoneTarget = worldStones.find(s => s === hitObj);
+                    if (stoneTarget && currentTool === 'pickaxe') {
+                        scene.remove(stoneTarget);
+                        worldStones = worldStones.filter(s => s !== stoneTarget);
+                        solidObjects = solidObjects.filter(o => o.mesh !== stoneTarget);
+                        stoneCount += 1;
+                        currentScore += 15;
+                        updateUI();
+                        alert('Berhasil menambang batu! +1 Batu 🪨');
+                        return;
+                    }
+
+                    // Cek apakah berburu hewan dengan SENAPAN
+                    let animalTarget = animals.find(a => a === hitObj || a.children.includes(a) || a.children.some(c => c.children.includes(hitObj)));
+                    if (animalTarget && currentTool === 'rifle') {
+                        scene.remove(animalTarget);
+                        animals = animals.filter(a => a !== animalTarget);
+                        solidObjects = solidObjects.filter(o => o.mesh !== animalTarget);
+                        meatCount += 1;
+                        currentScore += 30;
+                        updateUI();
+                        setTimeout(spawnAnimal, 3000);
+                        alert('Berhasil berburu hewan! +1 Daging 🥩');
+                        return;
                     }
                 }
             }
@@ -399,26 +500,24 @@
         function toggleFullScreen() {
             const elem = document.getElementById('gameWrapper');
             if (!document.fullscreenElement) {
-                elem.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+                elem.requestFullscreen();
             } else {
                 document.exitFullscreen();
             }
         }
 
         function onWindowResize() {
-            const container = document.getElementById('canvasContainer');
-            if (!container || !camera || !renderer) return;
-            camera.aspect = container.clientWidth / container.clientHeight;
+            if (!camera || !renderer) return;
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
         function animateThree() {
             if (!gameActive) return;
             animationFrameId = requestAnimationFrame(animateThree);
 
-            // Gerakan Jalan Player mengikuti kontur bukit (Terrain Height)
-            const speed = 0.18;
+            const speed = 0.16;
             const direction = new THREE.Vector3();
             camera.getWorldDirection(direction);
             direction.y = 0;
@@ -434,23 +533,36 @@
             if (moveLeft) { newX += sideDirection.x * speed; newZ += sideDirection.z * speed; }
             if (moveRight) { newX -= sideDirection.x * speed; newZ -= sideDirection.z * speed; }
 
-            // Update posisi kamera di atas permukaan tanah bukit
-            camera.position.x = newX;
-            camera.position.z = newZ;
-            camera.position.y = getTerrainHeight(newX, newZ) + 2.2;
+            // Sistem Collision (Tidak Tembus Objek / Pohon / Batu)
+            let collision = false;
+            for (let obj of solidObjects) {
+                let dx = newX - obj.mesh.position.x;
+                let dz = newZ - obj.mesh.position.z;
+                let dist = Math.sqrt(dx * dx + dz * dz);
+                if (dist < obj.radius + 0.6) {
+                    collision = true;
+                    break;
+                }
+            }
 
-            // Animasi pergerakan hewan bolak-balik di hutan
+            if (!collision) {
+                camera.position.x = newX;
+                camera.position.z = newZ;
+            }
+
+            camera.position.y = getTerrainHeight(camera.position.x, camera.position.z) + 2.2;
+
+            // Animasi Hewan Bergerak
             animals.forEach(animal => {
                 animal.position.x += Math.cos(animal.userData.direction) * animal.userData.speed;
                 animal.position.z += Math.sin(animal.userData.direction) * animal.userData.speed;
-                // Sesuaikan ketinggian hewan dengan kontur bukit
                 animal.position.y = getTerrainHeight(animal.position.x, animal.position.z);
-
-                // Ubah arah acak secara berkala
-                if (Math.random() < 0.02) {
-                    animal.userData.direction += (Math.random() - 0.5) * 1.5;
-                }
+                if (Math.random() < 0.02) animal.userData.direction += (Math.random() - 0.5);
             });
+
+            document.getElementById('gameWood').innerText = woodCount;
+            document.getElementById('gameStone').innerText = stoneCount;
+            document.getElementById('gameScore').innerText = currentScore;
 
             renderer.render(scene, camera);
         }
@@ -462,27 +574,20 @@
             if (document.fullscreenElement) document.exitFullscreen();
             document.getElementById('gameModal').classList.add('hidden');
 
-            window.removeEventListener('keydown', onKeyDown);
-            window.removeEventListener('keyup', onKeyUp);
+            const playerName = document.getElementById('playerName').value.trim() || 'SurvivorMaster';
 
-            const playerName = document.getElementById('playerName').value.trim() || 'AlphaSniper';
+            // Simpan otomatis ke Supabase saat keluar
+            const { error } = await supabaseClient
+                .from('leaderboard')
+                .insert([{ 
+                    player_name: playerName, 
+                    score: currentScore, 
+                    kills: meatCount,
+                    level: campBuilt ? 2 : 1
+                }]);
 
-            if (currentScore > 0) {
-                const { error } = await supabaseClient
-                    .from('leaderboard')
-                    .insert([{ 
-                        player_name: playerName, 
-                        score: currentScore, 
-                        kills: currentKills,
-                        level: Math.floor(currentScore / 100) + 1
-                    }]);
-
-                if (error) {
-                    alert('Gagal simpan ke Supabase: ' + error.message);
-                } else {
-                    alert('Skor berhasil dikirim ke database Supabase!');
-                    loadLeaderboard();
-                }
+            if (!error) {
+                loadLeaderboard();
             }
         }
     </script>
