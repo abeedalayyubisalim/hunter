@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter - 3D Forest Hunting Game</title>
+    <!-- Tailwind CSS untuk styling UI modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js untuk Engine 3D Hutan -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass-card { background: rgba(22, 27, 34, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(48, 54, 61, 0.7); }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex flex-col justify-between">
+
+    <!-- Top Header -->
+    <header class="flex justify-between items-center max-w-7xl mx-auto w-full mb-4 px-4">
+        <div class="flex items-center space-x-2">
+            <span class="text-xl">🏹</span>
+            <h1 class="text-xl font-black tracking-wider text-amber-500">HUNTER 3D</h1>
+        </div>
+        <div class="text-xs text-gray-400">Supabase Connected: <span class="text-emerald-400 font-semibold">Active</span></div>
+    </header>
+
+    <!-- Main Container Layout -->
+    <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+        
+        <!-- KOLOM KIRI: Menu Utama & Profil (Lebar 4 Grid) -->
+        <section class="lg:col-span-4 glass-card p-6 rounded-2xl shadow-2xl flex flex-col justify-between">
+            <div>
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-black text-amber-500 uppercase tracking-widest">HUNTER</h2>
+                    <p class="text-xs text-gray-400 mt-1">Jelajahi hutan, buru hewan liar, jadilah legenda!</p>
+                </div>
+
+                <!-- Input Nama Player -->
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nama Pemburu</label>
+                    <input type="text" id="playerName" value="ProHunter_ID" class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Tombol Mulai Game -->
+                <button onclick="startGame()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 mb-6 flex items-center justify-center space-x-2">
+                    <span>🎯 Mulai Berburu (Single Player)</span>
+                </button>
+
+                <!-- Top Survival (Mini Leaderboard Lokal) -->
+                <div class="bg-[#0d1117]/60 p-4 rounded-xl border border-gray-800">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Top Survival Kamu</h3>
+                    <div id="localTopStats" class="space-y-1 text-xs text-gray-300">
+                        <div class="flex justify-string">Memuat data dari Supabase...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center text-[10px] text-gray-500">
+                Project GitHub: Hunter 3D Game &bull; Powered by Supabase
+            </div>
+        </section>
+
+        <!-- KOLOM KANAN: Galeri & Klasemen (Lebar 8 Grid) -->
+        <section class="lg:col-span-8 space-y-6">
+            
+            <!-- Grid Atas: Galeri Hewan & Galeri Senjata -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Galeri Hewan Buruan -->
+                <div class="glass-card p-5 rounded-2xl shadow-xl">
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">🐗 Galeri Hewan Buruan</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-gray-800">
+                            <div class="text-2xl mb-1">🐇</div>
+                            <div class="text-xs font-semibold">Kelinci</div>
+                            <div class="text-[10px] text-gray-500">+10 Poin</div>
+                        </div>
+                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-gray-800">
+                            <div class="text-2xl mb-1">🦌</div>
+                            <div class="text-xs font-semibold">Rusa</div>
+                            <div class="text-[10px] text-gray-500">+25 Poin</div>
+                        </div>
+                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-gray-800">
+                            <div class="text-2xl mb-1">🐻</div>
+                            <div class="text-xs font-semibold">Beruang</div>
+                            <div class="text-[10px] text-gray-500">+50 Poin</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Galeri Senjata -->
+                <div class="glass-card p-5 rounded-2xl shadow-xl">
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">⚔️ Galeri Senjata</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-emerald-800">
+                            <div class="text-2xl mb-1">🏹</div>
+                            <div class="text-xs font-semibold text-emerald-400">Busur Panah</div>
+                            <div class="text-[10px] text-gray-500">Standard</div>
+                        </div>
+                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-blue-800">
+                            <div class="text-2xl mb-1">🎯</div>
+                            <div class="text-xs font-semibold text-blue-400">Sniper Rifle</div>
+                            <div class="text-[10px] text-gray-500">Rare</div>
+                        </div>
+                        <div class="bg-[#0d1117] p-2 rounded-xl text-center border border-purple-800">
+                            <div class="text-2xl mb-1">⚡</div>
+                            <div class="text-xs font-semibold text-purple-400">Magical Bow</div>
+                            <div class="text-[10px] text-gray-500">Epic</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Bawah: Klasemen Global (Supabase Leaderboard) -->
+            <div class="glass-card p-5 rounded-2xl shadow-xl">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">🏆 Klasemen Pemburu (Global Supabase)</h3>
+                    <button onclick="loadLeaderboard()" class="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-lg text-gray-300">🔄 Refresh</button>
+                </div>
+                <div class="overflow-x-auto max-h-48 overflow-y-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="text-gray-500 border-b border-gray-800">
+                                <th class="pb-2 font-medium">Rank</th>
+                                <th class="pb-2 font-medium">Nama Pemburu</th>
+                                <th class="pb-2 font-medium">Score</th>
+                                <th class="pb-2 font-medium">Kills</th>
+                                <th class="pb-2 font-medium">Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardTableBody" class="divide-y divide-gray-800/50">
+                            <tr>
+                                <td colspan="5" class="py-3 text-center text-gray-500">Mengambil data klasemen...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- MODAL GAME 3D BERBURU DI HUTAN (Hidden by default) -->
+    <div id="gameModal" class="fixed inset-0 bg-black/90 z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="relative w-full max-w-4xl bg-[#161b22] border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+            <!-- Game Top Bar -->
+            <div class="bg-[#0d1117] px-6 py-3 flex justify-between items-center border-b border-gray-800">
+                <div class="flex space-x-6 text-sm">
+                    <div>Pemain: <span id="gamePlayerName" class="font-bold text-amber-400">-</span></div>
+                    <div>Skor: <span id="gameScore" class="font-bold text-emerald-400">0</span></div>
+                    <div>Buruan Ditangkap: <span id="gameKills" class="font-bold text-blue-400">0</span></div>
+                </div>
+                <button onclick="exitGame()" class="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-lg">Selesai & Simpan Skor</button>
+            </div>
+            <!-- Canvas Area untuk Three.js -->
+            <div id="canvasContainer" class="w-full h-[450px] relative cursor-crosshair">
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none text-gray-500 text-sm">
+                    [ Klik hewan/target merah di hutan untuk menembak! ]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Integrasi Supabase & Three.js Game Engine -->
+    <script>
+        // Inisialisasi Supabase menggunakan kredensial kamu
+        const SUPABASE_URL = 'https://mlsibwihfzehqcdawrdh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sc2lid2loZnplaHFjZGF3cmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTcwNTEsImV4cCI6MjEwMzY5MzA1MX0.faKWNZqTLE6nEH6nPw0L4uFepTy6ZvqrZDy2BaHcWxs';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Variabel Game
+        let currentScore = 0;
+        let currentKills = 0;
+        let scene, camera, renderer, animals = [], raycaster, mouse;
+        let gameActive = false;
+        let animationFrameId = null;
+
+        // Load Klasemen saat halaman dibuka
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLeaderboard();
+        });
+
+        async function loadLeaderboard() {
+            const tbody = document.getElementById('leaderboardTableBody');
+            const localStats = document.getElementById('localTopStats');
+            
+            const { data, error } = await supabaseClient
+                .from('leaderboard')
+                .select('*')
+                .order('score', { ascending: false })
+                .limit(10);
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-3 text-center text-red-400">Gagal memuat data: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-3 text-center text-gray-500">Belum ada data skor di Supabase.</td></tr>`;
+                localStats.innerHTML = `<div class="text-gray-400">Belum ada riwayat.</div>`;
+                return;
+            }
+
+            // Render tabel global
+            tbody.innerHTML = '';
+            data.forEach((row, index) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-800/30">
+                        <td class="py-2.5 font-bold text-amber-500">#${index + 1}</td>
+                        <td class="py-2.5 font-semibold text-white">${row.player_name}</td>
+                        <td class="py-2.5 text-emerald-400 font-bold">${row.score} pt</td>
+                        <td class="py-2.5 text-blue-400">${row.kills || 0} kills</td>
+                        <td class="py-2.5 text-gray-400">Lv.${row.level || 1}</td>
+                    </tr>
+                `;
+            });
+
+            // Render ringkasan lokal teratas
+            localStats.innerHTML = `
+                <div class="flex justify-between font-semibold text-amber-400">
+                    <span>${data[0].player_name}</span>
+                    <span>${data[0].score} pts</span>
+                </div>
+            `;
+        }
+
+        // Mulai Game 3D
+        function startGame() {
+            const name = document.getElementById('playerName').value.trim() || 'HunterX';
+            document.getElementById('gamePlayerName').innerText = name;
+            currentScore = 0;
+            currentKills = 0;
+            document.getElementById('gameScore').innerText = currentScore;
+            document.getElementById('gameKills').innerText = currentKills;
+
+            document.getElementById('gameModal').classList.remove('hidden');
+            initThreeJS();
+        }
+
+        // Setup Three.js 3D Forest World
+        function initThreeJS() {
+            const container = document.getElementById('canvasContainer');
+            container.innerHTML = ''; // Bersihkan canvas sebelumnya
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a1a0a); // Nuansa malam hutan gelap
+
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            // Pencahayaan
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            scene.add(directionalLight);
+
+            // Lantai Hutan (Tanah)
+            const floorGeo = new THREE.PlaneGeometry(100, 100);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x132e13, roughness: 0.9 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // Spawn Pohon-pohon di Hutan
+            for (let i = 0; i < 25; i++) {
+                const treeTrunkGeo = new THREE.CylinderGeometry(0.5, 0.8, 4);
+                const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x3d2817 });
+                const trunk = new THREE.Mesh(treeTrunkGeo, treeTrunkMat);
+                
+                const x = (Math.random() - 0.5) * 60;
+                const z = (Math.random() - 0.5) * 60 - 10;
+                if (Math.abs(x) < 5 && Math.abs(z) < 5) continue; // Jangan di tengah jalan
+                
+                trunk.position.set(x, 2, z);
+                scene.add(trunk);
+
+                // Daun pohon kerucut
+                const leavesGeo = new THREE.ConeGeometry(2.5, 6);
+                const leavesMat = new THREE.MeshStandardMaterial({ color: 0x1b4d1b });
+                const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+                leaves.position.set(x, 5.5, z);
+                scene.add(leaves);
+            }
+
+            // Spawn Hewan Buruan Target
+            animals = [];
+            for (let i = 0; i < 6; i++) {
+                spawnAnimal();
+            }
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            container.addEventListener('click', onCanvasClick);
+
+            gameActive = true;
+            animateThree();
+        }
+
+        function spawnAnimal() {
+            // Bentuk hewan buruan (simulasi kotak/silinder merah menyala sebagai target buruan)
+            const animalGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+            const animalMat = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x450a0a });
+            const animal = new THREE.Mesh(animalGeo, animalMat);
+
+            animal.position.set(
+                (Math.random() - 0.5) * 35,
+                0.75,
+                (Math.random() - 0.5) * 30 - 10
+            );
+            
+            scene.add(animal);
+            animals.push(animal);
+        }
+
+        function animateThree() {
+            if (!gameActive) return;
+            animationFrameId = requestAnimationFrame(animateThree);
+
+            // Gerakan kecil hewan bolak-balik
+            animals.forEach(animal => {
+                animal.position.x += Math.sin(Date.now() * 0.003 + animal.id) * 0.03;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        function onCanvasClick(event) {
+            const container = document.getElementById('canvasContainer');
+            const rect = container.getBoundingClientRect();
+            
+            mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(animals);
+
+            if (intersects.length > 0) {
+                const hitAnimal = intersects[0].object;
+                scene.remove(hitAnimal);
+                animals = animals.filter(a => a !== hitAnimal);
+
+                // Tambah Skor
+                currentScore += 25;
+                currentKills += 1;
+                document.getElementById('gameScore').innerText = currentScore;
+                document.getElementById('gameKills').innerText = currentKills;
+
+                // Spawn hewan baru pengganti
+                setTimeout(spawnAnimal, 800);
+            }
+        }
+
+        // Keluar game dan simpan skor ke Supabase
+        async function exitGame() {
+            gameActive = false;
+            cancelAnimationFrame(animationFrameId);
+            document.getElementById('gameModal').classList.add('hidden');
+
+            const playerName = document.getElementById('playerName').value.trim() || 'HunterX';
+
+            if (currentScore > 0) {
+                // Simpan ke database Supabase
+                const { error } = await supabaseClient
+                    .from('leaderboard')
+                    .insert([{ 
+                        player_name: playerName, 
+                        score: currentScore, 
+                        kills: currentKills,
+                        level: Math.floor(currentScore / 100) + 1
+                    }]);
+
+                if (error) {
+                    alert('Gagal menyimpan skor ke Supabase: ' + error.message);
+                } else {
+                    alert('Skor berhasil disimpan ke Supabase Database!');
+                    loadLeaderboard();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
