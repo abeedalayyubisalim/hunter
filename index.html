@@ -217,7 +217,7 @@
 
     <script>
         // ============================================
-        // ERROR REPORTER - tampil di layar, tidak hilang
+        // ERROR REPORTER
         // ============================================
         function showPersistentError(msg) {
             const box = document.getElementById('errorBox');
@@ -229,6 +229,11 @@
         window.addEventListener('error', function (e) {
             showPersistentError(e.message);
         }, true);
+
+        // ============================================
+        // MATH HELPERS - tanpa dependensi API Babylon
+        // ============================================
+        function lerp(a, b, t) { return a + (b - a) * t; }
 
         // ============================================
         // SUPABASE CONFIG
@@ -353,7 +358,7 @@
         }
 
         // ============================================
-        // BABYLON.JS - STANDARD MATERIAL (anti hitam)
+        // BABYLON.JS 3D WORLD
         // ============================================
         let engine, scene, camera, sunLight, water, skybox, animals = [];
         const playerState = { yaw: 0, pitch: 0, speed: 15, isPointerLocked: false };
@@ -365,7 +370,11 @@
             const u = x * x * (3 - 2 * x), v = z * z * (3 - 2 * z);
             const A = (X * 137 + Z * 311) & 0xFFFF, B = ((X + 1) * 137 + Z * 311) & 0xFFFF;
             const C = (X * 137 + (Z + 1) * 311) & 0xFFFF, D = ((X + 1) * 137 + (Z + 1) * 311) & 0xFFFF;
-            return BABYLON.Scalar.lerp(BABYLON.Scalar.lerp((A & 0xFF) / 255, (B & 0xFF) / 255, u), BABYLON.Scalar.lerp((C & 0xFF) / 255, (D & 0xFF) / 255, u), v);
+            return lerp(
+                lerp((A & 0xFF) / 255, (B & 0xFF) / 255, u),
+                lerp((C & 0xFF) / 255, (D & 0xFF) / 255, u),
+                v
+            );
         }
 
         function getTerrainHeight(x, z) {
@@ -384,13 +393,11 @@
                 scene.fogDensity = 0.003;
                 scene.fogColor = new BABYLON.Color3(0.7, 0.8, 0.9);
 
-                // Kamera spawn DI ATAS tanah
                 const spawnY = getTerrainHeight(0, 0) + 3;
                 camera = new BABYLON.UniversalCamera('playerCamera', new BABYLON.Vector3(0, spawnY, 0), scene);
                 camera.minZ = 0.1; camera.maxZ = 1000; camera.fov = 1.2; camera.inertia = 0;
                 camera.inputs.clear();
 
-                // Lighting
                 const hemiLight = new BABYLON.HemisphericLight('skyLight', new BABYLON.Vector3(0, 1, 0), scene);
                 hemiLight.intensity = 0.8;
                 hemiLight.groundColor = new BABYLON.Color3(0.3, 0.3, 0.35);
@@ -406,7 +413,7 @@
                     shadowGenerator.blurKernel = 16;
                 } catch (e) { console.warn('Shadows disabled:', e.message); }
 
-                // Terrain dengan vertex colors + StandardMaterial
+                // Terrain
                 const terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 400, height: 400, subdivisions: 120, updatable: true }, scene);
                 const positions = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
                 const colors = [];
@@ -448,7 +455,7 @@
                     }
                 });
 
-                // Skybox gradient
+                // Skybox
                 skybox = BABYLON.MeshBuilder.CreateBox('skyBox', { size: 800 }, scene);
                 const skyMat = new BABYLON.StandardMaterial('skyMat', scene);
                 skyMat.backFaceCulling = false;
@@ -506,7 +513,7 @@
                     if (shadowGenerator) shadowGenerator.addShadowCaster(animal);
                 }
 
-                // Post-processing (opsional, aman jika gagal)
+                // Post-processing (opsional)
                 try {
                     const pipeline = new BABYLON.DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
                     pipeline.bloomEnabled = true; pipeline.bloomThreshold = 0.7; pipeline.bloomWeight = 0.3;
@@ -545,7 +552,6 @@
                     const delta = Math.min((now - lastTime) / 1000, 0.1);
                     lastTime = now;
 
-                    // Kamera selalu menempel di atas tanah
                     const terrainY = getTerrainHeight(camera.position.x, camera.position.z);
                     camera.position.y = Math.max(terrainY, 0.5) + 2;
 
@@ -628,7 +634,6 @@
         }
 
         function startGame() {
-            // CEK DULU: library 3D harus ada sebelum masuk game
             if (typeof BABYLON === 'undefined') {
                 showPersistentError('Library 3D (BabylonJS) gagal dimuat dari CDN. Matikan adblock / periksa internet, lalu refresh (Ctrl+F5).');
                 return;
