@@ -1,1 +1,1011 @@
 
+<write_to_file>
+<path>index.html</path>
+<content><!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hunter 3D - The Cursed Expedition</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+      body {
+        font-family: 'Courier New', monospace;
+        overflow: hidden;
+        background: #0a0a0a;
+        color: #e0e0e0;
+    }
+
+    #gameCanvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+    }
+
+    /* Main Menu Overlay */
+    #mainMenu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .menu-title {
+        font-size: 4rem;
+        font-weight: bold;
+        color: #e94560;
+        text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        margin-bottom: 1rem;
+        letter-spacing: 3px;
+    }
+
+    .menu-subtitle {
+        font-size: 1.2rem;
+        color: #a0a0a0;
+        margin-bottom: 3rem;
+        text-align: center;
+        max-width: 600px;
+        line-height: 1.6;
+    }
+
+    .menu-input {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid #e94560;
+        color: #fff;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        width: 300px;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .menu-input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 20px rgba(233, 69, 96, 0.3);
+    }
+
+    .menu-btn {
+        padding: 15px 50px;
+        font-size: 1.2rem;
+        background: linear-gradient(135deg, #e94560, #c23152);
+        border: none;
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin: 0.5rem;
+    }
+
+    .menu-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+    }
+
+    .menu-btn.secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid #e94560;
+    }
+
+    /* HUD Container */
+    #hud {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        display: none;
+        z-index: 100;
+    }
+
+    /* Top Bar - Compass & Time */
+    .top-bar {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 10px 25px;
+        border-radius: 30px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .compass {
+        font-size: 1.5rem;
+        color: #e94560;
+        font-weight: bold;
+        text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+    }
+
+    .time-display {
+        font-size: 1.1rem;
+        color: #ffd700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .weather-icon {
+        font-size: 1.3rem;
+    }
+
+    /* Quest Tracker - Top Right */
+    .quest-tracker {
+        position: absolute;
+        top: 80px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px 20px;
+        border-radius: 10px;
+        border-left: 4px solid #e94560;
+        min-width: 280px;
+        backdrop-filter: blur(10px);
+    }
+
+    .quest-title {
+        font-size: 0.9rem;
+        color: #e94560;
+        font-weight: bold;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .quest-objective {
+        font-size: 0.95rem;
+        color: #e0e0e0;
+        line-height: 1.5;
+    }
+
+    .quest-progress {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #a0a0a0;
+    }
+
+    /* Status Bars - Bottom Left */
+    .status-container {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 250px;
+    }
+
+    .status-icon {
+        font-size: 1.5rem;
+        width: 30px;
+        text-align: center;
+    }
+
+    .status-info {
+        flex: 1;
+    }
+
+    .status-label {
+        font-size: 0.75rem;
+        color: #a0a0a0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+    }
+
+    .bar-container {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .bar-fill {
+        height: 100%;
+        transition: width 0.3s ease, background 0.3s;
+        position: relative;
+    }
+
+    .bar-fill.health { background: linear-gradient(90deg, #ff4444, #ff6666); }
+    .bar-fill.hunger { background: linear-gradient(90deg, #ff8800, #ffaa00); }
+    .bar-fill.thirst { background: linear-gradient(90deg, #0088ff, #00aaff); }
+    .bar-fill.energy { background: linear-gradient(90deg, #ffdd00, #ffee00); }
+
+    .bar-fill.critical {
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .status-value {
+        font-size: 0.85rem;
+        color: #fff;
+        font-weight: bold;
+        min-width: 45px;
+        text-align: right;
+    }
+
+    /* Inventory - Bottom Right */
+    .inventory {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .inventory-title {
+        font-size: 0.8rem;
+        color: #a0a0a0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .inventory-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .inventory-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s;
+    }
+
+    .inventory-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .item-icon {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
+
+    .item-count {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .item-name {
+        font-size: 0.7rem;
+        color: #a0a0a0;
+        margin-top: 3px;
+    }
+
+    /* Tool Selector - Bottom Center */
+    .tool-selector {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 15px;
+        border-radius: 30px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tool-slot {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .tool-slot.active {
+        border-color: #e94560;
+        background: rgba(233, 69, 96, 0.2);
+        box-shadow: 0 0 15px rgba(233, 69, 96, 0.4);
+    }
+
+    .tool-slot:hover {
+        transform: translateY(-3px);
+    }
+
+    .tool-icon {
+        font-size: 1.8rem;
+    }
+
+    .tool-key {
+        position: absolute;
+        top: 3px;
+        right: 5px;
+        font-size: 0.7rem;
+        color: #a0a0a0;
+        font-weight: bold;
+    }
+
+    /* Action Prompts - Center */
+    .action-prompt {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 15px 30px;
+        border-radius: 10px;
+        border: 2px solid #e94560;
+        display: none;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -60%);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    .action-text {
+        font-size: 1.1rem;
+        color: #fff;
+        text-align: center;
+    }
+
+    .action-key {
+        display: inline-block;
+        background: #e94560;
+        padding: 5px 12px;
+        border-radius: 5px;
+        margin: 0 5px;
+        font-weight: bold;
+    }
+
+    /* Notification System */
+    .notification {
+        position: absolute;
+        top: 150px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        padding: 15px 30px;
+        border-radius: 10px;
+        border-left: 4px solid #e94560;
+        color: #fff;
+        font-size: 1rem;
+        display: none;
+        animation: slideDown 0.5s ease-out;
+        z-index: 200;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -100%);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+    }
+
+    /* Crosshair */
+    .crosshair {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+        content: '';
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .crosshair::before {
+        width: 2px;
+        height: 20px;
+        left: 9px;
+    }
+
+    .crosshair::after {
+        width: 20px;
+        height: 2px;
+        top: 9px;
+    }
+
+    /* Minimap - Top Left */
+    .minimap {
+        position: absolute;
+        top: 80px;
+        left: 20px;
+        width: 150px;
+        height: 150px;
+        background: rgba(0, 0, 0, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+
+    .minimap-content {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .player-dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        background: #e94560;
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(233, 69, 96, 0.8);
+    }
+
+    .minimap-label {
+        position: absolute;
+        bottom: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.75rem;
+        color: #a0a0a0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Loading Screen */
+    #loadingScreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0a0a0a;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 2000;
+    }
+
+    .loading-text {
+        font-size: 1.5rem;
+        color: #e94560;
+        margin-bottom: 20px;
+        animation: pulse 1.5s infinite;
+    }
+
+    .loading-bar {
+        width: 300px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .loading-progress {
+        height: 100%;
+        background: #e94560;
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    /* Pause Menu */
+    #pauseMenu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 1500;
+    }
+
+    .pause-title {
+        font-size: 3rem;
+        color: #e94560;
+        margin-bottom: 2rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .status-container {
+            transform: scale(0.8);
+            transform-origin: bottom left;
+        }
+        .inventory {
+            transform: scale(0.8);
+            transform-origin: bottom right;
+        }
+        .quest-tracker {
+            transform: scale(0.8);
+            transform-origin: top right;
+        }
+    }
+</style>
+
+  </head>
+<body>
+<!-- Loading Screen -->
+<div id="loadingScreen">
+<div class="loading-text">Memuat Dunia...</div>
+<div class="loading-bar">
+<div class="loading-progress" id="loadingProgress"></div>
+</div>
+</div>
+
+  <!-- Main Menu -->
+<div id="mainMenu">
+    <div class="menu-title">🏹 HUNTER 3D</div>
+    <div class="menu-subtitle">
+        <strong>The Cursed Expedition</strong><br>
+        Bertahan hidup di pulau terkutuk. Temukan 3 Mercusuar Kuno untuk memanggil bantuan sebelum malam terakhir tiba.
+    </div>
+    <input type="text" class="menu-input" id="playerNameInput" placeholder="Nama Survivor" maxlength="20">
+    <div>
+        <button class="menu-btn" id="startGameBtn">☀️ Mulai Ekspedisi</button>
+        <button class="menu-btn secondary" id="loadGameBtn">📂 Muat Permainan</button>
+    </div>
+</div>
+
+<!-- Game Canvas -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+    <!-- Top Bar - Compass & Time -->
+    <div class="top-bar">
+        <div class="compass" id="compass">N</div>
+        <div class="time-display">
+            <span class="weather-icon" id="weatherIcon">☀️</span>
+            <span id="timeText">Siang Hari</span>
+            <span id="dayCount">Hari 1</span>
+        </div>
+    </div>
+
+    <!-- Minimap -->
+    <div class="minimap">
+        <div class="minimap-content">
+            <div class="player-dot"></div>
+        </div>
+        <div class="minimap-label">Peta</div>
+    </div>
+
+    <!-- Quest Tracker -->
+    <div class="quest-tracker">
+        <div class="quest-title">📜 Misi Aktif</div>
+        <div class="quest-objective" id="questObjective">Cari sumber makanan dan bangun tempat berlindung</div>
+        <div class="quest-progress" id="questProgress">Progres: 0/3</div>
+    </div>
+
+    <!-- Status Bars -->
+    <div class="status-container">
+        <div class="status-bar">
+            <div class="status-icon">❤️</div>
+            <div class="status-info">
+                <div class="status-label">Kesehatan</div>
+                <div class="bar-container">
+                    <div class="bar-fill health" id="healthBar" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="status-value" id="healthValue">100%</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-icon">🍖</div>
+            <div class="status-info">
+                <div class="status-label">Kelaparan</div>
+                <div class="bar-container">
+                    <div class="bar-fill hunger" id="hungerBar" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="status-value" id="hungerValue">100%</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-icon">💧</div>
+            <div class="status-info">
+                <div class="status-label">Kehausan</div>
+                <div class="bar-container">
+                    <div class="bar-fill thirst" id="thirstBar" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="status-value" id="thirstValue">100%</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-icon">⚡</div>
+            <div class="status-info">
+                <div class="status-label">Energi</div>
+                <div class="bar-container">
+                    <div class="bar-fill energy" id="energyBar" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="status-value" id="energyValue">100%</div>
+        </div>
+    </div>
+
+    <!-- Inventory -->
+    <div class="inventory">
+        <div class="inventory-title">🎒 Ransel</div>
+        <div class="inventory-grid">
+            <div class="inventory-item">
+                <div class="item-icon">🪵</div>
+                <div class="item-count" id="woodCount">0</div>
+                <div class="item-name">Kayu</div>
+            </div>
+            <div class="inventory-item">
+                <div class="item-icon">🪨</div>
+                <div class="item-count" id="stoneCount">0</div>
+                <div class="item-name">Batu</div>
+            </div>
+            <div class="inventory-item">
+                <div class="item-icon">🥩</div>
+                <div class="item-count" id="meatCount">0</div>
+                <div class="item-name">Daging</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool Selector -->
+    <div class="tool-selector">
+        <div class="tool-slot active" data-tool="axe">
+            <div class="tool-key">1</div>
+            <div class="tool-icon">🪓</div>
+        </div>
+        <div class="tool-slot" data-tool="hook">
+            <div class="tool-key">2</div>
+            <div class="tool-icon">🪝</div>
+        </div>
+        <div class="tool-slot" data-tool="rifle">
+            <div class="tool-key">3</div>
+            <div class="tool-icon">🔫</div>
+        </div>
+    </div>
+
+    <!-- Action Prompt -->
+    <div class="action-prompt" id="actionPrompt">
+        <div class="action-text">
+            Tekan <span class="action-key" id="actionKey">E</span> untuk <span id="actionText">Makan</span>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Crosshair -->
+    <div class="crosshair"></div>
+</div>
+
+<!-- Pause Menu -->
+<div id="pauseMenu">
+    <div class="pause-title">⏸️ Jeda</div>
+    <button class="menu-btn" id="resumeBtn">▶️ Lanjutkan</button>
+    <button class="menu-btn secondary" id="saveBtn">💾 Simpan Permainan</button>
+    <button class="menu-btn secondary" id="quitBtn">🚪 Keluar</button>
+</div>
+
+<script>
+    // Game State
+    const gameState = {
+        playerName: '',
+        health: 100,
+        hunger: 100,
+        thirst: 100,
+        energy: 100,
+        wood: 0,
+        stone: 0,
+        meat: 0,
+        currentTool: 'axe',
+        day: 1,
+        timeOfDay: 'day', // day, dusk, night, dawn
+        weather: 'clear', // clear, rain, fog
+        lighthouses: 0,
+        quests: [
+            { id: 1, title: 'Bertahan Hidup', objective: 'Kumpulkan 10 kayu dan 5 batu', target: 15, current: 0, completed: false },
+            { id: 2, title: 'Pemburu', objective: 'Berburu 5 hewan', target: 5, current: 0, completed: false },
+            { id: 3, title: 'Penjelajah', objective: 'Temukan Mercusuar Pertama', target: 1, current: 0, completed: false }
+        ],
+        currentQuest: 0
+    };
+
+    // DOM Elements
+    const mainMenu = document.getElementById('mainMenu');
+    const hud = document.getElementById('hud');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const pauseMenu = document.getElementById('pauseMenu');
+    const notification = document.getElementById('notification');
+    const actionPrompt = document.getElementById('actionPrompt');
+
+    // Initialize Game
+    document.getElementById('startGameBtn').addEventListener('click', startGame);
+    document.getElementById('loadGameBtn').addEventListener('click', loadGame);
+    document.getElementById('resumeBtn').addEventListener('click', resumeGame);
+    document.getElementById('saveBtn').addEventListener('click', saveGame);
+    document.getElementById('quitBtn').addEventListener('click', quitGame);
+
+    function startGame() {
+        const name = document.getElementById('playerNameInput').value.trim();
+        if (!name) {
+            showNotification('⚠️ Masukkan nama survivor!');
+            return;
+        }
+
+        gameState.playerName = name;
+        mainMenu.style.display = 'none';
+        loadingScreen.style.display = 'flex';
+
+        // Simulate loading
+        let progress = 0;
+        const loadingInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(loadingInterval);
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    hud.style.display = 'block';
+                    showNotification(`🌍 Selamat datang, ${name}! Bertahan hiduplah...`);
+                    startGameLoop();
+                }, 500);
+            }
+            document.getElementById('loadingProgress').style.width = progress + '%';
+        }, 100);
+    }
+
+    function loadGame() {
+        const saved = localStorage.getItem('hunter3d_save');
+        if (saved) {
+            const data = JSON.parse(saved);
+            Object.assign(gameState, data);
+            showNotification('✅ Permainan berhasil dimuat!');
+            startGame();
+        } else {
+            showNotification('❌ Tidak ada data tersimpan!');
+        }
+    }
+
+    function saveGame() {
+        localStorage.setItem('hunter3d_save', JSON.stringify(gameState));
+        showNotification('💾 Permainan berhasil disimpan!');
+    }
+
+    function resumeGame() {
+        pauseMenu.style.display = 'none';
+    }
+
+    function quitGame() {
+        saveGame();
+        location.reload();
+    }
+
+    // Game Loop
+    function startGameLoop() {
+        // Status decay
+        setInterval(() => {
+            gameState.hunger = Math.max(0, gameState.hunger - 0.5);
+            gameState.thirst = Math.max(0, gameState.thirst - 0.7);
+            gameState.energy = Math.max(0, gameState.energy - 0.3);
+
+            // Health damage from starvation/dehydration
+            if (gameState.hunger === 0 || gameState.thirst === 0) {
+                gameState.health = Math.max(0, gameState.health - 1);
+            }
+
+            // Night danger
+            if (gameState.timeOfDay === 'night') {
+                gameState.energy = Math.max(0, gameState.energy - 0.5);
+                if (gameState.energy < 30) {
+                    gameState.health = Math.max(0, gameState.health - 0.5);
+                }
+            }
+
+            updateUI();
+        }, 2000);
+
+        // Time cycle
+        setInterval(() => {
+            advanceTime();
+        }, 30000); // 30 seconds per time phase
+
+        // Keyboard controls
+        document.addEventListener('keydown', handleKeyPress);
+    }
+
+    function advanceTime() {
+        const phases = ['dawn', 'day', 'dusk', 'night'];
+        const currentIndex = phases.indexOf(gameState.timeOfDay);
+        const nextIndex = (currentIndex + 1) % 4;
+        gameState.timeOfDay = phases[nextIndex];
+
+        if (nextIndex === 0) {
+            gameState.day++;
+            showNotification(`🌅 Hari ${gameState.day} dimulai!`);
+        }
+
+        updateUI();
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Escape') {
+            pauseMenu.style.display = 'flex';
+            return;
+        }
+
+        // Tool switching
+        if (e.key === '1') selectTool('axe');
+        if (e.key === '2') selectTool('hook');
+        if (e.key === '3') selectTool('rifle');
+
+        // Actions
+        if (e.key === 'e' || e.key === 'E') eatMeat();
+        if (e.key === 'f' || e.key === 'F') drinkWater();
+        if (e.key === 'z' || e.key === 'Z') sleep();
+    }
+
+    function selectTool(tool) {
+        gameState.currentTool = tool;
+        document.querySelectorAll('.tool-slot').forEach(slot => {
+            slot.classList.remove('active');
+            if (slot.dataset.tool === tool) {
+                slot.classList.add('active');
+            }
+        });
+    }
+
+    function eatMeat() {
+        if (gameState.meat > 0) {
+            gameState.meat--;
+            gameState.hunger = Math.min(100, gameState.hunger + 30);
+            showNotification('🥩 Kamu memakan daging. Lapar pulih!');
+            updateUI();
+        } else {
+            showNotification('❌ Tidak ada daging!');
+        }
+    }
+
+    function drinkWater() {
+        gameState.thirst = Math.min(100, gameState.thirst + 40);
+        showNotification('💧 Kamu minum air segar.');
+        updateUI();
+    }
+
+    function sleep() {
+        if (gameState.energy < 100) {
+            gameState.energy = Math.min(100, gameState.energy + 50);
+            gameState.health = Math.min(100, gameState.health + 10);
+            showNotification('💤 Kamu beristirahat. Energi pulih!');
+            updateUI();
+        }
+    }
+
+    function updateUI() {
+        // Status bars
+        updateStatusBar('health', gameState.health);
+        updateStatusBar('hunger', gameState.hunger);
+        updateStatusBar('thirst', gameState.thirst);
+        updateStatusBar('energy', gameState.energy);
+
+        // Inventory
+        document.getElementById('woodCount').textContent = gameState.wood;
+        document.getElementById('stoneCount').textContent = gameState.stone;
+        document.getElementById('meatCount').textContent = gameState.meat;
+
+        // Time & Weather
+        const timeTexts = {
+            'dawn': '🌅 Fajar',
+            'day': '☀️ Siang',
+            'dusk': '🌆 Senja',
+            'night': '🌙 Malam'
+        };
+        document.getElementById('timeText').textContent = timeTexts[gameState.timeOfDay];
+        document.getElementById('dayCount').textContent = `Hari ${gameState.day}`;
+
+        // Quest
+        const quest = gameState.quests[gameState.currentQuest];
+        if (quest && !quest.completed) {
+            document.getElementById('questObjective').textContent = quest.objective;
+            document.getElementById('questProgress').textContent = `Progres: ${quest.current}/${quest.target}`;
+        }
+    }
+
+    function updateStatusBar(type, value) {
+        const bar = document.getElementById(`${type}Bar`);
+        const valueEl = document.getElementById(`${type}Value`);
+        
+        bar.style.width = value + '%';
+        valueEl.textContent = Math.round(value) + '%';
+
+        if (value < 30) {
+            bar.classList.add('critical');
+        } else {
+            bar.classList.remove('critical');
+        }
+    }
+
+    function showNotification(text) {
+        notification.textContent = text;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+
+    // Initialize UI
+    updateUI();
+</script>
+
+</body>
+</html>
+</content>
+</write_to_file>  
