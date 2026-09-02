@@ -8,6 +8,7 @@
 <title>Hunter 3D - The Cursed Expedition</title>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * {
 margin: 0;
@@ -15,7 +16,7 @@ padding: 0;
 box-sizing: border-box;
 }
 
-    body {
+        body {
         font-family: 'Courier New', monospace;
         overflow: hidden;
         background: #0a0a0a;
@@ -44,6 +45,8 @@ box-sizing: border-box;
         align-items: center;
         z-index: 1000;
         animation: fadeIn 1s ease-in;
+        overflow-y: auto;
+        padding: 20px;
     }
 
     @keyframes fadeIn {
@@ -63,7 +66,7 @@ box-sizing: border-box;
     .menu-subtitle {
         font-size: 1.2rem;
         color: #a0a0a0;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         text-align: center;
         max-width: 600px;
         line-height: 1.6;
@@ -76,7 +79,7 @@ box-sizing: border-box;
         border: 2px solid #e94560;
         color: #fff;
         border-radius: 8px;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         width: 300px;
         text-align: center;
         transition: all 0.3s;
@@ -111,6 +114,107 @@ box-sizing: border-box;
         background: rgba(255, 255, 255, 0.1);
         border: 2px solid #e94560;
     }
+
+    /* Supabase Status */
+    .supabase-status {
+        margin-top: 1.5rem;
+        padding: 10px 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #888;
+    }
+
+    .status-dot.connected {
+        background: #00ff88;
+        box-shadow: 0 0 10px #00ff88;
+        animation: pulse 2s infinite;
+    }
+
+    .status-dot.disconnected {
+        background: #ff4444;
+        box-shadow: 0 0 10px #ff4444;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* Leaderboard */
+    .leaderboard-container {
+        margin-top: 2rem;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        min-width: 500px;
+        max-width: 700px;
+    }
+
+    .leaderboard-title {
+        font-size: 1.3rem;
+        color: #ffd700;
+        margin-bottom: 15px;
+        text-align: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .refresh-btn {
+        background: rgba(233, 69, 96, 0.2);
+        border: 1px solid #e94560;
+        color: #e94560;
+        padding: 5px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+    }
+
+    .refresh-btn:hover {
+        background: rgba(233, 69, 96, 0.4);
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .leaderboard-table th {
+        background: rgba(233, 69, 96, 0.3);
+        padding: 10px;
+        text-align: left;
+        color: #fff;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .leaderboard-table td {
+        padding: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+    }
+
+    .leaderboard-table tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .rank-1 { color: #ffd700; font-weight: bold; }
+    .rank-2 { color: #c0c0c0; font-weight: bold; }
+    .rank-3 { color: #cd7f32; font-weight: bold; }
 
     /* HUD Container */
     #hud {
@@ -255,11 +359,6 @@ box-sizing: border-box;
 
     .bar-fill.critical {
         animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
     }
 
     .status-value {
@@ -585,10 +684,14 @@ box-sizing: border-box;
         .menu-title {
             font-size: 2.5rem;
         }
+        .leaderboard-container {
+            min-width: auto;
+            width: 100%;
+        }
     }
 </style>
 
-          </head>
+    </head>
 <body>
 <!-- Loading Screen -->
 <div id="loadingScreen">
@@ -598,7 +701,7 @@ box-sizing: border-box;
 </div>
 </div>
 
-          <!-- Main Menu -->
+    <!-- Main Menu -->
 <div id="mainMenu">
     <div class="menu-title">🏹 HUNTER 3D</div>
     <div class="menu-subtitle">
@@ -609,6 +712,35 @@ box-sizing: border-box;
     <div>
         <button class="menu-btn" id="startGameBtn">☀️ Mulai Ekspedisi</button>
         <button class="menu-btn secondary" id="loadGameBtn">📂 Muat Permainan</button>
+    </div>
+
+    <!-- Supabase Status -->
+    <div class="supabase-status">
+        <div class="status-dot" id="supabaseStatusDot"></div>
+        <span id="supabaseStatusText">Memeriksa koneksi Supabase...</span>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-container">
+        <div class="leaderboard-title">
+            <span>🏆 Leaderboard Penjelajah Dunia</span>
+            <button class="refresh-btn" id="refreshLeaderboardBtn">🔄 Refresh</button>
+        </div>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Nama Penjelajah</th>
+                    <th>Skor Survival</th>
+                    <th>Total Berburu</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -752,6 +884,42 @@ box-sizing: border-box;
 
 <script>
     // ============================================
+    // SUPABASE CONFIGURATION - ISI DENGAN DATA ANDA
+    // ============================================
+    const SUPABASE_URL = 'https://mlsibwihfzehqcdawrdh.supabase.co';      // Ganti dengan URL Supabase Anda
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sc2lid2loZnplaHFjZGF3cmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTcwNTEsImV4cCI6MjEwMzY5MzA1MX0.faKWNZqTLE6nEH6nPw0L4uFepTy6ZvqrZDy2BaHcWxs';  // Ganti dengan Anon Key Anda
+
+    // Initialize Supabase Client
+    let supabase = null;
+    let supabaseConnected = false;
+
+    try {
+        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseConnected = true;
+            console.log('✅ Supabase connected');
+        } else {
+            console.warn('⚠️ Supabase not configured. Using local storage only.');
+        }
+    } catch (error) {
+        console.error('❌ Supabase initialization error:', error);
+    }
+
+    // Update status indicator
+    function updateSupabaseStatus() {
+        const dot = document.getElementById('supabaseStatusDot');
+        const text = document.getElementById('supabaseStatusText');
+        
+        if (supabaseConnected) {
+            dot.classList.add('connected');
+            text.textContent = 'Supabase: Connected';
+        } else {
+            dot.classList.add('disconnected');
+            text.textContent = 'Supabase: Not Configured (Local Mode)';
+        }
+    }
+
+    // ============================================
     // GAME STATE
     // ============================================
     const gameState = {
@@ -769,6 +937,7 @@ box-sizing: border-box;
         weather: 'clear',
         lighthouses: 0,
         score: 0,
+        totalHunts: 0,
         quests: [
             { id: 1, title: 'Bertahan Hidup', objective: 'Kumpulkan 10 kayu dan 5 batu', target: 15, current: 0, completed: false },
             { id: 2, title: 'Pemburu', objective: 'Berburu 5 hewan', target: 5, current: 0, completed: false },
@@ -780,6 +949,168 @@ box-sizing: border-box;
     };
 
     // ============================================
+    // SUPABASE FUNCTIONS
+    // ============================================
+    async function fetchLeaderboard() {
+        const tbody = document.getElementById('leaderboardBody');
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td></tr>';
+
+        if (!supabaseConnected) {
+            // Fallback to localStorage
+            const localData = JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]');
+            renderLeaderboard(localData);
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .select('*')
+                .order('score', { ascending: false })
+                .limit(10);
+
+            if (error) throw error;
+            renderLeaderboard(data || []);
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ff4444;">Gagal memuat data</td></tr>';
+        }
+    }
+
+    function renderLeaderboard(data) {
+        const tbody = document.getElementById('leaderboardBody');
+        
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Belum ada data</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map((player, index) => {
+            const rankClass = index < 3 ? `rank-${index + 1}` : '';
+            const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+            return `
+                <tr>
+                    <td class="${rankClass}">${rankEmoji}</td>
+                    <td>${player.name}</td>
+                    <td>${player.score}</td>
+                    <td>${player.total_hunts || 0}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function submitScore() {
+        const scoreData = {
+            name: gameState.playerName,
+            score: gameState.score,
+            total_hunts: gameState.totalHunts,
+            days_survived: gameState.day,
+            created_at: new Date().toISOString()
+        };
+
+        if (!supabaseConnected) {
+            // Fallback to localStorage
+            const localData = JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]');
+            localData.push(scoreData);
+            localData.sort((a, b) => b.score - a.score);
+            localStorage.setItem('hunter3d_leaderboard', JSON.stringify(localData.slice(0, 10)));
+            console.log('Score saved to localStorage');
+            return;
+        }
+
+        try {
+            const { error } = await supabase
+                .from('leaderboard')
+                .insert([scoreData]);
+
+            if (error) throw error;
+            console.log('✅ Score submitted to Supabase');
+        } catch (error) {
+            console.error('Error submitting score:', error);
+        }
+    }
+
+    async function saveGameToSupabase() {
+        const saveData = {
+            name: gameState.playerName,
+            game_state: gameState,
+            saved_at: new Date().toISOString()
+        };
+
+        if (!supabaseConnected) {
+            localStorage.setItem('hunter3d_save', JSON.stringify(gameState));
+            showNotification('💾 Game disimpan (Local)');
+            return;
+        }
+
+        try {
+            // Check if save exists
+            const { data: existing } = await supabase
+                .from('saves')
+                .select('id')
+                .eq('name', gameState.playerName)
+                .single();
+
+            if (existing) {
+                const { error } = await supabase
+                    .from('saves')
+                    .update(saveData)
+                    .eq('id', existing.id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase
+                    .from('saves')
+                    .insert([saveData]);
+                if (error) throw error;
+            }
+            showNotification('💾 Game tersimpan ke cloud!');
+        } catch (error) {
+            console.error('Error saving game:', error);
+            showNotification('⚠️ Gagal menyimpan ke cloud');
+        }
+    }
+
+    async function loadGameFromSupabase() {
+        const name = document.getElementById('playerNameInput').value.trim();
+        if (!name) {
+            showNotification('⚠️ Masukkan nama untuk load game!');
+            return false;
+        }
+
+        if (!supabaseConnected) {
+            const saved = localStorage.getItem('hunter3d_save');
+            if (saved) {
+                Object.assign(gameState, JSON.parse(saved));
+                showNotification('✅ Game dimuat (Local)');
+                return true;
+            }
+            showNotification('❌ Tidak ada data tersimpan!');
+            return false;
+        }
+
+        try {
+            const { data, error } = await supabase
+                .from('saves')
+                .select('*')
+                .eq('name', name)
+                .single();
+
+            if (error || !data) {
+                showNotification('❌ Tidak ada save untuk nama ini!');
+                return false;
+            }
+
+            Object.assign(gameState, data.game_state);
+            showNotification('✅ Game dimuat dari cloud!');
+            return true;
+        } catch (error) {
+            console.error('Error loading game:', error);
+            showNotification('❌ Gagal memuat game!');
+            return false;
+        }
+    }
+
+    // ============================================
     // BABYLON.JS SETUP - MODERN 3D
     // ============================================
     let engine, scene, camera, light, sunLight;
@@ -788,7 +1119,6 @@ box-sizing: border-box;
     let animals = [];
     let trees = [];
 
-    // Player movement
     const playerState = {
         position: new BABYLON.Vector3(0, 5, 0),
         velocity: new BABYLON.Vector3(0, 0, 0),
@@ -802,7 +1132,6 @@ box-sizing: border-box;
         w: false, a: false, s: false, d: false
     };
 
-    // Simple noise function for terrain
     function noise2D(x, z) {
         const X = Math.floor(x) & 255;
         const Z = Math.floor(z) & 255;
@@ -844,7 +1173,6 @@ box-sizing: border-box;
         scene.fogDensity = 0.003;
         scene.fogColor = new BABYLON.Color3(0.7, 0.8, 0.9);
 
-        // Camera - Universal Camera (FPS style)
         camera = new BABYLON.UniversalCamera(
             'playerCamera',
             new BABYLON.Vector3(0, 5, 0),
@@ -855,11 +1183,8 @@ box-sizing: border-box;
         camera.fov = 1.2;
         camera.inertia = 0;
         camera.angularSensibility = 1500;
-
-        // Disable default camera controls
         camera.inputs.clear();
 
-        // Lighting - Modern PBR
         const hemisphericLight = new BABYLON.HemisphericLight(
             'skyLight',
             new BABYLON.Vector3(0, 1, 0),
@@ -869,7 +1194,6 @@ box-sizing: border-box;
         hemisphericLight.groundColor = new BABYLON.Color3(0.2, 0.25, 0.3);
         hemisphericLight.diffuse = new BABYLON.Color3(0.9, 0.95, 1);
 
-        // Sun light with shadows
         sunLight = new BABYLON.DirectionalLight(
             'sunLight',
             new BABYLON.Vector3(-0.5, -1, -0.5),
@@ -878,15 +1202,12 @@ box-sizing: border-box;
         sunLight.intensity = 1.2;
         sunLight.diffuse = new BABYLON.Color3(1, 0.95, 0.85);
 
-        // Shadow Generator - High Quality
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, sunLight);
         shadowGenerator.useBlurExponentialShadowMap = true;
         shadowGenerator.blurKernel = 32;
         shadowGenerator.darkness = 0.4;
 
-        // ============================================
-        // PROCEDURAL TERRAIN
-        // ============================================
+        // Terrain
         const terrainSize = 400;
         const terrainSubdivisions = 150;
         terrain = BABYLON.MeshBuilder.CreateGround(
@@ -895,7 +1216,6 @@ box-sizing: border-box;
             scene
         );
 
-        // Apply height map
         const positions = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
         const colors = [];
         
@@ -905,19 +1225,14 @@ box-sizing: border-box;
             const height = getTerrainHeight(x, z);
             positions[i + 1] = height;
 
-            // Color based on height (grass, dirt, rock)
             let r, g, b;
             if (height < 1) {
-                // Sandy beach
                 r = 0.76; g = 0.70; b = 0.50;
             } else if (height < 3) {
-                // Grass
                 r = 0.25; g = 0.55; b = 0.20;
             } else if (height < 5) {
-                // Dark grass / dirt
                 r = 0.30; g = 0.40; b = 0.20;
             } else {
-                // Rock
                 r = 0.5; g = 0.5; b = 0.5;
             }
             colors.push(r, g, b, 1);
@@ -927,18 +1242,15 @@ box-sizing: border-box;
         terrain.setVerticesData(BABYLON.VertexBuffer.ColorKind, colors);
         terrain.createNormals(true);
 
-        // PBR Material for terrain
         const terrainMaterial = new BABYLON.PBRMaterial('terrainMat', scene);
-        terrainMaterial.albedoColor = new BABYLON.Color3(1, 1, 1); // Use vertex colors
+        terrainMaterial.albedoColor = new BABYLON.Color3(1, 1, 1);
         terrainMaterial.useVertexColors = true;
         terrainMaterial.roughness = 0.9;
         terrainMaterial.metallic = 0;
         terrain.material = terrainMaterial;
         terrain.receiveShadows = true;
 
-        // ============================================
-        // WATER - Animated
-        // ============================================
+        // Water
         water = BABYLON.MeshBuilder.CreateGround(
             'water',
             { width: 200, height: 200, subdivisions: 30 },
@@ -955,7 +1267,6 @@ box-sizing: border-box;
         waterMaterial.subSurface.indexOfRefraction = 1.33;
         water.material = waterMaterial;
 
-        // Animate water
         scene.registerBeforeRender(() => {
             const time = performance.now() * 0.001;
             const waterPositions = water.getVerticesData(BABYLON.VertexBuffer.PositionKind);
@@ -967,9 +1278,7 @@ box-sizing: border-box;
             water.updateVerticesData(BABYLON.VertexBuffer.PositionKind, waterPositions);
         });
 
-        // ============================================
-        // SKYBOX - Gradient
-        // ============================================
+        // Skybox
         skybox = BABYLON.MeshBuilder.CreateBox(
             'skyBox',
             { size: 800 },
@@ -979,7 +1288,6 @@ box-sizing: border-box;
         skyMaterial.backFaceCulling = false;
         skyMaterial.disableLighting = true;
         
-        // Create gradient sky texture
         const skyTexture = new BABYLON.DynamicTexture('skyTex', { width: 512, height: 512 }, scene);
         const ctx = skyTexture.getContext();
         const gradient = ctx.createLinearGradient(0, 0, 0, 512);
@@ -995,15 +1303,12 @@ box-sizing: border-box;
         skybox.material = skyMaterial;
         skybox.infiniteDistance = true;
 
-        // ============================================
-        // STYLIZED TREES - Multi-layer
-        // ============================================
+        // Trees
         for (let i = 0; i < 80; i++) {
             const x = (Math.random() - 0.5) * 350;
             const z = (Math.random() - 0.5) * 350;
             const y = getTerrainHeight(x, z);
             
-            // Skip if too low (water) or too high (mountain)
             if (y < 1.5 || y > 5) continue;
 
             const tree = createStylizedTree(scene);
@@ -1016,9 +1321,7 @@ box-sizing: border-box;
             shadowGenerator.addShadowCaster(tree);
         }
 
-        // ============================================
-        // ROCKS - Detailed
-        // ============================================
+        // Rocks
         for (let i = 0; i < 40; i++) {
             const x = (Math.random() - 0.5) * 350;
             const z = (Math.random() - 0.5) * 350;
@@ -1035,9 +1338,7 @@ box-sizing: border-box;
             shadowGenerator.addShadowCaster(rock);
         }
 
-        // ============================================
-        // ANIMALS - Low-poly stylized
-        // ============================================
+        // Animals
         for (let i = 0; i < 12; i++) {
             const x = (Math.random() - 0.5) * 250;
             const z = (Math.random() - 0.5) * 250;
@@ -1053,15 +1354,10 @@ box-sizing: border-box;
             shadowGenerator.addShadowCaster(animal);
         }
 
-        // ============================================
-        // PARTICLES - Dust & Fireflies
-        // ============================================
         createDustParticles(scene);
         createFireflyParticles(scene);
 
-        // ============================================
-        // POST-PROCESSING
-        // ============================================
+        // Post-processing
         const pipeline = new BABYLON.DefaultRenderingPipeline(
             'defaultPipeline',
             true,
@@ -1073,22 +1369,16 @@ box-sizing: border-box;
         pipeline.bloomWeight = 0.3;
         pipeline.bloomKernel = 64;
         pipeline.bloomScale = 0.5;
-
         pipeline.fxaaEnabled = true;
-        
         pipeline.imageProcessing.toneMappingEnabled = true;
         pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
         pipeline.imageProcessing.exposure = 1.1;
         pipeline.imageProcessing.contrast = 1.1;
-
-        // Vignette
         pipeline.imageProcessing.vignetteEnabled = true;
         pipeline.imageProcessing.vignetteWeight = 2;
         pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0, 0.3);
 
-        // ============================================
-        // INPUT HANDLING
-        // ============================================
+        // Input handling
         canvas.addEventListener('click', () => {
             canvas.requestPointerLock();
         });
@@ -1118,9 +1408,6 @@ box-sizing: border-box;
             if (e.code === 'KeyD') keys.d = false;
         });
 
-        // ============================================
-        // ANIMATION LOOP
-        // ============================================
         let lastTime = performance.now();
         
         scene.registerBeforeRender(() => {
@@ -1129,10 +1416,8 @@ box-sizing: border-box;
             lastTime = now;
 
             if (playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead) {
-                // Update camera rotation
                 camera.rotation = new BABYLON.Vector3(playerState.pitch, playerState.yaw, 0);
 
-                // Calculate movement direction
                 const forward = new BABYLON.Vector3(
                     Math.sin(playerState.yaw),
                     0,
@@ -1155,19 +1440,15 @@ box-sizing: border-box;
                     camera.position.addInPlace(moveDir.scale(playerState.speed * delta));
                 }
 
-                // Keep player on terrain
                 const terrainY = getTerrainHeight(camera.position.x, camera.position.z);
                 camera.position.y = Math.max(terrainY, 0.5) + 2;
 
-                // Keep player in bounds
                 camera.position.x = Math.max(-180, Math.min(180, camera.position.x));
                 camera.position.z = Math.max(-180, Math.min(180, camera.position.z));
 
-                // Update compass
                 updateCompass();
             }
 
-            // Animate animals (simple wandering)
             animals.forEach(animal => {
                 const time = performance.now() * 0.001;
                 const speed = animal.metadata.speed;
@@ -1181,7 +1462,6 @@ box-sizing: border-box;
                 );
             });
 
-            // Update skybox position to follow camera
             skybox.position.x = camera.position.x;
             skybox.position.y = camera.position.y;
             skybox.position.z = camera.position.z;
@@ -1198,13 +1478,9 @@ box-sizing: border-box;
         return { shadowGenerator, pipeline };
     }
 
-    // ============================================
-    // STYLIZED TREE CREATOR
-    // ============================================
     function createStylizedTree(scene) {
         const tree = new BABYLON.TransformNode('tree', scene);
 
-        // Trunk
         const trunk = BABYLON.MeshBuilder.CreateCylinder(
             'trunk',
             { height: 4, diameterTop: 0.4, diameterBottom: 0.8, tessellation: 8 },
@@ -1219,7 +1495,6 @@ box-sizing: border-box;
         trunkMat.metallic = 0;
         trunk.material = trunkMat;
 
-        // Multi-layer foliage (3 cones)
         const foliageMat = new BABYLON.PBRMaterial('foliageMat', scene);
         foliageMat.albedoColor = new BABYLON.Color3(0.2, 0.5, 0.15);
         foliageMat.roughness = 0.8;
@@ -1245,9 +1520,6 @@ box-sizing: border-box;
         return tree;
     }
 
-    // ============================================
-    // STYLIZED ROCK CREATOR
-    // ============================================
     function createStylizedRock(scene) {
         const rock = BABYLON.MeshBuilder.CreatePolyhedron(
             'rock',
@@ -1265,13 +1537,9 @@ box-sizing: border-box;
         return rock;
     }
 
-    // ============================================
-    // STYLIZED ANIMAL CREATOR
-    // ============================================
     function createStylizedAnimal(scene) {
         const animal = new BABYLON.TransformNode('animal', scene);
 
-        // Body
         const body = BABYLON.MeshBuilder.CreateBox(
             'body',
             { width: 1.2, height: 0.8, depth: 2 },
@@ -1279,7 +1547,6 @@ box-sizing: border-box;
         );
         body.parent = animal;
 
-        // Head
         const head = BABYLON.MeshBuilder.CreateBox(
             'head',
             { width: 0.7, height: 0.7, depth: 0.7 },
@@ -1288,7 +1555,6 @@ box-sizing: border-box;
         head.position = new BABYLON.Vector3(0, 0.3, 1);
         head.parent = animal;
 
-        // Legs (4)
         const legPositions = [
             new BABYLON.Vector3(-0.4, -0.5, 0.6),
             new BABYLON.Vector3(0.4, -0.5, 0.6),
@@ -1306,15 +1572,14 @@ box-sizing: border-box;
             leg.parent = animal;
         });
 
-        // Material
         const animalMat = new BABYLON.PBRMaterial('animalMat', scene);
         const colorChoice = Math.random();
         if (colorChoice < 0.33) {
-            animalMat.albedoColor = new BABYLON.Color3(0.55, 0.35, 0.2); // Brown
+            animalMat.albedoColor = new BABYLON.Color3(0.55, 0.35, 0.2);
         } else if (colorChoice < 0.66) {
-            animalMat.albedoColor = new BABYLON.Color3(0.3, 0.25, 0.2); // Dark
+            animalMat.albedoColor = new BABYLON.Color3(0.3, 0.25, 0.2);
         } else {
-            animalMat.albedoColor = new BABYLON.Color3(0.7, 0.6, 0.5); // Light
+            animalMat.albedoColor = new BABYLON.Color3(0.7, 0.6, 0.5);
         }
         animalMat.roughness = 0.85;
         animalMat.metallic = 0;
@@ -1326,13 +1591,9 @@ box-sizing: border-box;
         return animal;
     }
 
-    // ============================================
-    // PARTICLE SYSTEMS
-    // ============================================
     function createDustParticles(scene) {
         dustParticles = new BABYLON.ParticleSystem('dust', 200, scene);
         
-        // Create a simple particle texture
         const particleTexture = new BABYLON.DynamicTexture('particleTex', { width: 64, height: 64 }, scene);
         const pCtx = particleTexture.getContext();
         const pGradient = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -1390,7 +1651,7 @@ box-sizing: border-box;
         fireflyParticles.maxSize = 0.35;
         fireflyParticles.minLifeTime = 2;
         fireflyParticles.maxLifeTime = 4;
-        fireflyParticles.emitRate = 0; // Start disabled
+        fireflyParticles.emitRate = 0;
         
         fireflyParticles.direction1 = new BABYLON.Vector3(-0.5, 0.5, -0.5);
         fireflyParticles.direction2 = new BABYLON.Vector3(0.5, 1, 0.5);
@@ -1433,14 +1694,18 @@ box-sizing: border-box;
     let sceneContext = null;
 
     document.getElementById('startGameBtn').addEventListener('click', startGame);
-    document.getElementById('loadGameBtn').addEventListener('click', loadGame);
+    document.getElementById('loadGameBtn').addEventListener('click', async () => {
+        const loaded = await loadGameFromSupabase();
+        if (loaded) startGame();
+    });
     document.getElementById('resumeBtn').addEventListener('click', resumeGame);
     document.getElementById('saveBtn').addEventListener('click', saveGame);
     document.getElementById('quitBtn').addEventListener('click', quitGame);
     document.getElementById('respawnBtn').addEventListener('click', respawn);
     document.getElementById('mainMenuBtn').addEventListener('click', () => location.reload());
+    document.getElementById('refreshLeaderboardBtn').addEventListener('click', fetchLeaderboard);
 
-    function startGame() {
+    async function startGame() {
         const name = document.getElementById('playerNameInput').value.trim();
         if (!name) {
             showNotification('⚠️ Masukkan nama survivor!');
@@ -1471,21 +1736,8 @@ box-sizing: border-box;
         }, 100);
     }
 
-    function loadGame() {
-        const saved = localStorage.getItem('hunter3d_save');
-        if (saved) {
-            const data = JSON.parse(saved);
-            Object.assign(gameState, data);
-            showNotification('✅ Permainan berhasil dimuat!');
-            startGame();
-        } else {
-            showNotification('❌ Tidak ada data tersimpan!');
-        }
-    }
-
-    function saveGame() {
-        localStorage.setItem('hunter3d_save', JSON.stringify(gameState));
-        showNotification('💾 Permainan berhasil disimpan!');
+    async function saveGame() {
+        await saveGameToSupabase();
     }
 
     function resumeGame() {
@@ -1493,8 +1745,9 @@ box-sizing: border-box;
         gameState.isPaused = false;
     }
 
-    function quitGame() {
-        saveGame();
+    async function quitGame() {
+        await saveGameToSupabase();
+        await submitScore();
         location.reload();
     }
 
@@ -1582,7 +1835,6 @@ box-sizing: border-box;
     function updateEnvironment() {
         if (!scene) return;
 
-        // Update sky/lighting based on time
         const timeSettings = {
             'dawn': {
                 sky: new BABYLON.Color4(1, 0.6, 0.4, 1),
@@ -1621,7 +1873,6 @@ box-sizing: border-box;
         sunLight.intensity = settings.sunIntensity;
         sunLight.diffuse = settings.sunColor;
 
-        // Weather adjustments
         if (gameState.weather === 'fog') {
             scene.fogDensity = 0.02;
         } else if (gameState.weather === 'rain') {
@@ -1629,18 +1880,16 @@ box-sizing: border-box;
             scene.clearColor = new BABYLON.Color4(0.4, 0.45, 0.5, 1);
         }
 
-        // Fireflies at night
         if (fireflyParticles) {
             fireflyParticles.emitRate = gameState.timeOfDay === 'night' ? 15 : 0;
         }
 
-        // Dust less at night
         if (dustParticles) {
             dustParticles.emitRate = gameState.timeOfDay === 'night' ? 5 : 30;
         }
     }
 
-    function triggerDeath() {
+    async function triggerDeath() {
         gameState.isDead = true;
         document.exitPointerLock();
         
@@ -1654,6 +1903,9 @@ box-sizing: border-box;
         document.getElementById('deathMessage').textContent = 
             deathMessages[Math.floor(Math.random() * deathMessages.length)];
         deathScreen.style.display = 'flex';
+
+        // Submit score to leaderboard
+        await submitScore();
     }
 
     function handleKeyPress(e) {
@@ -1777,10 +2029,18 @@ box-sizing: border-box;
         }, 3000);
     }
 
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    updateSupabaseStatus();
+    fetchLeaderboard();
     updateUI();
+
+    // Auto-refresh leaderboard every 60 seconds
+    setInterval(fetchLeaderboard, 60000);
 </script>
 
-          </body>
+    </body>
 </html>
 </content>
 </write_to_file>
