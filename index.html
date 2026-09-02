@@ -13,8 +13,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0a0a; color: #e0e0e0; }
 #gameCanvas { width: 100vw; height: 100vh; display: block; cursor: none; outline: none; }
-
-            #mainMenu {
+                #mainMenu {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -34,7 +33,6 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
     .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #888; transition: all 0.3s; }
     .status-dot.connected { background: #00ff88; box-shadow: 0 0 10px #00ff88; animation: pulse 2s infinite; }
     .status-dot.disconnected { background: #ff4444; box-shadow: 0 0 10px #ff4444; }
-    .status-dot.checking { background: #ffd700; box-shadow: 0 0 10px #ffd700; animation: pulse 1s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     .leaderboard-container { margin-top: 2rem; background: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); min-width: 500px; max-width: 700px; }
@@ -113,14 +111,14 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
     }
 </style>
 
-        </head>
+            </head>
 <body>
 <div id="loadingScreen">
 <div class="loading-text">Memuat Dunia...</div>
 <div class="loading-bar"><div class="loading-progress" id="loadingProgress"></div></div>
 </div>
 
-        <div id="mainMenu">
+            <div id="mainMenu">
     <div class="menu-title">🏹 HUNTER 3D</div>
     <div class="menu-subtitle">
         <strong>The Cursed Expedition</strong><br>
@@ -133,8 +131,8 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
     </div>
 
     <div class="supabase-status">
-        <div class="status-dot checking" id="supabaseStatusDot"></div>
-        <span id="supabaseStatusText">Memeriksa koneksi Supabase...</span>
+        <div class="status-dot" id="supabaseStatusDot"></div>
+        <span id="supabaseStatusText">Initializing...</span>
     </div>
 
     <div class="leaderboard-container">
@@ -169,7 +167,7 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
         <div class="minimap-label">Peta</div>
     </div>
     <div class="quest-tracker">
-        <div class="quest-title">📜 Misi Aktif</div>
+        <div class="quest-title"> Misi Aktif</div>
         <div class="quest-objective" id="questObjective">Cari sumber makanan dan bangun tempat berlindung</div>
         <div class="quest-progress" id="questProgress">Progres: 0/3</div>
     </div>
@@ -191,7 +189,7 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
             <div class="status-value" id="hungerValue">100%</div>
         </div>
         <div class="status-bar">
-            <div class="status-icon">💧</div>
+            <div class="status-icon"></div>
             <div class="status-info">
                 <div class="status-label">Kehausan</div>
                 <div class="bar-container"><div class="bar-fill thirst" id="thirstBar" style="width: 100%"></div></div>
@@ -212,7 +210,7 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
         <div class="inventory-grid">
             <div class="inventory-item"><div class="item-icon">🪵</div><div class="item-count" id="woodCount">0</div><div class="item-name">Kayu</div></div>
             <div class="inventory-item"><div class="item-icon">🪨</div><div class="item-count" id="stoneCount">0</div><div class="item-name">Batu</div></div>
-            <div class="inventory-item"><div class="item-icon">🥩</div><div class="item-count" id="meatCount">0</div><div class="item-name">Daging</div></div>
+            <div class="inventory-item"><div class="item-icon"></div><div class="item-count" id="meatCount">0</div><div class="item-name">Daging</div></div>
         </div>
     </div>
     <div class="tool-selector">
@@ -247,29 +245,58 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
 
     let supabase = null;
     let supabaseConnected = false;
+    let supabaseInitialized = false;
 
-    function initSupabase() {
+    function setSupabaseStatus(connected, message) {
         const dot = document.getElementById('supabaseStatusDot');
         const text = document.getElementById('supabaseStatusText');
         
+        if (connected) {
+            dot.className = 'status-dot connected';
+            text.textContent = message || 'Supabase: Connected ✅';
+        } else {
+            dot.className = 'status-dot disconnected';
+            text.textContent = message || 'Supabase: Local Mode (Offline)';
+        }
+        supabaseInitialized = true;
+    }
+
+    function initSupabase() {
+        // Check if Supabase library is loaded
+        if (typeof window.supabase === 'undefined') {
+            console.warn('⚠️ Supabase library not loaded from CDN');
+            setSupabaseStatus(false, 'Supabase: Library Not Loaded');
+            return;
+        }
+
         try {
-            if (typeof window.supabase === 'undefined') {
-                throw new Error('Supabase library not loaded');
-            }
-            if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                supabaseConnected = true;
-                dot.className = 'status-dot connected';
-                text.textContent = 'Supabase: Connected ✅';
-                console.log('✅ Supabase connected successfully');
-            } else {
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
                 throw new Error('Default credentials detected');
             }
+
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseConnected = true;
+            setSupabaseStatus(true, 'Supabase: Connected ✅');
+            console.log('✅ Supabase initialized successfully');
+            
+            // Test connection
+            testSupabaseConnection();
         } catch (error) {
-            console.warn('⚠️ Supabase fallback to LocalStorage:', error.message);
+            console.error('❌ Supabase initialization failed:', error);
+            setSupabaseStatus(false, 'Supabase: Connection Failed - Using Local');
             supabaseConnected = false;
-            dot.className = 'status-dot disconnected';
-            text.textContent = 'Supabase: Local Mode (Offline)';
+        }
+    }
+
+    async function testSupabaseConnection() {
+        try {
+            const { data, error } = await supabase.from('leaderboard').select('*').limit(1);
+            if (error) throw error;
+            console.log('✅ Supabase connection test passed');
+        } catch (error) {
+            console.error('❌ Supabase connection test failed:', error.message);
+            setSupabaseStatus(false, 'Supabase: DB Error - Using Local');
+            supabaseConnected = false;
         }
     }
 
@@ -293,21 +320,23 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
     // ============================================
     async function fetchLeaderboard() {
         const tbody = document.getElementById('leaderboardBody');
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td></tr>';
-
-        if (!supabaseConnected) {
+        
+        if (!supabaseConnected || !supabase) {
             const localData = JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]');
             renderLeaderboard(localData);
             return;
         }
 
         try {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td></tr>';
             const { data, error } = await supabase.from('leaderboard').select('*').order('score', { ascending: false }).limit(10);
             if (error) throw error;
             renderLeaderboard(data || []);
         } catch (error) {
             console.error('Error fetching leaderboard:', error);
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ff4444;">Gagal memuat data (Check Console)</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ff4444;">Gagal memuat (Local Mode)</td></tr>';
+            const localData = JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]');
+            renderLeaderboard(localData);
         }
     }
 
@@ -336,7 +365,7 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
             created_at: new Date().toISOString()
         };
 
-        if (!supabaseConnected) {
+        if (!supabaseConnected || !supabase) {
             const localData = JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]');
             localData.push(scoreData);
             localData.sort((a, b) => b.score - a.score);
@@ -352,7 +381,7 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
 
     async function saveGameToSupabase() {
         const saveData = { name: gameState.playerName, game_state: gameState, saved_at: new Date().toISOString() };
-        if (!supabaseConnected) {
+        if (!supabaseConnected || !supabase) {
             localStorage.setItem('hunter3d_save', JSON.stringify(gameState));
             showNotification('💾 Game disimpan (Local)');
             return;
@@ -375,9 +404,9 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
 
     async function loadGameFromSupabase() {
         const name = document.getElementById('playerNameInput').value.trim();
-        if (!name) { showNotification('⚠️ Masukkan nama untuk load game!'); return false; }
+        if (!name) { showNotification('️ Masukkan nama untuk load game!'); return false; }
 
-        if (!supabaseConnected) {
+        if (!supabaseConnected || !supabase) {
             const saved = localStorage.getItem('hunter3d_save');
             if (saved) { Object.assign(gameState, JSON.parse(saved)); showNotification('✅ Game dimuat (Local)'); return true; }
             showNotification('❌ Tidak ada data tersimpan!'); return false;
@@ -397,7 +426,7 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
     }
 
     // ============================================
-    // BABYLON.JS SETUP (Simplified for brevity, same as before)
+    // BABYLON.JS SETUP
     // ============================================
     let engine, scene, camera, sunLight, terrain, water, skybox, dustParticles, fireflyParticles, animals = [], trees = [];
     const playerState = { position: new BABYLON.Vector3(0, 5, 0), yaw: 0, pitch: 0, speed: 15, isPointerLocked: false };
@@ -765,17 +794,27 @@ body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0
     }
 
     // ============================================
-    // INITIALIZATION
+    // INITIALIZATION - RUN IMMEDIATELY
     // ============================================
-    window.addEventListener('DOMContentLoaded', () => {
+    (function initialize() {
+        console.log(' Hunter 3D Initializing...');
+        
+        // Initialize Supabase immediately
         initSupabase();
-        fetchLeaderboard();
+        
+        // Load leaderboard
+        setTimeout(() => fetchLeaderboard(), 1000);
+        
+        // Update UI
         updateUI();
+        
+        // Auto-refresh leaderboard every 60 seconds
         setInterval(fetchLeaderboard, 60000);
-    });
+        
+        console.log('✅ Initialization complete');
+    })();
 </script>
-
-        </body>
+</body>
 </html>
 </content>
 </write_to_file>
