@@ -12,112 +12,77 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0a0a; color: #e0e0e0; }
         #gameCanvas { width: 100vw; height: 100vh; display: block; cursor: none; outline: none; position: fixed; top: 0; left: 0; z-index: 0; }
-
-        #errorBox {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(60, 0, 0, 0.95); border: 2px solid #ff4444; color: #ffcccc;
-            padding: 15px 25px; border-radius: 10px; z-index: 3000; display: none;
-            max-width: 90%; font-size: 0.95rem; line-height: 1.5;
-        }
-
-        #hintBox {
-            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8); border: 1px solid #e94560; color: #fff;
-            padding: 10px 25px; border-radius: 20px; z-index: 150; display: none;
-            font-size: 0.95rem; animation: pulse 2s infinite;
-        }
-
-        #mainMenu {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1000; animation: fadeIn 1s ease-in; overflow-y: auto; padding: 20px;
-        }
+        #errorBox { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(60,0,0,.95); border: 2px solid #ff4444; color: #ffcccc; padding: 15px 25px; border-radius: 10px; z-index: 3000; display: none; max-width: 90%; font-size: .95rem; line-height: 1.5; }
+        #hintBox { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.8); border: 1px solid #e94560; color: #fff; padding: 10px 25px; border-radius: 20px; z-index: 150; display: none; font-size: .95rem; animation: pulse 2s infinite; text-align: center; }
+        #mainMenu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 1s ease-in; overflow-y: auto; padding: 20px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .menu-title { font-size: 4rem; font-weight: bold; color: #e94560; text-shadow: 0 0 20px rgba(233, 69, 96, 0.5); margin-bottom: 1rem; letter-spacing: 3px; }
+        .menu-title { font-size: 4rem; font-weight: bold; color: #e94560; text-shadow: 0 0 20px rgba(233,69,96,.5); margin-bottom: 1rem; letter-spacing: 3px; }
         .menu-subtitle { font-size: 1.2rem; color: #a0a0a0; margin-bottom: 2rem; text-align: center; max-width: 600px; line-height: 1.6; }
-        .menu-input { padding: 15px 30px; font-size: 1.1rem; background: rgba(255, 255, 255, 0.1); border: 2px solid #e94560; color: #fff; border-radius: 8px; margin-bottom: 1rem; width: 300px; text-align: center; transition: all 0.3s; }
-        .menu-input:focus { outline: none; background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 20px rgba(233, 69, 96, 0.3); }
-        .menu-btn { padding: 15px 50px; font-size: 1.2rem; background: linear-gradient(135deg, #e94560, #c23152); border: none; color: #fff; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: bold; letter-spacing: 2px; margin: 0.5rem; }
-        .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4); }
-        .menu-btn.secondary { background: rgba(255, 255, 255, 0.1); border: 2px solid #e94560; }
-
-        .supabase-status { margin-top: 1.5rem; padding: 10px 20px; background: rgba(0, 0, 0, 0.5); border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #888; transition: all 0.3s; }
+        .menu-input { padding: 15px 30px; font-size: 1.1rem; background: rgba(255,255,255,.1); border: 2px solid #e94560; color: #fff; border-radius: 8px; margin-bottom: 1rem; width: 300px; text-align: center; }
+        .menu-btn { padding: 15px 50px; font-size: 1.2rem; background: linear-gradient(135deg, #e94560, #c23152); border: none; color: #fff; border-radius: 8px; cursor: pointer; transition: all .3s; font-weight: bold; letter-spacing: 2px; margin: .5rem; }
+        .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(233,69,96,.4); }
+        .menu-btn.secondary { background: rgba(255,255,255,.1); border: 2px solid #e94560; }
+        .supabase-status { margin-top: 1.5rem; padding: 10px 20px; background: rgba(0,0,0,.5); border-radius: 20px; font-size: .9rem; display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #888; }
         .status-dot.connected { background: #00ff88; box-shadow: 0 0 10px #00ff88; animation: pulse 2s infinite; }
         .status-dot.disconnected { background: #ff4444; box-shadow: 0 0 10px #ff4444; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        .leaderboard-container { margin-top: 2rem; background: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); min-width: 500px; max-width: 700px; }
-        .leaderboard-title { font-size: 1.3rem; color: #ffd700; margin-bottom: 15px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
-        .refresh-btn { background: rgba(233, 69, 96, 0.2); border: 1px solid #e94560; color: #e94560; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; }
-        .refresh-btn:hover { background: rgba(233, 69, 96, 0.4); }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+        .leaderboard-container { margin-top: 2rem; background: rgba(0,0,0,.6); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); min-width: 500px; max-width: 700px; }
+        .leaderboard-title { font-size: 1.3rem; color: #ffd700; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .refresh-btn { background: rgba(233,69,96,.2); border: 1px solid #e94560; color: #e94560; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: .85rem; }
         .leaderboard-table { width: 100%; border-collapse: collapse; }
-        .leaderboard-table th { background: rgba(233, 69, 96, 0.3); padding: 10px; text-align: left; color: #fff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-        .leaderboard-table td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.9rem; }
-        .leaderboard-table tr:hover { background: rgba(255, 255, 255, 0.05); }
-        .rank-1 { color: #ffd700; font-weight: bold; }
-        .rank-2 { color: #c0c0c0; font-weight: bold; }
-        .rank-3 { color: #cd7f32; font-weight: bold; }
-
+        .leaderboard-table th { background: rgba(233,69,96,.3); padding: 10px; text-align: left; color: #fff; font-size: .85rem; text-transform: uppercase; }
+        .leaderboard-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.1); font-size: .9rem; }
+        .rank-1 { color: #ffd700; font-weight: bold; } .rank-2 { color: #c0c0c0; font-weight: bold; } .rank-3 { color: #cd7f32; font-weight: bold; }
         #hud { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 100; }
-        .top-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; align-items: center; background: rgba(0, 0, 0, 0.6); padding: 10px 25px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .compass { font-size: 1.5rem; color: #e94560; font-weight: bold; text-shadow: 0 0 10px rgba(233, 69, 96, 0.5); }
+        .top-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; align-items: center; background: rgba(0,0,0,.6); padding: 10px 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,.1); }
+        .compass { font-size: 1.5rem; color: #e94560; font-weight: bold; }
         .time-display { font-size: 1.1rem; color: #ffd700; display: flex; align-items: center; gap: 8px; }
-        .weather-icon { font-size: 1.3rem; }
-        .quest-tracker { position: absolute; top: 80px; right: 20px; background: rgba(0, 0, 0, 0.7); padding: 15px 20px; border-radius: 10px; border-left: 4px solid #e94560; min-width: 280px; backdrop-filter: blur(10px); }
-        .quest-title { font-size: 0.9rem; color: #e94560; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .quest-objective { font-size: 0.95rem; color: #e0e0e0; line-height: 1.5; }
-        .quest-progress { margin-top: 8px; font-size: 0.85rem; color: #a0a0a0; }
-        .status-container { position: absolute; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(0, 0, 0, 0.7); padding: 20px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .quest-tracker { position: absolute; top: 80px; right: 20px; background: rgba(0,0,0,.7); padding: 15px 20px; border-radius: 10px; border-left: 4px solid #e94560; min-width: 280px; }
+        .quest-title { font-size: .9rem; color: #e94560; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .quest-objective { font-size: .95rem; line-height: 1.5; }
+        .quest-progress { margin-top: 8px; font-size: .85rem; color: #a0a0a0; }
+        .status-container { position: absolute; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,.7); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); }
         .status-bar { display: flex; align-items: center; gap: 12px; min-width: 250px; }
         .status-icon { font-size: 1.5rem; width: 30px; text-align: center; }
         .status-info { flex: 1; }
-        .status-label { font-size: 0.75rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .bar-container { width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; position: relative; }
-        .bar-fill { height: 100%; transition: width 0.3s ease, background 0.3s; position: relative; }
-        .bar-fill.health { background: linear-gradient(90deg, #ff4444, #ff6666); }
-        .bar-fill.hunger { background: linear-gradient(90deg, #ff8800, #ffaa00); }
-        .bar-fill.thirst { background: linear-gradient(90deg, #0088ff, #00aaff); }
-        .bar-fill.energy { background: linear-gradient(90deg, #ffdd00, #ffee00); }
+        .status-label { font-size: .75rem; color: #a0a0a0; text-transform: uppercase; margin-bottom: 4px; }
+        .bar-container { width: 100%; height: 8px; background: rgba(255,255,255,.1); border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width .3s ease; }
+        .bar-fill.health { background: linear-gradient(90deg,#ff4444,#ff6666); } .bar-fill.hunger { background: linear-gradient(90deg,#ff8800,#ffaa00); }
+        .bar-fill.thirst { background: linear-gradient(90deg,#0088ff,#00aaff); } .bar-fill.energy { background: linear-gradient(90deg,#ffdd00,#ffee00); }
         .bar-fill.critical { animation: pulse 1s infinite; }
-        .status-value { font-size: 0.85rem; color: #fff; font-weight: bold; min-width: 45px; text-align: right; }
-        .inventory { position: absolute; bottom: 20px; right: 20px; background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .inventory-title { font-size: 0.8rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; text-align: center; }
-        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .inventory-item { background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; }
+        .status-value { font-size: .85rem; color: #fff; font-weight: bold; min-width: 45px; text-align: right; }
+        .inventory { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,.7); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); }
+        .inventory-title { font-size: .8rem; color: #a0a0a0; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+        .inventory-item { background: rgba(255,255,255,.05); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,.1); }
         .item-icon { font-size: 1.8rem; margin-bottom: 5px; }
         .item-count { font-size: 1rem; font-weight: bold; color: #fff; }
-        .item-name { font-size: 0.7rem; color: #a0a0a0; margin-top: 3px; }
-        .tool-selector { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(0, 0, 0, 0.7); padding: 10px 15px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .tool-slot { width: 60px; height: 60px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; position: relative; }
-        .tool-slot.active { border-color: #e94560; background: rgba(233, 69, 96, 0.2); box-shadow: 0 0 15px rgba(233, 69, 96, 0.4); }
+        .item-name { font-size: .7rem; color: #a0a0a0; margin-top: 3px; }
+        .tool-selector { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(0,0,0,.7); padding: 10px 15px; border-radius: 30px; border: 1px solid rgba(255,255,255,.1); }
+        .tool-slot { width: 60px; height: 60px; background: rgba(255,255,255,.05); border: 2px solid rgba(255,255,255,.2); border-radius: 10px; display: flex; justify-content: center; align-items: center; position: relative; }
+        .tool-slot.active { border-color: #e94560; background: rgba(233,69,96,.2); box-shadow: 0 0 15px rgba(233,69,96,.4); }
         .tool-icon { font-size: 1.8rem; }
-        .tool-key { position: absolute; top: 3px; right: 5px; font-size: 0.7rem; color: #a0a0a0; font-weight: bold; }
-        .notification { position: absolute; top: 150px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.9); padding: 15px 30px; border-radius: 10px; border-left: 4px solid #e94560; color: #fff; font-size: 1rem; display: none; animation: slideDown 0.5s ease-out; z-index: 200; pointer-events: none; }
-        @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -100%); } to { opacity: 1; transform: translate(-50%, 0); } }
-        .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; pointer-events: none; }
-        .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255, 255, 255, 0.8); }
-        .crosshair::before { width: 2px; height: 20px; left: 9px; }
-        .crosshair::after { width: 20px; height: 2px; top: 9px; }
-        .minimap { position: absolute; top: 80px; left: 20px; width: 150px; height: 150px; background: rgba(0, 0, 0, 0.7); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 50%; backdrop-filter: blur(10px); overflow: hidden; }
-        .minimap-content { width: 100%; height: 100%; position: relative; }
-        .player-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: #e94560; border-radius: 50%; box-shadow: 0 0 10px rgba(233, 69, 96, 0.8); }
-        .minimap-label { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px; }
-        #loadingScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 2000; }
+        .tool-key { position: absolute; top: 3px; right: 5px; font-size: .7rem; color: #a0a0a0; font-weight: bold; }
+        .notification { position: absolute; top: 150px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.9); padding: 15px 30px; border-radius: 10px; border-left: 4px solid #e94560; color: #fff; display: none; z-index: 200; }
+        .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 20px; height: 20px; }
+        .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,.8); }
+        .crosshair::before { width: 2px; height: 20px; left: 9px; } .crosshair::after { width: 20px; height: 2px; top: 9px; }
+        .minimap { position: absolute; top: 80px; left: 20px; width: 150px; height: 150px; background: rgba(0,0,0,.7); border: 2px solid rgba(255,255,255,.2); border-radius: 50%; overflow: hidden; }
+        .player-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 10px; height: 10px; background: #e94560; border-radius: 50%; box-shadow: 0 0 10px rgba(233,69,96,.8); }
+        .minimap-label { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: .75rem; color: #a0a0a0; }
+        #loadingScreen { position: fixed; inset: 0; background: #0a0a0a; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 2000; }
         .loading-text { font-size: 1.5rem; color: #e94560; margin-bottom: 20px; animation: pulse 1.5s infinite; }
-        .loading-bar { width: 300px; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; }
-        .loading-progress { height: 100%; background: #e94560; width: 0%; transition: width 0.3s; }
-        #pauseMenu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1500; }
-        .pause-title { font-size: 3rem; color: #e94560; margin-bottom: 2rem; }
-        #deathScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(139, 0, 0, 0.9); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1500; }
-        .death-title { font-size: 4rem; color: #fff; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(0, 0, 0, 0.8); }
+        .loading-bar { width: 300px; height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+        .loading-progress { height: 100%; background: #e94560; width: 0%; transition: width .3s; }
+        #pauseMenu, #deathScreen { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1500; }
+        #pauseMenu { background: rgba(0,0,0,.9); } #deathScreen { background: rgba(139,0,0,.9); }
+        .pause-title, .death-title { font-size: 3rem; color: #e94560; margin-bottom: 2rem; }
+        .death-title { font-size: 4rem; color: #fff; margin-bottom: 1rem; }
         .death-message { font-size: 1.2rem; color: #ffcccc; margin-bottom: 2rem; }
         @media (max-width: 768px) {
-            .status-container { transform: scale(0.8); transform-origin: bottom left; }
-            .inventory { transform: scale(0.8); transform-origin: bottom right; }
-            .quest-tracker { transform: scale(0.8); transform-origin: top right; }
+            .status-container, .inventory, .quest-tracker { transform: scale(.8); }
             .menu-title { font-size: 2.5rem; }
             .leaderboard-container { min-width: auto; width: 100%; }
         }
@@ -126,7 +91,7 @@
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="errorBox"></div>
-    <div id="hintBox">🖱️ Klik layar untuk mengunci kursor & mulai bergerak (WASD)</div>
+    <div id="hintBox">🖱️ Klik layar: kunci kursor<br>Klik kiri = pakai alat • WASD jalan • [1][2][3] ganti alat</div>
 
     <div id="loadingScreen">
         <div class="loading-text">Memuat Dunia...</div>
@@ -135,27 +100,18 @@
 
     <div id="mainMenu">
         <div class="menu-title">🏹 HUNTER 3D</div>
-        <div class="menu-subtitle">
-            <strong>The Cursed Expedition</strong><br>
-            Bertahan hidup di pulau terkutuk. Temukan 3 Mercusuar Kuno untuk memanggil bantuan sebelum malam terakhir tiba.
-        </div>
+        <div class="menu-subtitle"><strong>The Cursed Expedition</strong><br>Bertahan hidup di pulau terkutuk. Temukan Mercusuar Kuno untuk memanggil bantuan sebelum malam terakhir tiba.</div>
         <input type="text" class="menu-input" id="playerNameInput" placeholder="Nama Survivor" maxlength="20" value="Survivor">
         <div>
             <button class="menu-btn" id="startGameBtn">☀️ Mulai Ekspedisi</button>
             <button class="menu-btn secondary" id="loadGameBtn">📂 Muat Permainan</button>
         </div>
-        <div class="supabase-status">
-            <div class="status-dot" id="supabaseStatusDot"></div>
-            <span id="supabaseStatusText">Loading...</span>
-        </div>
+        <div class="supabase-status"><div class="status-dot" id="supabaseStatusDot"></div><span id="supabaseStatusText">Loading...</span></div>
         <div class="leaderboard-container">
-            <div class="leaderboard-title">
-                <span>🏆 Leaderboard Penjelajah Dunia</span>
-                <button class="refresh-btn" id="refreshLeaderboardBtn">🔄 Refresh</button>
-            </div>
+            <div class="leaderboard-title"><span>🏆 Leaderboard Penjelajah Dunia</span><button class="refresh-btn" id="refreshLeaderboardBtn">🔄 Refresh</button></div>
             <table class="leaderboard-table">
-                <thead><tr><th>Rank</th><th>Nama Penjelajah</th><th>Skor Survival</th><th>Total Berburu</th></tr></thead>
-                <tbody id="leaderboardBody"><tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td></tr></tbody>
+                <thead><tr><th>Rank</th><th>Nama</th><th>Skor</th><th>Berburu</th></tr></thead>
+                <tbody id="leaderboardBody"><tr><td colspan="4" style="text-align:center;color:#a0a0a0;">Memuat data...</td></tr></tbody>
             </table>
         </div>
     </div>
@@ -163,26 +119,19 @@
     <div id="hud">
         <div class="top-bar">
             <div class="compass" id="compass">N</div>
-            <div class="time-display">
-                <span class="weather-icon" id="weatherIcon">☀️</span>
-                <span id="timeText">Siang Hari</span>
-                <span id="dayCount">Hari 1</span>
-            </div>
+            <div class="time-display"><span class="weather-icon" id="weatherIcon">☀️</span><span id="timeText">Siang Hari</span><span id="dayCount">Hari 1</span></div>
         </div>
-        <div class="minimap">
-            <div class="minimap-content"><div class="player-dot"></div></div>
-            <div class="minimap-label">Peta</div>
-        </div>
+        <div class="minimap"><div class="player-dot"></div><div class="minimap-label">Peta</div></div>
         <div class="quest-tracker">
             <div class="quest-title">📜 Misi Aktif</div>
             <div class="quest-objective" id="questObjective">Kumpulkan 10 kayu dan 5 batu</div>
             <div class="quest-progress" id="questProgress">Progres: 0/15</div>
         </div>
         <div class="status-container">
-            <div class="status-bar"><div class="status-icon">❤️</div><div class="status-info"><div class="status-label">Kesehatan</div><div class="bar-container"><div class="bar-fill health" id="healthBar" style="width: 100%"></div></div></div><div class="status-value" id="healthValue">100%</div></div>
-            <div class="status-bar"><div class="status-icon">🍖</div><div class="status-info"><div class="status-label">Kelaparan</div><div class="bar-container"><div class="bar-fill hunger" id="hungerBar" style="width: 100%"></div></div></div><div class="status-value" id="hungerValue">100%</div></div>
-            <div class="status-bar"><div class="status-icon">💧</div><div class="status-info"><div class="status-label">Kehausan</div><div class="bar-container"><div class="bar-fill thirst" id="thirstBar" style="width: 100%"></div></div></div><div class="status-value" id="thirstValue">100%</div></div>
-            <div class="status-bar"><div class="status-icon">⚡</div><div class="status-info"><div class="status-label">Energi</div><div class="bar-container"><div class="bar-fill energy" id="energyBar" style="width: 100%"></div></div></div><div class="status-value" id="energyValue">100%</div></div>
+            <div class="status-bar"><div class="status-icon">❤️</div><div class="status-info"><div class="status-label">Kesehatan</div><div class="bar-container"><div class="bar-fill health" id="healthBar" style="width:100%"></div></div></div><div class="status-value" id="healthValue">100%</div></div>
+            <div class="status-bar"><div class="status-icon">🍖</div><div class="status-info"><div class="status-label">Kelaparan</div><div class="bar-container"><div class="bar-fill hunger" id="hungerBar" style="width:100%"></div></div></div><div class="status-value" id="hungerValue">100%</div></div>
+            <div class="status-bar"><div class="status-icon">💧</div><div class="status-info"><div class="status-label">Kehausan</div><div class="bar-container"><div class="bar-fill thirst" id="thirstBar" style="width:100%"></div></div></div><div class="status-value" id="thirstValue">100%</div></div>
+            <div class="status-bar"><div class="status-icon">⚡</div><div class="status-info"><div class="status-label">Energi</div><div class="bar-container"><div class="bar-fill energy" id="energyBar" style="width:100%"></div></div></div><div class="status-value" id="energyValue">100%</div></div>
         </div>
         <div class="inventory">
             <div class="inventory-title">🎒 Ransel</div>
@@ -204,7 +153,7 @@
     <div id="pauseMenu">
         <div class="pause-title">⏸️ Jeda</div>
         <button class="menu-btn" id="resumeBtn">▶️ Lanjutkan</button>
-        <button class="menu-btn secondary" id="saveBtn">💾 Simpan Permainan</button>
+        <button class="menu-btn secondary" id="saveBtn">💾 Simpan</button>
         <button class="menu-btn secondary" id="quitBtn">🚪 Keluar</button>
     </div>
 
@@ -216,153 +165,110 @@
     </div>
 
     <script>
-        // ============================================
-        // ERROR REPORTER - dengan detail file & baris
-        // ============================================
         function showPersistentError(msg) {
             const box = document.getElementById('errorBox');
             if (!box) return;
-            box.innerHTML = '⚠️ <strong>ERROR:</strong> ' + msg + '<br><small>Coba refresh (Ctrl+F5). Jika tetap muncul, screenshot kotak ini dan kirim ke developer.</small>';
+            box.innerHTML = '⚠️ <strong>ERROR:</strong> ' + msg + '<br><small>Refresh (Ctrl+F5). Jika tetap muncul, screenshot kotak ini.</small>';
             box.style.display = 'block';
             console.error('❌ ' + msg);
         }
         window.addEventListener('error', function (e) {
-            let detail = e.message || 'Unknown error';
-            if (e.filename) {
-                detail += ' [' + e.filename.split('/').pop() + ':' + e.lineno + ']';
-            }
-            showPersistentError(detail);
+            let d = e.message || 'Unknown error';
+            if (e.filename) d += ' [' + e.filename.split('/').pop() + ':' + e.lineno + ']';
+            showPersistentError(d);
         }, true);
 
         function lerp(a, b, t) { return a + (b - a) * t; }
 
-        // ============================================
-        // SUPABASE CONFIG
-        // ============================================
         const SUPABASE_URL = 'https://mlsibwihfzehqcdawrdh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sc2lid2loZnplaHFjZGF3cmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTcwNTEsImV4cCI6MjEwMzY5MzA1MX0.faKWNZqTLE6nEH6nPw0L4uFepTy6ZvqrZDy2BaHcWxs';
+        let supabaseClient = null, supabaseConnected = false;
 
-        let supabaseClient = null;
-        let supabaseConnected = false;
-
-        function setSupabaseStatus(connected, message) {
-            const dot = document.getElementById('supabaseStatusDot');
-            const text = document.getElementById('supabaseStatusText');
+        function setSupabaseStatus(c, m) {
+            const dot = document.getElementById('supabaseStatusDot'), text = document.getElementById('supabaseStatusText');
             if (!dot || !text) return;
-            dot.className = 'status-dot ' + (connected ? 'connected' : 'disconnected');
-            text.textContent = message;
+            dot.className = 'status-dot ' + (c ? 'connected' : 'disconnected');
+            text.textContent = m;
         }
-
         function initSupabase() {
             try {
-                if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
-                    throw new Error('Library Supabase belum dimuat');
-                }
+                if (typeof window.supabase === 'undefined' || !window.supabase.createClient) throw new Error('no lib');
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 supabaseConnected = true;
                 setSupabaseStatus(true, 'Supabase: Connected ✅');
-            } catch (error) {
-                supabaseConnected = false;
-                setSupabaseStatus(false, 'Supabase: Offline Mode 📴');
-            }
+            } catch (e) { supabaseConnected = false; setSupabaseStatus(false, 'Supabase: Offline Mode 📴'); }
         }
 
-        // ============================================
-        // GAME STATE
-        // ============================================
         const gameState = {
             playerName: '', health: 100, hunger: 100, thirst: 100, energy: 100,
             wood: 0, stone: 0, meat: 0, currentTool: 'axe', day: 1, timeOfDay: 'day',
-            weather: 'clear', lighthouses: 0, score: 0, totalHunts: 0,
+            weather: 'clear', score: 0, totalHunts: 0,
             quests: [
-                { id: 1, title: 'Bertahan Hidup', objective: 'Kumpulkan 10 kayu dan 5 batu', target: 15, current: 0, completed: false },
-                { id: 2, title: 'Pemburu', objective: 'Berburu 5 hewan', target: 5, current: 0, completed: false },
-                { id: 3, title: 'Penjelajah', objective: 'Temukan Mercusuar Pertama', target: 1, current: 0, completed: false }
+                { id: 1, title: 'Bertahan Hidup', objective: 'Kumpulkan 10 kayu dan 5 batu (Klik pohon/batu dengan Kapak)', target: 15, current: 0, completed: false },
+                { id: 2, title: 'Pemburu', objective: 'Berburu 5 hewan dengan Senapan [3]', target: 5, current: 0, completed: false },
+                { id: 3, title: 'Penjelajah', objective: 'Capai Mercusuar Kuno (menara cahaya) di ujung pulau', target: 1, current: 0, completed: false }
             ],
             currentQuest: 0, isPaused: false, isDead: false
         };
 
-        // ============================================
-        // SUPABASE FUNCTIONS
-        // ============================================
         async function fetchLeaderboard() {
             const tbody = document.getElementById('leaderboardBody');
             if (!tbody) return;
-            if (!supabaseConnected || !supabaseClient) {
-                renderLeaderboard(JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]'));
-                return;
-            }
+            if (!supabaseConnected || !supabaseClient) { renderLeaderboard(JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]')); return; }
             try {
                 const { data, error } = await supabaseClient.from('leaderboard').select('*').order('score', { ascending: false }).limit(10);
                 if (error) throw error;
                 renderLeaderboard(data || []);
-            } catch (error) {
-                renderLeaderboard(JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]'));
-            }
+            } catch (e) { renderLeaderboard(JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]')); }
         }
-
         function renderLeaderboard(data) {
             const tbody = document.getElementById('leaderboardBody');
-            if (!tbody) return;
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Belum ada data</td></tr>';
-                return;
-            }
-            tbody.innerHTML = data.map((player, index) => {
-                const rankClass = index < 3 ? 'rank-' + (index + 1) : '';
-                const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '#' + (index + 1);
-                return '<tr><td class="' + rankClass + '">' + rankEmoji + '</td><td>' + player.name + '</td><td>' + player.score + '</td><td>' + (player.total_hunts || 0) + '</td></tr>';
+            if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#a0a0a0;">Belum ada data</td></tr>'; return; }
+            tbody.innerHTML = data.map((p, i) => {
+                const rc = i < 3 ? 'rank-' + (i + 1) : '';
+                const re = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+                return '<tr><td class="' + rc + '">' + re + '</td><td>' + p.name + '</td><td>' + p.score + '</td><td>' + (p.total_hunts || 0) + '</td></tr>';
             }).join('');
         }
-
+        function saveScoreLocal(d) {
+            const l = JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]');
+            l.push(d); l.sort((a, b) => b.score - a.score);
+            localStorage.setItem('hunter3d_leaderboard', JSON.stringify(l.slice(0, 10)));
+        }
         async function submitScore() {
-            const scoreData = { name: gameState.playerName, score: gameState.score, total_hunts: gameState.totalHunts, days_survived: gameState.day, created_at: new Date().toISOString() };
-            if (!supabaseConnected || !supabaseClient) { saveScoreLocal(scoreData); return; }
-            try {
-                const { error } = await supabaseClient.from('leaderboard').insert([scoreData]);
-                if (error) throw error;
-            } catch (e) { saveScoreLocal(scoreData); }
+            const d = { name: gameState.playerName, score: gameState.score, total_hunts: gameState.totalHunts, days_survived: gameState.day, created_at: new Date().toISOString() };
+            if (!supabaseConnected || !supabaseClient) { saveScoreLocal(d); return; }
+            try { const { error } = await supabaseClient.from('leaderboard').insert([d]); if (error) throw error; } catch (e) { saveScoreLocal(d); }
         }
-
-        function saveScoreLocal(scoreData) {
-            const localData = JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]');
-            localData.push(scoreData);
-            localData.sort((a, b) => b.score - a.score);
-            localStorage.setItem('hunter3d_leaderboard', JSON.stringify(localData.slice(0, 10)));
-        }
-
         async function saveGameToSupabase() {
             localStorage.setItem('hunter3d_save', JSON.stringify(gameState));
-            if (!supabaseConnected || !supabaseClient) { showNotification('💾 Game disimpan (Local)'); return; }
+            if (!supabaseConnected || !supabaseClient) { showNotification('💾 Disimpan (Local)'); return; }
             try {
-                const saveData = { name: gameState.playerName, game_state: gameState, saved_at: new Date().toISOString() };
-                const { data: existing } = await supabaseClient.from('saves').select('id').eq('name', gameState.playerName).single();
-                if (existing) { await supabaseClient.from('saves').update(saveData).eq('id', existing.id); }
-                else { await supabaseClient.from('saves').insert([saveData]); }
-                showNotification('💾 Game tersimpan ke cloud!');
-            } catch (e) { showNotification('💾 Game disimpan (Local Only)'); }
+                const sd = { name: gameState.playerName, game_state: gameState, saved_at: new Date().toISOString() };
+                const { data: ex } = await supabaseClient.from('saves').select('id').eq('name', gameState.playerName).single();
+                if (ex) await supabaseClient.from('saves').update(sd).eq('id', ex.id);
+                else await supabaseClient.from('saves').insert([sd]);
+                showNotification('💾 Tersimpan ke cloud!');
+            } catch (e) { showNotification('💾 Disimpan (Local Only)'); }
         }
-
         async function loadGameFromSupabase() {
             const name = document.getElementById('playerNameInput').value.trim();
-            if (!name) { showNotification('⚠️ Masukkan nama untuk load game!'); return false; }
+            if (!name) { showNotification('⚠️ Masukkan nama!'); return false; }
             if (supabaseConnected && supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient.from('saves').select('*').eq('name', name).single();
-                    if (!error && data && data.game_state) { Object.assign(gameState, data.game_state); showNotification('✅ Game dimuat dari cloud!'); return true; }
+                    if (!error && data && data.game_state) { Object.assign(gameState, data.game_state); showNotification('✅ Dimuat dari cloud!'); return true; }
                 } catch (e) { }
             }
-            const saved = localStorage.getItem('hunter3d_save');
-            if (saved) { Object.assign(gameState, JSON.parse(saved)); showNotification('✅ Game dimuat (Local)'); return true; }
-            showNotification('❌ Tidak ada data tersimpan!');
-            return false;
+            const s = localStorage.getItem('hunter3d_save');
+            if (s) { Object.assign(gameState, JSON.parse(s)); showNotification('✅ Dimuat (Local)'); return true; }
+            showNotification('❌ Tidak ada save!'); return false;
         }
 
         // ============================================
-        // BABYLON.JS 3D WORLD - RINGAN & STABIL
-        // (tanpa ShadowGenerator & post-processing agar kompatibel semua perangkat)
+        // BABYLON WORLD - STYLIZED SUNSET (referensi gambar)
         // ============================================
-        let engine, scene, camera, sunLight, water, skybox, animals = [];
+        let engine, scene, camera, sunLight, water, skybox, fireLight, animals = [], lighthouses = [];
         const playerState = { yaw: 0, pitch: 0, speed: 15, isPointerLocked: false };
         const keys = { w: false, a: false, s: false, d: false };
 
@@ -372,144 +278,246 @@
             const u = x * x * (3 - 2 * x), v = z * z * (3 - 2 * z);
             const A = (X * 137 + Z * 311) & 0xFFFF, B = ((X + 1) * 137 + Z * 311) & 0xFFFF;
             const C = (X * 137 + (Z + 1) * 311) & 0xFFFF, D = ((X + 1) * 137 + (Z + 1) * 311) & 0xFFFF;
-            return lerp(
-                lerp((A & 0xFF) / 255, (B & 0xFF) / 255, u),
-                lerp((C & 0xFF) / 255, (D & 0xFF) / 255, u),
-                v
-            );
+            return lerp(lerp((A & 0xFF) / 255, (B & 0xFF) / 255, u), lerp((C & 0xFF) / 255, (D & 0xFF) / 255, u), v);
         }
-
         function getTerrainHeight(x, z) {
             return noise2D(x * 0.01, z * 0.01) * 8 + noise2D(x * 0.03, z * 0.03) * 3 + noise2D(x * 0.1, z * 0.1) * 0.5;
         }
+        function randomGrassPos() {
+            for (let i = 0; i < 20; i++) {
+                const x = (Math.random() - 0.5) * 340, z = (Math.random() - 0.5) * 340;
+                const y = getTerrainHeight(x, z);
+                if (y > 1.5 && y < 5) return new BABYLON.Vector3(x, y, z);
+            }
+            return new BABYLON.Vector3(0, getTerrainHeight(0, 0), 0);
+        }
+        function stdMat(name, color, emissive, spec) {
+            const m = new BABYLON.StandardMaterial(name, scene);
+            m.diffuseColor = color;
+            m.emissiveColor = emissive || BABYLON.Color3.Black();
+            m.specularColor = spec !== undefined ? spec : new BABYLON.Color3(0.05, 0.05, 0.05);
+            return m;
+        }
 
         function initBabylonJS() {
-            console.log('🎮 Initializing BabylonJS...');
+            console.log('🎮 Initializing BabylonJS (stylized sunset)...');
             const canvas = document.getElementById('gameCanvas');
-
             try {
-                if (!window.WebGLRenderingContext) {
-                    throw new Error('Browser tidak mendukung WebGL');
-                }
-
+                if (!window.WebGLRenderingContext) throw new Error('Browser tidak mendukung WebGL');
                 engine = new BABYLON.Engine(canvas, true);
                 scene = new BABYLON.Scene(engine);
-                scene.clearColor = new BABYLON.Color4(0.53, 0.81, 0.92, 1);
-                scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-                scene.fogDensity = 0.003;
-                scene.fogColor = new BABYLON.Color3(0.7, 0.8, 0.9);
 
-                const spawnY = getTerrainHeight(0, 0) + 3;
-                camera = new BABYLON.UniversalCamera('playerCamera', new BABYLON.Vector3(0, spawnY, 0), scene);
-                camera.minZ = 0.1; camera.maxZ = 1000; camera.fov = 1.2; camera.inertia = 0;
+                // Langit sunset pink/ungu
+                scene.clearColor = new BABYLON.Color4(0.95, 0.6, 0.8, 1);
+                scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+                scene.fogDensity = 0.0025;
+                scene.fogColor = new BABYLON.Color3(0.9, 0.65, 0.8);
+
+                camera = new BABYLON.UniversalCamera('playerCamera', new BABYLON.Vector3(0, getTerrainHeight(0, 0) + 3, 0), scene);
+                camera.minZ = 0.1; camera.maxZ = 1200; camera.fov = 1.15; camera.inertia = 0;
                 camera.inputs.clear();
 
-                // Lighting sederhana & terang
-                const hemiLight = new BABYLON.HemisphericLight('skyLight', new BABYLON.Vector3(0, 1, 0), scene);
-                hemiLight.intensity = 1.0;
-                hemiLight.groundColor = new BABYLON.Color3(0.35, 0.35, 0.4);
-                hemiLight.diffuse = new BABYLON.Color3(1, 1, 0.95);
-                sunLight = new BABYLON.DirectionalLight('sunLight', new BABYLON.Vector3(-0.5, -1, -0.5), scene);
-                sunLight.intensity = 1.0;
-                sunLight.diffuse = new BABYLON.Color3(1, 0.95, 0.85);
+                // Cahaya hangat sunset
+                const hemi = new BABYLON.HemisphericLight('hemi', new BABYLON.Vector3(0, 1, 0), scene);
+                hemi.intensity = 0.9;
+                hemi.diffuse = new BABYLON.Color3(1, 0.85, 0.95);
+                hemi.groundColor = new BABYLON.Color3(0.4, 0.3, 0.5);
+                sunLight = new BABYLON.DirectionalLight('sun', new BABYLON.Vector3(0.3, -0.6, 1), scene);
+                sunLight.intensity = 1.1;
+                sunLight.diffuse = new BABYLON.Color3(1, 0.75, 0.6);
 
-                // Terrain
+                // Terrain warna vibrant
                 const terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 400, height: 400, subdivisions: 100, updatable: true }, scene);
-                const positions = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-                const colors = [];
-                for (let i = 0; i < positions.length; i += 3) {
-                    const x = positions[i], z = positions[i + 2], height = getTerrainHeight(x, z);
-                    positions[i + 1] = height;
+                const pos = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+                const cols = [];
+                for (let i = 0; i < pos.length; i += 3) {
+                    const x = pos[i], z = pos[i + 2], h = getTerrainHeight(x, z);
+                    pos[i + 1] = h;
                     let r, g, b;
-                    if (height < 1) { r = 0.76; g = 0.70; b = 0.50; }
-                    else if (height < 3) { r = 0.25; g = 0.55; b = 0.20; }
-                    else if (height < 5) { r = 0.30; g = 0.40; b = 0.20; }
-                    else { r = 0.5; g = 0.5; b = 0.5; }
-                    colors.push(r, g, b, 1);
+                    if (h < 1) { r = 0.95; g = 0.82; b = 0.45; }        // pasir keemasan
+                    else if (h < 3) { r = 0.25; g = 0.75; b = 0.30; }   // rumput hijau cerah
+                    else if (h < 5) { r = 0.18; g = 0.6; b = 0.25; }
+                    else { r = 0.65; g = 0.5; b = 0.7; }                // batu keunguan
+                    cols.push(r, g, b, 1);
                 }
-                terrain.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
-                terrain.setVerticesData(BABYLON.VertexBuffer.ColorKind, colors);
+                terrain.setVerticesData(BABYLON.VertexBuffer.PositionKind, pos);
+                terrain.setVerticesData(BABYLON.VertexBuffer.ColorKind, cols);
                 terrain.createNormals(true);
-                const terrainMat = new BABYLON.StandardMaterial('terrainMat', scene);
-                terrainMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
-                terrainMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
-                terrain.material = terrainMat;
+                terrain.material = stdMat('terrainMat', new BABYLON.Color3(1, 1, 1));
 
-                // Water
-                water = BABYLON.MeshBuilder.CreateGround('water', { width: 200, height: 200, subdivisions: 16, updatable: true }, scene);
-                water.position = new BABYLON.Vector3(80, 0.5, 80);
+                // Danau berkilau
+                water = BABYLON.MeshBuilder.CreateGround('water', { width: 220, height: 220, subdivisions: 16, updatable: true }, scene);
+                water.position = new BABYLON.Vector3(80, 0.6, 80);
                 const waterMat = new BABYLON.StandardMaterial('waterMat', scene);
-                waterMat.diffuseColor = new BABYLON.Color3(0.1, 0.4, 0.65);
-                waterMat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
-                waterMat.alpha = 0.8;
+                waterMat.diffuseColor = new BABYLON.Color3(0.15, 0.45, 0.75);
+                waterMat.emissiveColor = new BABYLON.Color3(0.1, 0.25, 0.5);
+                waterMat.specularColor = new BABYLON.Color3(1, 0.8, 0.9);
+                waterMat.specularPower = 16;
+                waterMat.alpha = 0.85;
                 water.material = waterMat;
-
                 scene.registerBeforeRender(() => {
                     try {
-                        const time = performance.now() * 0.001;
-                        const wPos = water.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-                        if (wPos) {
-                            for (let i = 0; i < wPos.length; i += 3) {
-                                wPos[i + 1] = Math.sin(wPos[i] * 0.2 + time) * 0.15 + Math.cos(wPos[i + 2] * 0.2 + time) * 0.15;
-                            }
-                            water.updateVerticesData(BABYLON.VertexBuffer.PositionKind, wPos);
-                        }
-                    } catch (e) { /* abaikan error animasi air */ }
+                        const t = performance.now() * 0.001;
+                        const wp = water.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+                        for (let i = 0; i < wp.length; i += 3) wp[i + 1] = Math.sin(wp[i] * 0.2 + t) * 0.12 + Math.cos(wp[i + 2] * 0.2 + t) * 0.12;
+                        water.updateVerticesData(BABYLON.VertexBuffer.PositionKind, wp);
+                    } catch (e) { }
                 });
 
-                // Skybox
-                skybox = BABYLON.MeshBuilder.CreateBox('skyBox', { size: 800 }, scene);
+                // Skybox gradient sunset + matahari bersinar
+                skybox = BABYLON.MeshBuilder.CreateBox('skyBox', { size: 900 }, scene);
                 const skyMat = new BABYLON.StandardMaterial('skyMat', scene);
-                skyMat.backFaceCulling = false;
-                skyMat.disableLighting = true;
-                const skyTex = new BABYLON.DynamicTexture('skyTex', { width: 256, height: 256 }, scene);
+                skyMat.backFaceCulling = false; skyMat.disableLighting = true;
+                const skyTex = new BABYLON.DynamicTexture('skyTex', { width: 256, height: 512 }, scene);
                 const ctx = skyTex.getContext();
-                const grad = ctx.createLinearGradient(0, 0, 0, 256);
-                grad.addColorStop(0, '#4a90d9');
-                grad.addColorStop(0.5, '#87CEEB');
-                grad.addColorStop(1, '#FFE4B5');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, 256, 256);
+                const grad = ctx.createLinearGradient(0, 0, 0, 512);
+                grad.addColorStop(0, '#2a5fd4');
+                grad.addColorStop(0.35, '#7a6ae0');
+                grad.addColorStop(0.55, '#e08ad0');
+                grad.addColorStop(0.72, '#ffb0d0');
+                grad.addColorStop(0.85, '#ffd9a0');
+                grad.addColorStop(1, '#fff0c0');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, 256, 512);
                 skyTex.update();
-                skyMat.emissiveTexture = skyTex;
-                skyMat.diffuseTexture = skyTex;
-                skybox.material = skyMat;
-                skybox.infiniteDistance = true;
+                skyMat.emissiveTexture = skyTex; skyMat.diffuseTexture = skyTex;
+                skybox.material = skyMat; skybox.infiniteDistance = true;
 
-                // Trees
-                const trunkMat = new BABYLON.StandardMaterial('trunkMat', scene);
-                trunkMat.diffuseColor = new BABYLON.Color3(0.4, 0.26, 0.13);
-                const folMat = new BABYLON.StandardMaterial('foliageMat', scene);
-                folMat.diffuseColor = new BABYLON.Color3(0.2, 0.55, 0.18);
-                for (let i = 0; i < 50; i++) {
-                    const x = (Math.random() - 0.5) * 350, z = (Math.random() - 0.5) * 350, y = getTerrainHeight(x, z);
-                    if (y < 1.5 || y > 5) continue;
+                const sun = BABYLON.MeshBuilder.CreateSphere('sun', { diameter: 60, segments: 12 }, scene);
+                const sunMat = new BABYLON.StandardMaterial('sunMat', scene);
+                sunMat.disableLighting = true;
+                sunMat.emissiveColor = new BABYLON.Color3(1, 0.95, 0.75);
+                sun.material = sunMat;
+                sun.parent = skybox;
+                sun.position = new BABYLON.Vector3(0, 60, 420);
+
+                // Awan
+                const cloudMat = new BABYLON.StandardMaterial('cloudMat', scene);
+                cloudMat.disableLighting = true;
+                cloudMat.emissiveColor = new BABYLON.Color3(1, 0.9, 0.95);
+                cloudMat.alpha = 0.9;
+                for (let i = 0; i < 6; i++) {
+                    const c = BABYLON.MeshBuilder.CreateSphere('cloud' + i, { diameter: 30, segments: 8 }, scene);
+                    c.scaling = new BABYLON.Vector3(2 + Math.random() * 2, 0.35, 1 + Math.random());
+                    c.position = new BABYLON.Vector3((Math.random() - 0.5) * 700, 90 + Math.random() * 40, (Math.random() - 0.5) * 700);
+                    c.material = cloudMat;
+                }
+
+                // Gunung pink/ungu di cakrawala
+                const mtnColors = [new BABYLON.Color3(0.75, 0.45, 0.65), new BABYLON.Color3(0.6, 0.4, 0.7), new BABYLON.Color3(0.85, 0.55, 0.6)];
+                for (let i = 0; i < 10; i++) {
+                    const ang = (i / 10) * Math.PI * 2;
+                    const dist = 320 + Math.random() * 80;
+                    const m = BABYLON.MeshBuilder.CreateCylinder('mtn' + i, { height: 60 + Math.random() * 60, diameterTop: 0, diameterBottom: 120 + Math.random() * 80, tessellation: 5 }, scene);
+                    m.position = new BABYLON.Vector3(Math.sin(ang) * dist, 10, Math.cos(ang) * dist);
+                    m.material = stdMat('mtnMat' + i, mtnColors[i % 3], mtnColors[i % 3].scale(0.25));
+                }
+
+                // Pohon warna-warni (bulat & kerucut)
+                const foliageColors = ['#ff7eb0', '#5aa7ff', '#ffc94d', '#ff9440', '#4ecb5a', '#b07de0', '#ff6a6a'];
+                const trunkMat = stdMat('trunkMat', new BABYLON.Color3(0.45, 0.28, 0.15));
+                for (let i = 0; i < 60; i++) {
+                    const p = randomGrassPos();
                     const tree = new BABYLON.TransformNode('tree', scene);
                     const trunk = BABYLON.MeshBuilder.CreateCylinder('trunk', { height: 4, diameterTop: 0.4, diameterBottom: 0.8, tessellation: 6 }, scene);
                     trunk.position.y = 2; trunk.parent = tree; trunk.material = trunkMat;
-                    [{ y: 4, r: 2.5, h: 3 }, { y: 5.5, r: 2, h: 2.5 }, { y: 7, r: 1.3, h: 2 }].forEach((l, idx) => {
-                        const fol = BABYLON.MeshBuilder.CreateCylinder('fol' + idx, { height: l.h, diameterTop: 0, diameterBottom: l.r * 2, tessellation: 6 }, scene);
-                        fol.position.y = l.y; fol.parent = tree; fol.material = folMat;
-                    });
-                    tree.position = new BABYLON.Vector3(x, y, z);
-                    const s = 0.8 + Math.random() * 0.6;
+                    const col = BABYLON.Color3.FromHexString(foliageColors[Math.floor(Math.random() * foliageColors.length)]);
+                    const fMat = stdMat('fol' + i, col, col.scale(0.15));
+                    if (Math.random() < 0.5) {
+                        const canopy = BABYLON.MeshBuilder.CreateSphere('canopy', { diameter: 5, segments: 10 }, scene);
+                        canopy.position.y = 5.5; canopy.parent = tree; canopy.material = fMat;
+                    } else {
+                        [{ y: 4, r: 2.5, h: 3 }, { y: 5.5, r: 2, h: 2.5 }, { y: 7, r: 1.3, h: 2 }].forEach((l, idx) => {
+                            const f = BABYLON.MeshBuilder.CreateCylinder('fol' + idx, { height: l.h, diameterTop: 0, diameterBottom: l.r * 2, tessellation: 7 }, scene);
+                            f.position.y = l.y; f.parent = tree; f.material = fMat;
+                        });
+                    }
+                    tree.position = p;
+                    const s = 0.8 + Math.random() * 0.7;
                     tree.scaling = new BABYLON.Vector3(s, s, s);
                     tree.rotation.y = Math.random() * Math.PI * 2;
+                    tree.metadata = { type: 'tree', hp: 3 };
+                    tree.getChildMeshes().forEach(m => m.metadata = { type: 'tree', root: tree });
                 }
 
-                // Animals
-                const aMat = new BABYLON.StandardMaterial('animalMat', scene);
-                aMat.diffuseColor = new BABYLON.Color3(0.55, 0.35, 0.2);
+                // Batu
+                for (let i = 0; i < 25; i++) {
+                    const p = randomGrassPos();
+                    const rock = BABYLON.MeshBuilder.CreatePolyhedron('rock', { type: 1, size: 1.2 }, scene);
+                    rock.position = p; rock.scaling.y = 0.7;
+                    rock.rotation.y = Math.random() * Math.PI;
+                    rock.material = stdMat('rockMat' + i, new BABYLON.Color3(0.6, 0.55, 0.68), new BABYLON.Color3(0.1, 0.1, 0.15));
+                    rock.metadata = { type: 'rock', hp: 3, root: rock };
+                }
+
+                // Rumput & bunga berwarna (instances = ringan)
+                const tuftColors = ['#ffe14d', '#ff5a4d', '#ff8ad4', '#7dff6a', '#ffa64d'];
+                tuftColors.forEach((hex, ci) => {
+                    const col = BABYLON.Color3.FromHexString(hex);
+                    const base = BABYLON.MeshBuilder.CreateCone('tuft' + ci, { height: 0.7, diameterBottom: 0.2, tessellation: 4 }, scene);
+                    base.material = stdMat('tuftMat' + ci, col, col.scale(0.5));
+                    base.position = randomGrassPos();
+                    for (let k = 0; k < 50; k++) {
+                        const inst = base.createInstance('ti' + ci + '_' + k);
+                        inst.position = randomGrassPos();
+                        const sc = 0.7 + Math.random() * 0.9;
+                        inst.scaling = new BABYLON.Vector3(sc, sc, sc);
+                        inst.rotation.y = Math.random() * Math.PI;
+                    }
+                });
+
+                // Perkemahan: tenda + api unggun + perahu
+                const campY = getTerrainHeight(-4, -4);
+                const tent = BABYLON.MeshBuilder.CreateCylinder('tent', { height: 2.5, diameterTop: 0, diameterBottom: 4, tessellation: 4 }, scene);
+                tent.position = new BABYLON.Vector3(-5, campY + 1.2, -4);
+                tent.rotation.y = Math.PI / 4;
+                tent.material = stdMat('tentMat', new BABYLON.Color3(0.2, 0.8, 0.3), new BABYLON.Color3(0.05, 0.2, 0.05));
+
+                const firePit = BABYLON.MeshBuilder.CreateCylinder('firePit', { height: 0.3, diameter: 1.4, tessellation: 8 }, scene);
+                firePit.position = new BABYLON.Vector3(2, campY + 0.15, 1);
+                firePit.material = stdMat('pitMat', new BABYLON.Color3(0.2, 0.2, 0.2));
+                const flame = BABYLON.MeshBuilder.CreateCone('flame', { height: 1.4, diameterBottom: 0.8, tessellation: 6 }, scene);
+                flame.position = new BABYLON.Vector3(2, campY + 0.9, 1);
+                const flameMat = new BABYLON.StandardMaterial('flameMat', scene);
+                flameMat.disableLighting = true;
+                flameMat.emissiveColor = new BABYLON.Color3(1, 0.55, 0.15);
+                flame.material = flameMat;
+                fireLight = new BABYLON.PointLight('fireLight', new BABYLON.Vector3(2, campY + 2, 1), scene);
+                fireLight.diffuse = new BABYLON.Color3(1, 0.6, 0.2);
+                fireLight.intensity = 1.5;
+                fireLight.range = 25;
+
+                const boat = BABYLON.MeshBuilder.CreateBox('boat', { width: 1.2, height: 0.5, depth: 3.5 }, scene);
+                boat.position = new BABYLON.Vector3(6, campY + 0.3, 6);
+                boat.rotation.y = 0.6;
+                boat.material = stdMat('boatMat', new BABYLON.Color3(0.5, 0.3, 0.15));
+
+                // Mercusuar (tujuan akhir)
+                [[150, 150], [-160, 80], [60, -160]].forEach((lc, i) => {
+                    const y = getTerrainHeight(lc[0], lc[1]);
+                    const tower = BABYLON.MeshBuilder.CreateCylinder('lh' + i, { height: 16, diameterTop: 3, diameterBottom: 4.5, tessellation: 10 }, scene);
+                    tower.position = new BABYLON.Vector3(lc[0], y + 8, lc[1]);
+                    tower.material = stdMat('lhMat' + i, new BABYLON.Color3(0.95, 0.9, 0.9), new BABYLON.Color3(0.2, 0.2, 0.2));
+                    const lamp = BABYLON.MeshBuilder.CreateSphere('lhLamp' + i, { diameter: 3, segments: 10 }, scene);
+                    lamp.position = new BABYLON.Vector3(lc[0], y + 17, lc[1]);
+                    const lampMat = new BABYLON.StandardMaterial('lampMat' + i, scene);
+                    lampMat.disableLighting = true;
+                    lampMat.emissiveColor = new BABYLON.Color3(1, 0.85, 0.3);
+                    lamp.material = lampMat;
+                    lighthouses.push(new BABYLON.Vector3(lc[0], y, lc[1]));
+                });
+
+                // Hewan
+                const aMat = stdMat('animalMat', new BABYLON.Color3(0.55, 0.35, 0.2));
                 for (let i = 0; i < 10; i++) {
-                    const x = (Math.random() - 0.5) * 250, z = (Math.random() - 0.5) * 250, y = getTerrainHeight(x, z);
-                    if (y < 1.5) continue;
+                    const p = randomGrassPos();
                     const animal = new BABYLON.TransformNode('animal', scene);
                     const body = BABYLON.MeshBuilder.CreateBox('body', { width: 1.2, height: 0.8, depth: 2 }, scene);
                     body.parent = animal; body.material = aMat;
                     const head = BABYLON.MeshBuilder.CreateBox('head', { width: 0.7, height: 0.7, depth: 0.7 }, scene);
                     head.position = new BABYLON.Vector3(0, 0.3, 1); head.parent = animal; head.material = aMat;
-                    animal.position = new BABYLON.Vector3(x, y + 0.5, z);
-                    animal.metadata = { speed: 0.5 + Math.random() * 0.5 };
+                    animal.position = new BABYLON.Vector3(p.x, p.y + 0.5, p.z);
+                    animal.metadata = { speed: 0.5 + Math.random() * 0.5, type: 'animal' };
+                    animal.getChildMeshes().forEach(m => m.metadata = { type: 'animal', root: animal });
                     animals.push(animal);
                 }
 
@@ -521,9 +529,12 @@
                 });
                 document.addEventListener('mousemove', (e) => {
                     if (!playerState.isPointerLocked) return;
-                    playerState.yaw -= e.movementX * 0.002;
-                    playerState.pitch -= e.movementY * 0.002;
+                    playerState.yaw -= e.movementX * 0.002;      // mouse kanan = lihat kanan
+                    playerState.pitch += e.movementY * 0.002;    // mouse atas = lihat atas
                     playerState.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, playerState.pitch));
+                });
+                document.addEventListener('mousedown', (e) => {
+                    if (playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead && e.button === 0) useTool();
                 });
                 document.addEventListener('keydown', (e) => {
                     if (e.code === 'KeyW') keys.w = true; if (e.code === 'KeyA') keys.a = true;
@@ -534,60 +545,53 @@
                     if (e.code === 'KeyS') keys.s = false; if (e.code === 'KeyD') keys.d = false;
                 });
 
-                // Render loop dengan pengaman
                 let lastTime = performance.now();
-                let renderErrorShown = false;
-
                 scene.registerBeforeRender(() => {
                     const now = performance.now();
                     const delta = Math.min((now - lastTime) / 1000, 0.1);
                     lastTime = now;
 
-                    const terrainY = getTerrainHeight(camera.position.x, camera.position.z);
-                    camera.position.y = Math.max(terrainY, 0.5) + 2;
+                    const ty = getTerrainHeight(camera.position.x, camera.position.z);
+                    camera.position.y = Math.max(ty, 0.5) + 2;
+
+                    // Api unggun berkedip
+                    if (fireLight) fireLight.intensity = 1.4 + Math.sin(now * 0.01) * 0.3 + Math.random() * 0.15;
 
                     if (playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead) {
                         camera.rotation = new BABYLON.Vector3(playerState.pitch, playerState.yaw, 0);
-                        const forward = new BABYLON.Vector3(Math.sin(playerState.yaw), 0, Math.cos(playerState.yaw));
-                        const right = new BABYLON.Vector3(Math.sin(playerState.yaw + Math.PI / 2), 0, Math.cos(playerState.yaw + Math.PI / 2));
-                        const moveDir = new BABYLON.Vector3(0, 0, 0);
-                        if (keys.w) moveDir.addInPlace(forward);
-                        if (keys.s) moveDir.subtractInPlace(forward);
-                        if (keys.d) moveDir.addInPlace(right);
-                        if (keys.a) moveDir.subtractInPlace(right);
-                        if (moveDir.lengthSquared() > 0) {
-                            moveDir.normalize();
-                            camera.position.addInPlace(moveDir.scale(playerState.speed * delta));
-                        }
-                        camera.position.x = Math.max(-180, Math.min(180, camera.position.x));
-                        camera.position.z = Math.max(-180, Math.min(180, camera.position.z));
-                        updateCompass();
+                        // Gerak mengikuti arah pandang kamera (presisi, tidak terbalik)
+                        const fwd = camera.getDirection(new BABYLON.Vector3(0, 0, 1)); fwd.y = 0; fwd.normalize();
+                        const rgt = camera.getDirection(new BABYLON.Vector3(1, 0, 0)); rgt.y = 0; rgt.normalize();
+                        const mv = new BABYLON.Vector3(0, 0, 0);
+                        if (keys.w) mv.addInPlace(fwd);
+                        if (keys.s) mv.subtractInPlace(fwd);
+                        if (keys.d) mv.addInPlace(rgt);
+                        if (keys.a) mv.subtractInPlace(rgt);
+                        if (mv.lengthSquared() > 0) { mv.normalize(); camera.position.addInPlace(mv.scale(playerState.speed * delta)); }
+                        camera.position.x = Math.max(-190, Math.min(190, camera.position.x));
+                        camera.position.z = Math.max(-190, Math.min(190, camera.position.z));
+                        const deg = (Math.atan2(fwd.x, fwd.z) * 180 / Math.PI + 360) % 360;
+                        let t = 'N';
+                        if (deg >= 315 || deg < 45) t = 'N'; else if (deg >= 45 && deg < 135) t = 'E'; else if (deg >= 135 && deg < 225) t = 'S'; else t = 'W';
+                        document.getElementById('compass').textContent = t;
                     }
 
                     animals.forEach(animal => {
-                        const time = now * 0.001;
-                        const speed = animal.metadata.speed;
-                        animal.position.x += Math.sin(time * speed + animal.position.z) * 0.02;
-                        animal.position.z += Math.cos(time * speed + animal.position.x) * 0.02;
+                        const t = now * 0.001, sp = animal.metadata.speed;
+                        animal.position.x += Math.sin(t * sp + animal.position.z) * 0.02;
+                        animal.position.z += Math.cos(t * sp + animal.position.x) * 0.02;
                         animal.position.y = getTerrainHeight(animal.position.x, animal.position.z) + 0.5;
                     });
 
                     skybox.position.copyFrom(camera.position);
                 });
 
+                let renderErr = false;
                 engine.runRenderLoop(function () {
-                    try {
-                        scene.render();
-                    } catch (err) {
-                        if (!renderErrorShown) {
-                            renderErrorShown = true;
-                            showPersistentError('Render error: ' + err.message);
-                        }
-                    }
+                    try { scene.render(); } catch (err) { if (!renderErr) { renderErr = true; showPersistentError('Render error: ' + err.message); } }
                 });
                 window.addEventListener('resize', () => engine.resize());
-
-                console.log('✅ BabylonJS initialized - dunia siap!');
+                console.log('✅ Dunia stylized siap!');
                 return true;
             } catch (error) {
                 showPersistentError('Gagal memuat dunia 3D: ' + error.message);
@@ -595,33 +599,96 @@
             }
         }
 
-        function updateCompass() {
-            const degrees = ((playerState.yaw * 180 / Math.PI) % 360 + 360) % 360;
-            let t = 'N';
-            if (degrees >= 315 || degrees < 45) t = 'N';
-            else if (degrees >= 45 && degrees < 135) t = 'W';
-            else if (degrees >= 135 && degrees < 225) t = 'S';
-            else t = 'E';
-            document.getElementById('compass').textContent = t;
+        // ============================================
+        // SISTEM ALAT (Kapak / Ganco / Senapan)
+        // ============================================
+        function useTool() {
+            if (!scene) return;
+            const pick = scene.pick(scene.getEngine().getRenderWidth() / 2, scene.getEngine().getRenderHeight() / 2);
+            if (!pick.hit || !pick.pickedMesh) return;
+
+            // Memancing
+            if (pick.pickedMesh === water) {
+                if (gameState.currentTool !== 'hook') { showNotification('🪝 Gunakan Ganco [2] untuk memancing!'); return; }
+                if (Math.random() < 0.7) { gainResource('meat', 1); showNotification('🐟 Dapat ikan! +1 🥩'); }
+                else showNotification('💦 Ikan lepas... coba lagi!');
+                return;
+            }
+
+            const meta = pick.pickedMesh.metadata;
+            if (!meta) return;
+            if (pick.distance > 45) { showNotification(' Terlalu jauh! Mendekatlah.'); return; }
+
+            if (meta.type === 'tree') {
+                if (gameState.currentTool !== 'axe') { showNotification('🪓 Gunakan Kapak [1] untuk menebang!'); return; }
+                const root = meta.root;
+                root.metadata.hp--;
+                gainResource('wood', 1);
+                showNotification('🪓 Tebang! +1 🪵');
+                root.scaling.scaleInPlace(0.88);
+                if (root.metadata.hp <= 0) {
+                    gainResource('wood', 2);
+                    showNotification('🌳 Pohon tumbang! +2 🪵');
+                    root.getChildMeshes().slice().forEach(m => m.dispose());
+                    root.dispose();
+                }
+            } else if (meta.type === 'rock') {
+                if (gameState.currentTool !== 'axe') { showNotification('🪓 Gunakan Kapak [1] untuk memecah batu!'); return; }
+                const rock = meta.root;
+                rock.metadata.hp--;
+                gainResource('stone', 1);
+                showNotification('⛏️ Pecah! +1 🪨');
+                rock.scaling.scaleInPlace(0.85);
+                if (rock.metadata.hp <= 0) {
+                    gainResource('stone', 2);
+                    showNotification('🪨 Batu hancur! +2 🪨');
+                    rock.dispose();
+                }
+            } else if (meta.type === 'animal') {
+                if (gameState.currentTool !== 'rifle') { showNotification('🔫 Gunakan Senapan [3] untuk berburu!'); return; }
+                gameState.totalHunts++;
+                gainResource('meat', 2);
+                showNotification('🎯 Buruan kena! +2 🥩 (Total: ' + gameState.totalHunts + ')');
+                const p = randomGrassPos();
+                meta.root.position = new BABYLON.Vector3(p.x, p.y + 0.5, p.z);
+                const q = gameState.quests[1];
+                if (!q.completed) { q.current = Math.min(q.target, gameState.totalHunts); if (q.current >= q.target) completeQuest(1); }
+                updateUI();
+            }
+        }
+
+        function gainResource(type, n) {
+            gameState[type] += n;
+            gameState.score += 5;
+            if (type === 'wood' || type === 'stone') {
+                const q = gameState.quests[0];
+                if (!q.completed) { q.current = Math.min(q.target, q.current + n); if (q.current >= q.target) completeQuest(0); }
+            }
+            updateUI();
+        }
+
+        function completeQuest(i) {
+            const q = gameState.quests[i];
+            if (q.completed) return;
+            q.completed = true;
+            gameState.score += 250;
+            showNotification('✅ MISI SELESAI: ' + q.title + '! +250 skor');
+            if (i < 2) gameState.currentQuest = i + 1;
+            if (i === 2) { gameState.score += 500; showNotification('🗼 MERCUSUAR MENYALA! BANTUAN DATANG — KAMU MENANG! 🎉'); }
+            updateUI();
         }
 
         // ============================================
-        // GAME LOGIC & UI
+        // UI & LOGIC
         // ============================================
-        const mainMenu = document.getElementById('mainMenu');
-        const hud = document.getElementById('hud');
-        const loadingScreen = document.getElementById('loadingScreen');
-        const pauseMenu = document.getElementById('pauseMenu');
-        const deathScreen = document.getElementById('deathScreen');
-        const notification = document.getElementById('notification');
+        const mainMenu = document.getElementById('mainMenu'), hud = document.getElementById('hud'),
+            loadingScreen = document.getElementById('loadingScreen'), pauseMenu = document.getElementById('pauseMenu'),
+            deathScreen = document.getElementById('deathScreen'), notification = document.getElementById('notification');
         let babylonInitialized = false;
 
         function setupEventListeners() {
             document.getElementById('startGameBtn').addEventListener('click', startGame);
-            document.getElementById('loadGameBtn').addEventListener('click', async () => {
-                const loaded = await loadGameFromSupabase();
-                if (loaded) startGame();
-            });
+            document.getElementById('loadGameBtn').addEventListener('click', async () => { if (await loadGameFromSupabase()) startGame(); });
             document.getElementById('resumeBtn').addEventListener('click', () => { pauseMenu.style.display = 'none'; gameState.isPaused = false; });
             document.getElementById('saveBtn').addEventListener('click', saveGameToSupabase);
             document.getElementById('quitBtn').addEventListener('click', async () => { await saveGameToSupabase(); await submitScore(); location.reload(); });
@@ -634,24 +701,17 @@
         }
 
         function startGame() {
-            if (typeof BABYLON === 'undefined') {
-                showPersistentError('Library 3D (BabylonJS) gagal dimuat dari CDN. Matikan adblock / periksa internet, lalu refresh (Ctrl+F5).');
-                return;
-            }
-
+            if (typeof BABYLON === 'undefined') { showPersistentError('BabylonJS gagal dimuat. Matikan adblock, refresh (Ctrl+F5).'); return; }
             const name = document.getElementById('playerNameInput').value.trim();
             if (!name) { showNotification('⚠️ Masukkan nama survivor!'); return; }
-
             gameState.playerName = name;
             mainMenu.style.display = 'none';
             loadingScreen.style.display = 'flex';
-
             let progress = 0;
-            const loadingInterval = setInterval(() => {
+            const li = setInterval(() => {
                 progress += Math.random() * 20;
                 if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(loadingInterval);
+                    progress = 100; clearInterval(li);
                     setTimeout(() => {
                         if (!babylonInitialized) babylonInitialized = initBabylonJS();
                         loadingScreen.style.display = 'none';
@@ -676,6 +736,14 @@
                     gameState.energy = Math.max(0, gameState.energy - 0.5);
                     if (gameState.energy < 30) gameState.health = Math.max(0, gameState.health - 0.5);
                 }
+                // Cek mercusuar (misi 3)
+                const q3 = gameState.quests[2];
+                if (!q3.completed && scene) {
+                    for (const lh of lighthouses) {
+                        const d = Math.sqrt(Math.pow(camera.position.x - lh.x, 2) + Math.pow(camera.position.z - lh.z, 2));
+                        if (d < 12) { q3.current = 1; completeQuest(2); break; }
+                    }
+                }
                 if (gameState.health <= 0 && !gameState.isDead) triggerDeath();
                 updateUI();
             }, 2000);
@@ -683,9 +751,9 @@
             setInterval(() => {
                 if (gameState.isPaused || gameState.isDead) return;
                 const phases = ['dawn', 'day', 'dusk', 'night'];
-                const nextIndex = (phases.indexOf(gameState.timeOfDay) + 1) % 4;
-                gameState.timeOfDay = phases[nextIndex];
-                if (nextIndex === 0) { gameState.day++; gameState.score += 100; showNotification('🌅 Hari ' + gameState.day + ' dimulai!'); }
+                const ni = (phases.indexOf(gameState.timeOfDay) + 1) % 4;
+                gameState.timeOfDay = phases[ni];
+                if (ni === 0) { gameState.day++; gameState.score += 100; showNotification('🌅 Hari ' + gameState.day + ' dimulai!'); }
                 updateEnvironment(); updateUI();
             }, 30000);
 
@@ -708,87 +776,80 @@
 
         function updateEnvironment() {
             if (!scene) return;
-            const settings = {
-                'dawn': { sky: new BABYLON.Color4(1, 0.6, 0.4, 1), fog: new BABYLON.Color3(1, 0.7, 0.5), sunIntensity: 0.8, sunColor: new BABYLON.Color3(1, 0.7, 0.5), fogDensity: 0.004 },
-                'day': { sky: new BABYLON.Color4(0.53, 0.81, 0.92, 1), fog: new BABYLON.Color3(0.7, 0.8, 0.9), sunIntensity: 1.0, sunColor: new BABYLON.Color3(1, 0.95, 0.85), fogDensity: 0.003 },
-                'dusk': { sky: new BABYLON.Color4(0.9, 0.4, 0.3, 1), fog: new BABYLON.Color3(0.8, 0.5, 0.4), sunIntensity: 0.6, sunColor: new BABYLON.Color3(1, 0.5, 0.3), fogDensity: 0.005 },
-                'night': { sky: new BABYLON.Color4(0.05, 0.05, 0.15, 1), fog: new BABYLON.Color3(0.1, 0.1, 0.2), sunIntensity: 0.2, sunColor: new BABYLON.Color3(0.3, 0.3, 0.5), fogDensity: 0.008 }
+            const S = {
+                'dawn': { sky: new BABYLON.Color4(1, 0.6, 0.5, 1), fog: new BABYLON.Color3(1, 0.7, 0.6), si: 0.9, sc: new BABYLON.Color3(1, 0.7, 0.5), fd: 0.003 },
+                'day': { sky: new BABYLON.Color4(0.55, 0.75, 0.95, 1), fog: new BABYLON.Color3(0.8, 0.8, 0.95), si: 1.1, sc: new BABYLON.Color3(1, 0.9, 0.75), fd: 0.0025 },
+                'dusk': { sky: new BABYLON.Color4(0.95, 0.5, 0.6, 1), fog: new BABYLON.Color3(0.9, 0.6, 0.7), si: 0.8, sc: new BABYLON.Color3(1, 0.6, 0.45), fd: 0.0035 },
+                'night': { sky: new BABYLON.Color4(0.08, 0.06, 0.2, 1), fog: new BABYLON.Color3(0.15, 0.1, 0.25), si: 0.25, sc: new BABYLON.Color3(0.4, 0.35, 0.6), fd: 0.006 }
             }[gameState.timeOfDay];
-            scene.clearColor = settings.sky; scene.fogColor = settings.fog; scene.fogDensity = settings.fogDensity;
-            sunLight.intensity = settings.sunIntensity; sunLight.diffuse = settings.sunColor;
-            if (gameState.weather === 'fog') scene.fogDensity = 0.02;
-            else if (gameState.weather === 'rain') { scene.fogDensity = 0.008; scene.clearColor = new BABYLON.Color4(0.4, 0.45, 0.5, 1); }
+            scene.clearColor = S.sky; scene.fogColor = S.fog; scene.fogDensity = S.fd;
+            sunLight.intensity = S.si; sunLight.diffuse = S.sc;
+            if (gameState.weather === 'fog') scene.fogDensity = 0.015;
+            else if (gameState.weather === 'rain') { scene.fogDensity = 0.006; scene.clearColor = new BABYLON.Color4(0.4, 0.45, 0.6, 1); }
         }
 
         async function triggerDeath() {
             gameState.isDead = true; document.exitPointerLock();
-            const msgs = ['Pulau ini telah menelanmu...', 'Kegelapan malam telah menang...', 'Kelaparan merenggut nyawamu...', 'Kehausan telah mengakhiri perjalananmu...'];
-            document.getElementById('deathMessage').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+            const m = ['Pulau ini telah menelanmu...', 'Kegelapan malam telah menang...', 'Kelaparan merenggut nyawamu...', 'Kehausan telah mengakhiri perjalananmu...'];
+            document.getElementById('deathMessage').textContent = m[Math.floor(Math.random() * m.length)];
             deathScreen.style.display = 'flex';
             await submitScore();
         }
 
-        function selectTool(tool) {
-            gameState.currentTool = tool;
-            document.querySelectorAll('.tool-slot').forEach(slot => slot.classList.toggle('active', slot.dataset.tool === tool));
-            showNotification('🛠️ Alat diganti: ' + tool.toUpperCase());
+        function selectTool(t) {
+            gameState.currentTool = t;
+            document.querySelectorAll('.tool-slot').forEach(s => s.classList.toggle('active', s.dataset.tool === t));
+            const names = { axe: '🪓 KAPAK', hook: '🪝 GANCO', rifle: '🔫 SENAPAN' };
+            showNotification('Alat: ' + names[t] + ' — Klik kiri untuk memakai!');
         }
-
         function eatMeat() {
             if (gameState.meat > 0) { gameState.meat--; gameState.hunger = Math.min(100, gameState.hunger + 30); showNotification('🥩 Lapar pulih!'); updateUI(); }
-            else showNotification('❌ Tidak ada daging!');
+            else showNotification('❌ Tidak ada daging! Berburu/memancing dulu.');
         }
-        function drinkWater() { gameState.thirst = Math.min(100, gameState.thirst + 40); showNotification('💧 Kamu minum air segar.'); updateUI(); }
+        function drinkWater() { gameState.thirst = Math.min(100, gameState.thirst + 40); showNotification('💧 Segar!'); updateUI(); }
         function sleep() {
             if (gameState.energy < 100) { gameState.energy = Math.min(100, gameState.energy + 50); gameState.health = Math.min(100, gameState.health + 10); showNotification('💤 Energi pulih!'); updateUI(); }
         }
 
         function updateUI() {
-            ['health', 'hunger', 'thirst', 'energy'].forEach(type => {
-                const val = gameState[type];
-                const bar = document.getElementById(type + 'Bar');
-                if (bar) {
-                    bar.style.width = val + '%';
-                    document.getElementById(type + 'Value').textContent = Math.round(val) + '%';
-                    bar.classList.toggle('critical', val < 30);
-                }
+            ['health', 'hunger', 'thirst', 'energy'].forEach(t => {
+                const v = gameState[t], bar = document.getElementById(t + 'Bar');
+                if (bar) { bar.style.width = v + '%'; document.getElementById(t + 'Value').textContent = Math.round(v) + '%'; bar.classList.toggle('critical', v < 30); }
             });
             document.getElementById('woodCount').textContent = gameState.wood;
             document.getElementById('stoneCount').textContent = gameState.stone;
             document.getElementById('meatCount').textContent = gameState.meat;
-            const timeTexts = { 'dawn': '🌅 Fajar', 'day': '☀️ Siang', 'dusk': '🌆 Senja', 'night': '🌙 Malam' };
-            const weatherIcons = { 'clear': '☀️', 'rain': '🌧️', 'fog': '🌫️' };
-            document.getElementById('timeText').textContent = timeTexts[gameState.timeOfDay];
-            document.getElementById('weatherIcon').textContent = weatherIcons[gameState.weather];
+            const tt = { 'dawn': '🌅 Fajar', 'day': '☀️ Siang', 'dusk': '🌆 Senja', 'night': '🌙 Malam' };
+            const wi = { 'clear': '☀️', 'rain': '🌧️', 'fog': '🌫️' };
+            document.getElementById('timeText').textContent = tt[gameState.timeOfDay];
+            document.getElementById('weatherIcon').textContent = wi[gameState.weather];
             document.getElementById('dayCount').textContent = 'Hari ' + gameState.day;
-            const quest = gameState.quests[gameState.currentQuest];
-            if (quest && !quest.completed) {
-                document.getElementById('questObjective').textContent = quest.objective;
-                document.getElementById('questProgress').textContent = 'Progres: ' + quest.current + '/' + quest.target;
+            const q = gameState.quests[gameState.currentQuest];
+            if (q) {
+                if (q.completed && gameState.currentQuest === 2) {
+                    document.getElementById('questObjective').textContent = '🎉 Semua misi selesai! Bertahan & nikmati pulau!';
+                    document.getElementById('questProgress').textContent = 'Selesai ✅';
+                } else {
+                    document.getElementById('questObjective').textContent = q.objective;
+                    document.getElementById('questProgress').textContent = 'Progres: ' + q.current + '/' + q.target;
+                }
             }
         }
 
-        function showNotification(text) {
+        function showNotification(t) {
             if (!notification) return;
-            notification.textContent = text;
-            notification.style.display = 'block';
+            notification.textContent = t; notification.style.display = 'block';
             setTimeout(() => { notification.style.display = 'none'; }, 3000);
         }
 
-        // ============================================
-        // MAIN INIT
-        // ============================================
         function mainInit() {
-            console.log('🎮 Hunter 3D - Main Initialization');
             setSupabaseStatus(false, 'Initializing...');
             setupEventListeners();
             setTimeout(initSupabase, 100);
             setTimeout(fetchLeaderboard, 500);
             updateUI();
             setInterval(fetchLeaderboard, 60000);
-            console.log('✅ Main initialization complete');
         }
-
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mainInit);
         else mainInit();
     </script>
