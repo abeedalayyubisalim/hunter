@@ -6,12 +6,26 @@
     <title>Hunter 3D - The Cursed Expedition</title>
     <link rel="icon" href="data:,">
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script>window.BABYLON || document.write('<script src="https://cdn.jsdelivr.net/npm/babylonjs@6/babylon.min.js"><\/script>')</script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0a0a; color: #e0e0e0; }
         #gameCanvas { width: 100vw; height: 100vh; display: block; cursor: none; outline: none; position: fixed; top: 0; left: 0; z-index: 0; }
+
+        #errorBox {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(60, 0, 0, 0.95); border: 2px solid #ff4444; color: #ffcccc;
+            padding: 15px 25px; border-radius: 10px; z-index: 3000; display: none;
+            max-width: 90%; font-size: 0.95rem; line-height: 1.5;
+        }
+
+        #hintBox {
+            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); border: 1px solid #e94560; color: #fff;
+            padding: 10px 25px; border-radius: 20px; z-index: 150; display: none;
+            font-size: 0.95rem; animation: pulse 2s infinite;
+        }
 
         #mainMenu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -73,14 +87,12 @@
         .inventory-title { font-size: 0.8rem; color: #a0a0a0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; text-align: center; }
         .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .inventory-item { background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; }
-        .inventory-item:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
         .item-icon { font-size: 1.8rem; margin-bottom: 5px; }
         .item-count { font-size: 1rem; font-weight: bold; color: #fff; }
         .item-name { font-size: 0.7rem; color: #a0a0a0; margin-top: 3px; }
         .tool-selector { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(0, 0, 0, 0.7); padding: 10px 15px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .tool-slot { width: 60px; height: 60px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; position: relative; }
         .tool-slot.active { border-color: #e94560; background: rgba(233, 69, 96, 0.2); box-shadow: 0 0 15px rgba(233, 69, 96, 0.4); }
-        .tool-slot:hover { transform: translateY(-3px); }
         .tool-icon { font-size: 1.8rem; }
         .tool-key { position: absolute; top: 3px; right: 5px; font-size: 0.7rem; color: #a0a0a0; font-weight: bold; }
         .notification { position: absolute; top: 150px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.9); padding: 15px 30px; border-radius: 10px; border-left: 4px solid #e94560; color: #fff; font-size: 1rem; display: none; animation: slideDown 0.5s ease-out; z-index: 200; pointer-events: none; }
@@ -113,6 +125,8 @@
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div id="errorBox"></div>
+    <div id="hintBox">🖱️ Klik layar untuk mengunci kursor & mulai bergerak (WASD)</div>
 
     <div id="loadingScreen">
         <div class="loading-text">Memuat Dunia...</div>
@@ -130,24 +144,18 @@
             <button class="menu-btn" id="startGameBtn">☀️ Mulai Ekspedisi</button>
             <button class="menu-btn secondary" id="loadGameBtn">📂 Muat Permainan</button>
         </div>
-
         <div class="supabase-status">
             <div class="status-dot" id="supabaseStatusDot"></div>
             <span id="supabaseStatusText">Loading...</span>
         </div>
-
         <div class="leaderboard-container">
             <div class="leaderboard-title">
                 <span>🏆 Leaderboard Penjelajah Dunia</span>
                 <button class="refresh-btn" id="refreshLeaderboardBtn">🔄 Refresh</button>
             </div>
             <table class="leaderboard-table">
-                <thead>
-                    <tr><th>Rank</th><th>Nama Penjelajah</th><th>Skor Survival</th><th>Total Berburu</th></tr>
-                </thead>
-                <tbody id="leaderboardBody">
-                    <tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td></tr>
-                </tbody>
+                <thead><tr><th>Rank</th><th>Nama Penjelajah</th><th>Skor Survival</th><th>Total Berburu</th></tr></thead>
+                <tbody id="leaderboardBody"><tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td></tr></tbody>
             </table>
         </div>
     </div>
@@ -167,42 +175,14 @@
         </div>
         <div class="quest-tracker">
             <div class="quest-title">📜 Misi Aktif</div>
-            <div class="quest-objective" id="questObjective">Cari sumber makanan dan bangun tempat berlindung</div>
-            <div class="quest-progress" id="questProgress">Progres: 0/3</div>
+            <div class="quest-objective" id="questObjective">Kumpulkan 10 kayu dan 5 batu</div>
+            <div class="quest-progress" id="questProgress">Progres: 0/15</div>
         </div>
         <div class="status-container">
-            <div class="status-bar">
-                <div class="status-icon">❤️</div>
-                <div class="status-info">
-                    <div class="status-label">Kesehatan</div>
-                    <div class="bar-container"><div class="bar-fill health" id="healthBar" style="width: 100%"></div></div>
-                </div>
-                <div class="status-value" id="healthValue">100%</div>
-            </div>
-            <div class="status-bar">
-                <div class="status-icon">🍖</div>
-                <div class="status-info">
-                    <div class="status-label">Kelaparan</div>
-                    <div class="bar-container"><div class="bar-fill hunger" id="hungerBar" style="width: 100%"></div></div>
-                </div>
-                <div class="status-value" id="hungerValue">100%</div>
-            </div>
-            <div class="status-bar">
-                <div class="status-icon">💧</div>
-                <div class="status-info">
-                    <div class="status-label">Kehausan</div>
-                    <div class="bar-container"><div class="bar-fill thirst" id="thirstBar" style="width: 100%"></div></div>
-                </div>
-                <div class="status-value" id="thirstValue">100%</div>
-            </div>
-            <div class="status-bar">
-                <div class="status-icon">⚡</div>
-                <div class="status-info">
-                    <div class="status-label">Energi</div>
-                    <div class="bar-container"><div class="bar-fill energy" id="energyBar" style="width: 100%"></div></div>
-                </div>
-                <div class="status-value" id="energyValue">100%</div>
-            </div>
+            <div class="status-bar"><div class="status-icon">❤️</div><div class="status-info"><div class="status-label">Kesehatan</div><div class="bar-container"><div class="bar-fill health" id="healthBar" style="width: 100%"></div></div></div><div class="status-value" id="healthValue">100%</div></div>
+            <div class="status-bar"><div class="status-icon">🍖</div><div class="status-info"><div class="status-label">Kelaparan</div><div class="bar-container"><div class="bar-fill hunger" id="hungerBar" style="width: 100%"></div></div></div><div class="status-value" id="hungerValue">100%</div></div>
+            <div class="status-bar"><div class="status-icon">💧</div><div class="status-info"><div class="status-label">Kehausan</div><div class="bar-container"><div class="bar-fill thirst" id="thirstBar" style="width: 100%"></div></div></div><div class="status-value" id="thirstValue">100%</div></div>
+            <div class="status-bar"><div class="status-icon">⚡</div><div class="status-info"><div class="status-label">Energi</div><div class="bar-container"><div class="bar-fill energy" id="energyBar" style="width: 100%"></div></div></div><div class="status-value" id="energyValue">100%</div></div>
         </div>
         <div class="inventory">
             <div class="inventory-title">🎒 Ransel</div>
@@ -237,13 +217,25 @@
 
     <script>
         // ============================================
+        // ERROR REPORTER - tampil di layar, tidak hilang
+        // ============================================
+        function showPersistentError(msg) {
+            const box = document.getElementById('errorBox');
+            if (!box) return;
+            box.innerHTML = '⚠️ <strong>ERROR:</strong> ' + msg + '<br><small>Coba refresh (Ctrl+F5). Jika tetap muncul, screenshot kotak ini dan kirim ke developer.</small>';
+            box.style.display = 'block';
+            console.error('❌ ' + msg);
+        }
+        window.addEventListener('error', function (e) {
+            showPersistentError(e.message);
+        }, true);
+
+        // ============================================
         // SUPABASE CONFIG
         // ============================================
         const SUPABASE_URL = 'https://mlsibwihfzehqcdawrdh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sc2lid2loZnplaHFjZGF3cmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTcwNTEsImV4cCI6MjEwMzY5MzA1MX0.faKWNZqTLE6nEH6nPw0L4uFepTy6ZvqrZDy2BaHcWxs';
 
-        // PENTING: nama variabel TIDAK boleh "supabase"
-        // karena library CDN sudah memakai nama global tersebut (var supabase = ...)
         let supabaseClient = null;
         let supabaseConnected = false;
 
@@ -255,9 +247,7 @@
             text.textContent = message;
         }
 
-        // Init SYNCHRONOUS - tidak mungkin stuck
         function initSupabase() {
-            console.log('🔄 Initializing Supabase...');
             try {
                 if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
                     throw new Error('Library Supabase belum dimuat');
@@ -265,35 +255,7 @@
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 supabaseConnected = true;
                 setSupabaseStatus(true, 'Supabase: Connected ✅');
-                console.log('✅ Supabase client created');
-                setTimeout(testConnectionAsync, 100);
-                return true;
             } catch (error) {
-                console.error('❌ Supabase init failed:', error);
-                supabaseConnected = false;
-                setSupabaseStatus(false, 'Supabase: Offline Mode 📴');
-                return false;
-            }
-        }
-
-        async function testConnectionAsync() {
-            try {
-                if (!supabaseClient) return;
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Connection timeout')), 5000)
-                );
-                const queryPromise = supabaseClient.from('leaderboard').select('*').limit(1);
-                const { error } = await Promise.race([queryPromise, timeoutPromise]);
-                if (error) {
-                    console.warn('⚠️ Supabase query error:', error.message);
-                    supabaseConnected = false;
-                    setSupabaseStatus(false, 'Supabase: DB Error - Offline 📴');
-                } else {
-                    console.log('✅ Supabase connection verified');
-                    setSupabaseStatus(true, 'Supabase: Connected ✅');
-                }
-            } catch (error) {
-                console.warn('⚠️ Connection test failed:', error.message);
                 supabaseConnected = false;
                 setSupabaseStatus(false, 'Supabase: Offline Mode 📴');
             }
@@ -315,24 +277,20 @@
         };
 
         // ============================================
-        // SUPABASE FUNCTIONS (dengan fallback local)
+        // SUPABASE FUNCTIONS
         // ============================================
         async function fetchLeaderboard() {
             const tbody = document.getElementById('leaderboardBody');
             if (!tbody) return;
-
             if (!supabaseConnected || !supabaseClient) {
                 renderLeaderboard(JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]'));
                 return;
             }
-
             try {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0a0a0;">Memuat data...</td></tr>';
                 const { data, error } = await supabaseClient.from('leaderboard').select('*').order('score', { ascending: false }).limit(10);
                 if (error) throw error;
                 renderLeaderboard(data || []);
             } catch (error) {
-                console.warn('Leaderboard fetch failed, using local:', error.message);
                 renderLeaderboard(JSON.parse(localStorage.getItem('hunter3d_leaderboard') || '[]'));
             }
         }
@@ -345,36 +303,19 @@
                 return;
             }
             tbody.innerHTML = data.map((player, index) => {
-                const rankClass = index < 3 ? `rank-${index + 1}` : '';
-                const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
-                return `<tr>
-                    <td class="${rankClass}">${rankEmoji}</td>
-                    <td>${player.name}</td>
-                    <td>${player.score}</td>
-                    <td>${player.total_hunts || 0}</td>
-                </tr>`;
+                const rankClass = index < 3 ? 'rank-' + (index + 1) : '';
+                const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '#' + (index + 1);
+                return '<tr><td class="' + rankClass + '">' + rankEmoji + '</td><td>' + player.name + '</td><td>' + player.score + '</td><td>' + (player.total_hunts || 0) + '</td></tr>';
             }).join('');
         }
 
         async function submitScore() {
-            const scoreData = {
-                name: gameState.playerName, score: gameState.score,
-                total_hunts: gameState.totalHunts, days_survived: gameState.day,
-                created_at: new Date().toISOString()
-            };
-
-            if (!supabaseConnected || !supabaseClient) {
-                saveScoreLocal(scoreData);
-                return;
-            }
-
+            const scoreData = { name: gameState.playerName, score: gameState.score, total_hunts: gameState.totalHunts, days_survived: gameState.day, created_at: new Date().toISOString() };
+            if (!supabaseConnected || !supabaseClient) { saveScoreLocal(scoreData); return; }
             try {
                 const { error } = await supabaseClient.from('leaderboard').insert([scoreData]);
                 if (error) throw error;
-            } catch (error) {
-                console.warn('Score submit failed:', error.message);
-                saveScoreLocal(scoreData);
-            }
+            } catch (e) { saveScoreLocal(scoreData); }
         }
 
         function saveScoreLocal(scoreData) {
@@ -386,61 +327,35 @@
 
         async function saveGameToSupabase() {
             localStorage.setItem('hunter3d_save', JSON.stringify(gameState));
-
-            if (!supabaseConnected || !supabaseClient) {
-                showNotification('💾 Game disimpan (Local)');
-                return;
-            }
-
-            const saveData = { name: gameState.playerName, game_state: gameState, saved_at: new Date().toISOString() };
+            if (!supabaseConnected || !supabaseClient) { showNotification('💾 Game disimpan (Local)'); return; }
             try {
+                const saveData = { name: gameState.playerName, game_state: gameState, saved_at: new Date().toISOString() };
                 const { data: existing } = await supabaseClient.from('saves').select('id').eq('name', gameState.playerName).single();
-                if (existing) {
-                    await supabaseClient.from('saves').update(saveData).eq('id', existing.id);
-                } else {
-                    await supabaseClient.from('saves').insert([saveData]);
-                }
+                if (existing) { await supabaseClient.from('saves').update(saveData).eq('id', existing.id); }
+                else { await supabaseClient.from('saves').insert([saveData]); }
                 showNotification('💾 Game tersimpan ke cloud!');
-            } catch (error) {
-                console.warn('Cloud save failed:', error.message);
-                showNotification('💾 Game disimpan (Local Only)');
-            }
+            } catch (e) { showNotification('💾 Game disimpan (Local Only)'); }
         }
 
         async function loadGameFromSupabase() {
             const name = document.getElementById('playerNameInput').value.trim();
-            if (!name) {
-                showNotification('⚠️ Masukkan nama untuk load game!');
-                return false;
-            }
-
+            if (!name) { showNotification('⚠️ Masukkan nama untuk load game!'); return false; }
             if (supabaseConnected && supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient.from('saves').select('*').eq('name', name).single();
-                    if (!error && data && data.game_state) {
-                        Object.assign(gameState, data.game_state);
-                        showNotification('✅ Game dimuat dari cloud!');
-                        return true;
-                    }
-                } catch (error) {
-                    console.warn('Cloud load failed:', error.message);
-                }
+                    if (!error && data && data.game_state) { Object.assign(gameState, data.game_state); showNotification('✅ Game dimuat dari cloud!'); return true; }
+                } catch (e) { }
             }
-
             const saved = localStorage.getItem('hunter3d_save');
-            if (saved) {
-                Object.assign(gameState, JSON.parse(saved));
-                showNotification('✅ Game dimuat (Local)');
-                return true;
-            }
+            if (saved) { Object.assign(gameState, JSON.parse(saved)); showNotification('✅ Game dimuat (Local)'); return true; }
             showNotification('❌ Tidak ada data tersimpan!');
             return false;
         }
 
         // ============================================
-        // BABYLON.JS SETUP
+        // BABYLON.JS - STANDARD MATERIAL (anti hitam)
         // ============================================
-        let engine, scene, camera, sunLight, terrain, water, skybox, animals = [];
+        let engine, scene, camera, sunLight, water, skybox, animals = [];
         const playerState = { yaw: 0, pitch: 0, speed: 15, isPointerLocked: false };
         const keys = { w: false, a: false, s: false, d: false };
 
@@ -462,26 +377,37 @@
             const canvas = document.getElementById('gameCanvas');
 
             try {
-                engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, antialias: true });
+                engine = new BABYLON.Engine(canvas, true, { antialias: true });
                 scene = new BABYLON.Scene(engine);
                 scene.clearColor = new BABYLON.Color4(0.53, 0.81, 0.92, 1);
                 scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
                 scene.fogDensity = 0.003;
                 scene.fogColor = new BABYLON.Color3(0.7, 0.8, 0.9);
 
-                camera = new BABYLON.UniversalCamera('playerCamera', new BABYLON.Vector3(0, 5, 0), scene);
-                camera.minZ = 0.1; camera.maxZ = 1000; camera.fov = 1.2; camera.inertia = 0; camera.angularSensibility = 1500;
+                // Kamera spawn DI ATAS tanah
+                const spawnY = getTerrainHeight(0, 0) + 3;
+                camera = new BABYLON.UniversalCamera('playerCamera', new BABYLON.Vector3(0, spawnY, 0), scene);
+                camera.minZ = 0.1; camera.maxZ = 1000; camera.fov = 1.2; camera.inertia = 0;
                 camera.inputs.clear();
 
+                // Lighting
                 const hemiLight = new BABYLON.HemisphericLight('skyLight', new BABYLON.Vector3(0, 1, 0), scene);
-                hemiLight.intensity = 0.6; hemiLight.groundColor = new BABYLON.Color3(0.2, 0.25, 0.3);
+                hemiLight.intensity = 0.8;
+                hemiLight.groundColor = new BABYLON.Color3(0.3, 0.3, 0.35);
+                hemiLight.diffuse = new BABYLON.Color3(1, 1, 0.95);
                 sunLight = new BABYLON.DirectionalLight('sunLight', new BABYLON.Vector3(-0.5, -1, -0.5), scene);
                 sunLight.intensity = 1.2;
+                sunLight.diffuse = new BABYLON.Color3(1, 0.95, 0.85);
 
-                const shadowGenerator = new BABYLON.ShadowGenerator(2048, sunLight);
-                shadowGenerator.useBlurExponentialShadowMap = true; shadowGenerator.blurKernel = 32;
+                let shadowGenerator = null;
+                try {
+                    shadowGenerator = new BABYLON.ShadowGenerator(1024, sunLight);
+                    shadowGenerator.useBlurExponentialShadowMap = true;
+                    shadowGenerator.blurKernel = 16;
+                } catch (e) { console.warn('Shadows disabled:', e.message); }
 
-                terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 400, height: 400, subdivisions: 150 }, scene);
+                // Terrain dengan vertex colors + StandardMaterial
+                const terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 400, height: 400, subdivisions: 120, updatable: true }, scene);
                 const positions = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
                 const colors = [];
                 for (let i = 0; i < positions.length; i += 3) {
@@ -497,16 +423,18 @@
                 terrain.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
                 terrain.setVerticesData(BABYLON.VertexBuffer.ColorKind, colors);
                 terrain.createNormals(true);
-                const terrainMat = new BABYLON.PBRMaterial('terrainMat', scene);
-                terrainMat.albedoColor = new BABYLON.Color3(1, 1, 1); terrainMat.useVertexColors = true;
-                terrainMat.roughness = 0.9; terrainMat.metallic = 0;
-                terrain.material = terrainMat; terrain.receiveShadows = true;
+                const terrainMat = new BABYLON.StandardMaterial('terrainMat', scene);
+                terrainMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                terrainMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+                terrain.material = terrainMat;
 
-                water = BABYLON.MeshBuilder.CreateGround('water', { width: 200, height: 200, subdivisions: 30 }, scene);
+                // Water
+                water = BABYLON.MeshBuilder.CreateGround('water', { width: 200, height: 200, subdivisions: 20, updatable: true }, scene);
                 water.position = new BABYLON.Vector3(80, 0.5, 80);
-                const waterMat = new BABYLON.PBRMaterial('waterMat', scene);
-                waterMat.albedoColor = new BABYLON.Color3(0.1, 0.4, 0.6); waterMat.metallic = 0.9; waterMat.roughness = 0.1;
-                waterMat.alpha = 0.85; waterMat.subSurface.isRefractionEnabled = true; waterMat.subSurface.indexOfRefraction = 1.33;
+                const waterMat = new BABYLON.StandardMaterial('waterMat', scene);
+                waterMat.diffuseColor = new BABYLON.Color3(0.1, 0.4, 0.65);
+                waterMat.specularColor = new BABYLON.Color3(0.6, 0.6, 0.6);
+                waterMat.alpha = 0.8;
                 water.material = waterMat;
 
                 scene.registerBeforeRender(() => {
@@ -520,65 +448,81 @@
                     }
                 });
 
+                // Skybox gradient
                 skybox = BABYLON.MeshBuilder.CreateBox('skyBox', { size: 800 }, scene);
                 const skyMat = new BABYLON.StandardMaterial('skyMat', scene);
-                skyMat.backFaceCulling = false; skyMat.disableLighting = true;
+                skyMat.backFaceCulling = false;
+                skyMat.disableLighting = true;
                 const skyTex = new BABYLON.DynamicTexture('skyTex', { width: 512, height: 512 }, scene);
                 const ctx = skyTex.getContext();
                 const grad = ctx.createLinearGradient(0, 0, 0, 512);
-                grad.addColorStop(0, '#87CEEB'); grad.addColorStop(0.5, '#B0E0E6'); grad.addColorStop(1, '#FFE4B5');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, 512, 512);
+                grad.addColorStop(0, '#4a90d9');
+                grad.addColorStop(0.5, '#87CEEB');
+                grad.addColorStop(1, '#FFE4B5');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 512, 512);
                 skyTex.update();
-                skyMat.diffuseTexture = skyTex; skyMat.emissiveTexture = skyTex;
-                skybox.material = skyMat; skybox.infiniteDistance = true;
+                skyMat.emissiveTexture = skyTex;
+                skyMat.diffuseTexture = skyTex;
+                skybox.material = skyMat;
+                skybox.infiniteDistance = true;
 
+                // Trees
+                const trunkMat = new BABYLON.StandardMaterial('trunkMat', scene);
+                trunkMat.diffuseColor = new BABYLON.Color3(0.4, 0.26, 0.13);
+                const folMat = new BABYLON.StandardMaterial('foliageMat', scene);
+                folMat.diffuseColor = new BABYLON.Color3(0.2, 0.55, 0.18);
                 for (let i = 0; i < 60; i++) {
                     const x = (Math.random() - 0.5) * 350, z = (Math.random() - 0.5) * 350, y = getTerrainHeight(x, z);
                     if (y < 1.5 || y > 5) continue;
                     const tree = new BABYLON.TransformNode('tree', scene);
                     const trunk = BABYLON.MeshBuilder.CreateCylinder('trunk', { height: 4, diameterTop: 0.4, diameterBottom: 0.8, tessellation: 8 }, scene);
-                    trunk.position.y = 2; trunk.parent = tree;
-                    const trunkMat = new BABYLON.PBRMaterial('trunkMat', scene);
-                    trunkMat.albedoColor = new BABYLON.Color3(0.35, 0.22, 0.12); trunkMat.roughness = 0.95;
-                    trunk.material = trunkMat;
-                    const folMat = new BABYLON.PBRMaterial('foliageMat', scene);
-                    folMat.albedoColor = new BABYLON.Color3(0.2, 0.5, 0.15); folMat.roughness = 0.8;
+                    trunk.position.y = 2; trunk.parent = tree; trunk.material = trunkMat;
                     [{ y: 4, r: 2.5, h: 3 }, { y: 5.5, r: 2, h: 2.5 }, { y: 7, r: 1.3, h: 2 }].forEach((l, idx) => {
-                        const fol = BABYLON.MeshBuilder.CreateCylinder('fol_' + idx, { height: l.h, diameterTop: 0, diameterBottom: l.r * 2, tessellation: 8 }, scene);
+                        const fol = BABYLON.MeshBuilder.CreateCylinder('fol' + idx, { height: l.h, diameterTop: 0, diameterBottom: l.r * 2, tessellation: 8 }, scene);
                         fol.position.y = l.y; fol.parent = tree; fol.material = folMat;
                     });
                     tree.position = new BABYLON.Vector3(x, y, z);
                     const s = 0.8 + Math.random() * 0.6;
                     tree.scaling = new BABYLON.Vector3(s, s, s);
                     tree.rotation.y = Math.random() * Math.PI * 2;
-                    shadowGenerator.addShadowCaster(tree);
+                    if (shadowGenerator) shadowGenerator.addShadowCaster(tree);
                 }
 
+                // Animals
+                const aMat = new BABYLON.StandardMaterial('animalMat', scene);
+                aMat.diffuseColor = new BABYLON.Color3(0.55, 0.35, 0.2);
                 for (let i = 0; i < 10; i++) {
                     const x = (Math.random() - 0.5) * 250, z = (Math.random() - 0.5) * 250, y = getTerrainHeight(x, z);
                     if (y < 1.5) continue;
                     const animal = new BABYLON.TransformNode('animal', scene);
-                    const body = BABYLON.MeshBuilder.CreateBox('body', { width: 1.2, height: 0.8, depth: 2 }, scene); body.parent = animal;
+                    const body = BABYLON.MeshBuilder.CreateBox('body', { width: 1.2, height: 0.8, depth: 2 }, scene);
+                    body.parent = animal; body.material = aMat;
                     const head = BABYLON.MeshBuilder.CreateBox('head', { width: 0.7, height: 0.7, depth: 0.7 }, scene);
-                    head.position = new BABYLON.Vector3(0, 0.3, 1); head.parent = animal;
-                    const aMat = new BABYLON.PBRMaterial('animalMat', scene);
-                    aMat.albedoColor = new BABYLON.Color3(0.55, 0.35, 0.2); aMat.roughness = 0.85;
-                    [body, head].forEach(m => m.material = aMat);
+                    head.position = new BABYLON.Vector3(0, 0.3, 1); head.parent = animal; head.material = aMat;
                     animal.position = new BABYLON.Vector3(x, y + 0.5, z);
-                    animal.metadata = { isAnimal: true, speed: 0.5 + Math.random() * 0.5 };
-                    animals.push(animal); shadowGenerator.addShadowCaster(animal);
+                    animal.metadata = { speed: 0.5 + Math.random() * 0.5 };
+                    animals.push(animal);
+                    if (shadowGenerator) shadowGenerator.addShadowCaster(animal);
                 }
 
-                const pipeline = new BABYLON.DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
-                pipeline.bloomEnabled = true; pipeline.bloomThreshold = 0.7; pipeline.bloomWeight = 0.3;
-                pipeline.fxaaEnabled = true;
-                pipeline.imageProcessing.toneMappingEnabled = true;
-                pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-                pipeline.imageProcessing.exposure = 1.1; pipeline.imageProcessing.contrast = 1.1;
-                pipeline.imageProcessing.vignetteEnabled = true; pipeline.imageProcessing.vignetteWeight = 2;
+                // Post-processing (opsional, aman jika gagal)
+                try {
+                    const pipeline = new BABYLON.DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
+                    pipeline.bloomEnabled = true; pipeline.bloomThreshold = 0.7; pipeline.bloomWeight = 0.3;
+                    pipeline.fxaaEnabled = true;
+                    pipeline.imageProcessing.exposure = 1.1;
+                    pipeline.imageProcessing.contrast = 1.1;
+                    pipeline.imageProcessing.vignetteEnabled = true;
+                    pipeline.imageProcessing.vignetteWeight = 2;
+                } catch (e) { console.warn('Post-processing disabled:', e.message); }
 
+                // Input
                 canvas.addEventListener('click', () => canvas.requestPointerLock());
-                document.addEventListener('pointerlockchange', () => { playerState.isPointerLocked = document.pointerLockElement === canvas; });
+                document.addEventListener('pointerlockchange', () => {
+                    playerState.isPointerLocked = document.pointerLockElement === canvas;
+                    if (playerState.isPointerLocked) document.getElementById('hintBox').style.display = 'none';
+                });
                 document.addEventListener('mousemove', (e) => {
                     if (!playerState.isPointerLocked) return;
                     playerState.yaw -= e.movementX * 0.002;
@@ -594,63 +538,65 @@
                     if (e.code === 'KeyS') keys.s = false; if (e.code === 'KeyD') keys.d = false;
                 });
 
+                // Render loop
                 let lastTime = performance.now();
                 scene.registerBeforeRender(() => {
                     const now = performance.now();
-                    const delta = (now - lastTime) / 1000;
+                    const delta = Math.min((now - lastTime) / 1000, 0.1);
                     lastTime = now;
+
+                    // Kamera selalu menempel di atas tanah
+                    const terrainY = getTerrainHeight(camera.position.x, camera.position.z);
+                    camera.position.y = Math.max(terrainY, 0.5) + 2;
 
                     if (playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead) {
                         camera.rotation = new BABYLON.Vector3(playerState.pitch, playerState.yaw, 0);
                         const forward = new BABYLON.Vector3(Math.sin(playerState.yaw), 0, Math.cos(playerState.yaw));
                         const right = new BABYLON.Vector3(Math.sin(playerState.yaw + Math.PI / 2), 0, Math.cos(playerState.yaw + Math.PI / 2));
                         const moveDir = new BABYLON.Vector3(0, 0, 0);
-                        if (keys.w) moveDir.addInPlace(forward); if (keys.s) moveDir.subtractInPlace(forward);
-                        if (keys.d) moveDir.addInPlace(right); if (keys.a) moveDir.subtractInPlace(right);
+                        if (keys.w) moveDir.addInPlace(forward);
+                        if (keys.s) moveDir.subtractInPlace(forward);
+                        if (keys.d) moveDir.addInPlace(right);
+                        if (keys.a) moveDir.subtractInPlace(right);
                         if (moveDir.lengthSquared() > 0) {
                             moveDir.normalize();
                             camera.position.addInPlace(moveDir.scale(playerState.speed * delta));
                         }
-                        const terrainY = getTerrainHeight(camera.position.x, camera.position.z);
-                        camera.position.y = Math.max(terrainY, 0.5) + 2;
                         camera.position.x = Math.max(-180, Math.min(180, camera.position.x));
                         camera.position.z = Math.max(-180, Math.min(180, camera.position.z));
                         updateCompass();
                     }
 
                     animals.forEach(animal => {
-                        const time = performance.now() * 0.001;
+                        const time = now * 0.001;
                         const speed = animal.metadata.speed;
                         animal.position.x += Math.sin(time * speed + animal.position.z) * 0.02;
                         animal.position.z += Math.cos(time * speed + animal.position.x) * 0.02;
                         animal.position.y = getTerrainHeight(animal.position.x, animal.position.z) + 0.5;
-                        animal.rotation.y = Math.atan2(Math.sin(time * speed + animal.position.z), Math.cos(time * speed + animal.position.x));
                     });
 
-                    skybox.position.x = camera.position.x; skybox.position.y = camera.position.y; skybox.position.z = camera.position.z;
+                    skybox.position.copyFrom(camera.position);
                 });
 
                 engine.runRenderLoop(() => scene.render());
                 window.addEventListener('resize', () => engine.resize());
 
-                console.log('✅ BabylonJS initialized');
+                console.log('✅ BabylonJS initialized - dunia siap!');
                 return true;
             } catch (error) {
-                console.error('❌ BabylonJS init failed:', error);
-                showNotification('❌ Gagal memuat 3D: ' + error.message);
+                showPersistentError('Gagal memuat dunia 3D: ' + error.message);
                 return false;
             }
         }
 
         function updateCompass() {
-            const angle = Math.atan2(Math.sin(playerState.yaw), Math.cos(playerState.yaw));
-            const degrees = (angle * 180 / Math.PI + 360) % 360;
-            let compassText = 'N';
-            if (degrees >= 315 || degrees < 45) compassText = 'N';
-            else if (degrees >= 45 && degrees < 135) compassText = 'E';
-            else if (degrees >= 135 && degrees < 225) compassText = 'S';
-            else if (degrees >= 225 && degrees < 315) compassText = 'W';
-            document.getElementById('compass').textContent = compassText;
+            const degrees = ((playerState.yaw * 180 / Math.PI) % 360 + 360) % 360;
+            let t = 'N';
+            if (degrees >= 315 || degrees < 45) t = 'N';
+            else if (degrees >= 45 && degrees < 135) t = 'W';
+            else if (degrees >= 135 && degrees < 225) t = 'S';
+            else t = 'E';
+            document.getElementById('compass').textContent = t;
         }
 
         // ============================================
@@ -679,16 +625,17 @@
             });
             document.getElementById('mainMenuBtn').addEventListener('click', () => location.reload());
             document.getElementById('refreshLeaderboardBtn').addEventListener('click', fetchLeaderboard);
-            console.log('✅ Event listeners ready');
         }
 
         function startGame() {
-            console.log('🚀 Starting game...');
-            const name = document.getElementById('playerNameInput').value.trim();
-            if (!name) {
-                showNotification('⚠️ Masukkan nama survivor!');
+            // CEK DULU: library 3D harus ada sebelum masuk game
+            if (typeof BABYLON === 'undefined') {
+                showPersistentError('Library 3D (BabylonJS) gagal dimuat dari CDN. Matikan adblock / periksa internet, lalu refresh (Ctrl+F5).');
                 return;
             }
+
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) { showNotification('⚠️ Masukkan nama survivor!'); return; }
 
             gameState.playerName = name;
             mainMenu.style.display = 'none';
@@ -701,12 +648,11 @@
                     progress = 100;
                     clearInterval(loadingInterval);
                     setTimeout(() => {
-                        if (!babylonInitialized) {
-                            babylonInitialized = initBabylonJS();
-                        }
+                        if (!babylonInitialized) babylonInitialized = initBabylonJS();
                         loadingScreen.style.display = 'none';
                         hud.style.display = 'block';
-                        showNotification('🌍 Selamat datang, ' + name + '! Bertahan hiduplah...');
+                        document.getElementById('hintBox').style.display = 'block';
+                        showNotification('🌍 Selamat datang, ' + name + '!');
                         startGameLoop();
                     }, 300);
                 }
@@ -763,10 +709,8 @@
                 'dusk': { sky: new BABYLON.Color4(0.9, 0.4, 0.3, 1), fog: new BABYLON.Color3(0.8, 0.5, 0.4), sunIntensity: 0.6, sunColor: new BABYLON.Color3(1, 0.5, 0.3), fogDensity: 0.005 },
                 'night': { sky: new BABYLON.Color4(0.05, 0.05, 0.15, 1), fog: new BABYLON.Color3(0.1, 0.1, 0.2), sunIntensity: 0.2, sunColor: new BABYLON.Color3(0.3, 0.3, 0.5), fogDensity: 0.008 }
             }[gameState.timeOfDay];
-
             scene.clearColor = settings.sky; scene.fogColor = settings.fog; scene.fogDensity = settings.fogDensity;
             sunLight.intensity = settings.sunIntensity; sunLight.diffuse = settings.sunColor;
-
             if (gameState.weather === 'fog') scene.fogDensity = 0.02;
             else if (gameState.weather === 'rain') { scene.fogDensity = 0.008; scene.clearColor = new BABYLON.Color4(0.4, 0.45, 0.5, 1); }
         }
@@ -781,20 +725,17 @@
 
         function selectTool(tool) {
             gameState.currentTool = tool;
-            document.querySelectorAll('.tool-slot').forEach(slot => {
-                slot.classList.toggle('active', slot.dataset.tool === tool);
-            });
+            document.querySelectorAll('.tool-slot').forEach(slot => slot.classList.toggle('active', slot.dataset.tool === tool));
             showNotification('🛠️ Alat diganti: ' + tool.toUpperCase());
         }
 
         function eatMeat() {
-            if (gameState.meat > 0) { gameState.meat--; gameState.hunger = Math.min(100, gameState.hunger + 30); showNotification('🥩 Kamu memakan daging. Lapar pulih!'); updateUI(); }
+            if (gameState.meat > 0) { gameState.meat--; gameState.hunger = Math.min(100, gameState.hunger + 30); showNotification('🥩 Lapar pulih!'); updateUI(); }
             else showNotification('❌ Tidak ada daging!');
         }
-
         function drinkWater() { gameState.thirst = Math.min(100, gameState.thirst + 40); showNotification('💧 Kamu minum air segar.'); updateUI(); }
         function sleep() {
-            if (gameState.energy < 100) { gameState.energy = Math.min(100, gameState.energy + 50); gameState.health = Math.min(100, gameState.health + 10); showNotification('💤 Kamu beristirahat. Energi pulih!'); updateUI(); }
+            if (gameState.energy < 100) { gameState.energy = Math.min(100, gameState.energy + 50); gameState.health = Math.min(100, gameState.health + 10); showNotification('💤 Energi pulih!'); updateUI(); }
         }
 
         function updateUI() {
@@ -810,13 +751,11 @@
             document.getElementById('woodCount').textContent = gameState.wood;
             document.getElementById('stoneCount').textContent = gameState.stone;
             document.getElementById('meatCount').textContent = gameState.meat;
-
             const timeTexts = { 'dawn': '🌅 Fajar', 'day': '☀️ Siang', 'dusk': '🌆 Senja', 'night': '🌙 Malam' };
             const weatherIcons = { 'clear': '☀️', 'rain': '🌧️', 'fog': '🌫️' };
             document.getElementById('timeText').textContent = timeTexts[gameState.timeOfDay];
             document.getElementById('weatherIcon').textContent = weatherIcons[gameState.weather];
             document.getElementById('dayCount').textContent = 'Hari ' + gameState.day;
-
             const quest = gameState.quests[gameState.currentQuest];
             if (quest && !quest.completed) {
                 document.getElementById('questObjective').textContent = quest.objective;
@@ -845,11 +784,8 @@
             console.log('✅ Main initialization complete');
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', mainInit);
-        } else {
-            mainInit();
-        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mainInit);
+        else mainInit();
     </script>
 </body>
 </html>
