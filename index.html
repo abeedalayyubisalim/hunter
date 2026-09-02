@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hunter 3D - The Cursed Expedition</title>
     <link rel="icon" href="data:,">
     <script src="https://cdn.babylonjs.com/babylon.js" crossorigin="anonymous"></script>
@@ -11,17 +11,18 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier New', monospace; overflow: hidden; background: #0a0a0a; color: #e0e0e0; }
-        #gameCanvas { width: 100vw; height: 100vh; display: block; cursor: none; outline: none; position: fixed; top: 0; left: 0; z-index: 0; }
+        #gameCanvas { width: 100vw; height: 100vh; display: block; outline: none; position: fixed; top: 0; left: 0; z-index: 0; }
         #errorBox { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(60,0,0,.95); border: 2px solid #ff4444; color: #ffcccc; padding: 15px 25px; border-radius: 10px; z-index: 3000; display: none; max-width: 90%; font-size: .95rem; line-height: 1.5; }
         #hintBox { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.8); border: 1px solid #e94560; color: #fff; padding: 10px 25px; border-radius: 20px; z-index: 150; display: none; font-size: .95rem; animation: pulse 2s infinite; text-align: center; }
-        #mainMenu { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 1s ease-in; overflow-y: auto; padding: 20px; }
+        #mainMenu { position: fixed; inset: 0; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 1s ease-in; overflow-y: auto; padding: 20px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .menu-title { font-size: 4rem; font-weight: bold; color: #e94560; text-shadow: 0 0 20px rgba(233,69,96,.5); margin-bottom: 1rem; letter-spacing: 3px; }
-        .menu-subtitle { font-size: 1.2rem; color: #a0a0a0; margin-bottom: 2rem; text-align: center; max-width: 600px; line-height: 1.6; }
+        .menu-subtitle { font-size: 1.1rem; color: #a0a0a0; margin-bottom: 2rem; text-align: center; max-width: 600px; line-height: 1.6; }
         .menu-input { padding: 15px 30px; font-size: 1.1rem; background: rgba(255,255,255,.1); border: 2px solid #e94560; color: #fff; border-radius: 8px; margin-bottom: 1rem; width: 300px; text-align: center; }
         .menu-btn { padding: 15px 50px; font-size: 1.2rem; background: linear-gradient(135deg, #e94560, #c23152); border: none; color: #fff; border-radius: 8px; cursor: pointer; transition: all .3s; font-weight: bold; letter-spacing: 2px; margin: .5rem; }
         .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(233,69,96,.4); }
         .menu-btn.secondary { background: rgba(255,255,255,.1); border: 2px solid #e94560; }
+        .menu-btn.small { padding: 8px 20px; font-size: .9rem; }
         .supabase-status { margin-top: 1.5rem; padding: 10px 20px; background: rgba(0,0,0,.5); border-radius: 20px; font-size: .9rem; display: flex; align-items: center; gap: 10px; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #888; }
         .status-dot.connected { background: #00ff88; box-shadow: 0 0 10px #00ff88; animation: pulse 2s infinite; }
@@ -34,11 +35,11 @@
         .leaderboard-table th { background: rgba(233,69,96,.3); padding: 10px; text-align: left; color: #fff; font-size: .85rem; text-transform: uppercase; }
         .leaderboard-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.1); font-size: .9rem; }
         .rank-1 { color: #ffd700; font-weight: bold; } .rank-2 { color: #c0c0c0; font-weight: bold; } .rank-3 { color: #cd7f32; font-weight: bold; }
-        #hud { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 100; }
+        #hud { position: fixed; inset: 0; pointer-events: none; display: none; z-index: 100; }
         .top-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; align-items: center; background: rgba(0,0,0,.6); padding: 10px 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,.1); }
         .compass { font-size: 1.5rem; color: #e94560; font-weight: bold; }
         .time-display { font-size: 1.1rem; color: #ffd700; display: flex; align-items: center; gap: 8px; }
-        .quest-tracker { position: absolute; top: 80px; right: 20px; background: rgba(0,0,0,.7); padding: 15px 20px; border-radius: 10px; border-left: 4px solid #e94560; min-width: 280px; }
+        .quest-tracker { position: absolute; top: 80px; right: 20px; background: rgba(0,0,0,.7); padding: 15px 20px; border-radius: 10px; border-left: 4px solid #e94560; min-width: 280px; max-width: 340px; }
         .quest-title { font-size: .9rem; color: #e94560; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
         .quest-objective { font-size: .95rem; line-height: 1.5; }
         .quest-progress { margin-top: 8px; font-size: .85rem; color: #a0a0a0; }
@@ -65,7 +66,7 @@
         .tool-slot.active { border-color: #e94560; background: rgba(233,69,96,.2); box-shadow: 0 0 15px rgba(233,69,96,.4); }
         .tool-icon { font-size: 1.8rem; }
         .tool-key { position: absolute; top: 3px; right: 5px; font-size: .7rem; color: #a0a0a0; font-weight: bold; }
-        .notification { position: absolute; top: 150px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.9); padding: 15px 30px; border-radius: 10px; border-left: 4px solid #e94560; color: #fff; display: none; z-index: 200; }
+        .notification { position: absolute; top: 150px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.9); padding: 15px 30px; border-radius: 10px; border-left: 4px solid #e94560; color: #fff; display: none; z-index: 200; max-width: 90%; text-align: center; }
         .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 20px; height: 20px; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,.8); }
         .crosshair::before { width: 2px; height: 20px; left: 9px; } .crosshair::after { width: 20px; height: 2px; top: 9px; }
@@ -78,11 +79,21 @@
         .loading-progress { height: 100%; background: #e94560; width: 0%; transition: width .3s; }
         #pauseMenu, #deathScreen { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1500; }
         #pauseMenu { background: rgba(0,0,0,.9); } #deathScreen { background: rgba(139,0,0,.9); }
-        .pause-title, .death-title { font-size: 3rem; color: #e94560; margin-bottom: 2rem; }
+        .pause-title { font-size: 3rem; color: #e94560; margin-bottom: 2rem; }
         .death-title { font-size: 4rem; color: #fff; margin-bottom: 1rem; }
         .death-message { font-size: 1.2rem; color: #ffcccc; margin-bottom: 2rem; }
+        /* Touch controls */
+        #touchControls { display: none; position: fixed; inset: 0; z-index: 120; pointer-events: none; }
+        #joyBase { position: absolute; left: 24px; bottom: 220px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.25); pointer-events: auto; touch-action: none; }
+        #joyKnob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; background: rgba(233,69,96,.7); }
+        #lookArea { position: absolute; right: 0; top: 0; width: 55%; height: 100%; pointer-events: auto; touch-action: none; }
+        #touchButtons { position: absolute; right: 16px; bottom: 220px; display: grid; grid-template-columns: repeat(2, 56px); gap: 8px; pointer-events: auto; }
+        #touchButtons button { width: 56px; height: 56px; border-radius: 12px; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.55); color: #fff; font-size: 1.3rem; }
         @media (max-width: 768px) {
-            .status-container, .inventory, .quest-tracker { transform: scale(.8); }
+            .status-container { transform: scale(.7); transform-origin: bottom left; }
+            .inventory { transform: scale(.7); transform-origin: bottom right; }
+            .quest-tracker { transform: scale(.75); transform-origin: top right; }
+            .minimap { display: none; }
             .menu-title { font-size: 2.5rem; }
             .leaderboard-container { min-width: auto; width: 100%; }
         }
@@ -100,7 +111,7 @@
 
     <div id="mainMenu">
         <div class="menu-title">🏹 HUNTER 3D</div>
-        <div class="menu-subtitle"><strong>The Cursed Expedition</strong><br>Bertahan hidup di pulau terkutuk. Temukan Mercusuar Kuno untuk memanggil bantuan sebelum malam terakhir tiba.</div>
+        <div class="menu-subtitle"><strong>The Cursed Expedition</strong><br>Terdampar di Pulau Vespera yang terkutuk. Bertahan hiduplah dari serigala & kabut malam, lengkapi 5 misi, dan nyalakan Mercusuar Kuno.</div>
         <input type="text" class="menu-input" id="playerNameInput" placeholder="Nama Survivor" maxlength="20" value="Survivor">
         <div>
             <button class="menu-btn" id="startGameBtn">☀️ Mulai Ekspedisi</button>
@@ -150,9 +161,23 @@
         <div class="crosshair"></div>
     </div>
 
+    <!-- Touch controls (tablet/iPad) -->
+    <div id="touchControls">
+        <div id="lookArea"></div>
+        <div id="joyBase"><div id="joyKnob"></div></div>
+        <div id="touchButtons">
+            <button id="tbUse">⚔️</button><button id="tbPause">⏸️</button>
+            <button id="tbAxe">🪓</button><button id="tbHook">🪝</button>
+            <button id="tbRifle">🔫</button><button id="tbEat">🍖</button>
+            <button id="tbDrink">💧</button><button id="tbSleep">💤</button>
+        </div>
+    </div>
+
     <div id="pauseMenu">
         <div class="pause-title">⏸️ Jeda</div>
         <button class="menu-btn" id="resumeBtn">▶️ Lanjutkan</button>
+        <button class="menu-btn secondary" id="invertXBtn">🔄 Balik Mouse X</button>
+        <button class="menu-btn secondary" id="invertYBtn">🔄 Balik Mouse Y</button>
         <button class="menu-btn secondary" id="saveBtn">💾 Simpan</button>
         <button class="menu-btn secondary" id="quitBtn">🚪 Keluar</button>
     </div>
@@ -179,8 +204,6 @@
         }, true);
 
         function lerp(a, b, t) { return a + (b - a) * t; }
-
-        // Helper kerucut yang kompatibel SEMUA versi Babylon
         function createCone(name, height, diameterBottom, tessellation, sc) {
             return BABYLON.MeshBuilder.CreateCylinder(name, { height: height, diameterTop: 0, diameterBottom: diameterBottom, tessellation: tessellation }, sc);
         }
@@ -204,18 +227,30 @@
             } catch (e) { supabaseConnected = false; setSupabaseStatus(false, 'Supabase: Offline Mode 📴'); }
         }
 
+        // ============================================
+        // STATE + STORY
+        // ============================================
         const gameState = {
             playerName: '', health: 100, hunger: 100, thirst: 100, energy: 100,
             wood: 0, stone: 0, meat: 0, currentTool: 'axe', day: 1, timeOfDay: 'day',
-            weather: 'clear', score: 0, totalHunts: 0,
+            weather: 'clear', score: 0, totalHunts: 0, wolvesKilled: 0,
             quests: [
-                { id: 1, title: 'Bertahan Hidup', objective: 'Kumpulkan 10 kayu dan 5 batu (Klik pohon/batu dengan Kapak)', target: 15, current: 0, completed: false },
-                { id: 2, title: 'Pemburu', objective: 'Berburu 5 hewan dengan Senapan [3]', target: 5, current: 0, completed: false },
-                { id: 3, title: 'Penjelajah', objective: 'Capai Mercusuar Kuno (menara cahaya) di ujung pulau', target: 1, current: 0, completed: false }
+                { title: 'Bertahan Hidup', objective: 'Kumpulkan 10 kayu & 5 batu (Kapak [1])', target: 15, current: 0, completed: false },
+                { title: 'Pemburu', objective: 'Berburu 5 hewan dengan Senapan [3]', target: 5, current: 0, completed: false },
+                { title: 'Malam Pertama', objective: 'Selamat hingga fajar Hari 2', target: 2, current: 1, completed: false },
+                { title: 'Pengusir Kutukan', objective: 'Kalahkan 3 serigala (Senapan [3])', target: 3, current: 0, completed: false },
+                { title: 'Penjelajah', objective: 'Capai Mercusuar Kuno (menara cahaya)', target: 1, current: 0, completed: false }
             ],
-            currentQuest: 0, isPaused: false, isDead: false
+            currentQuest: 0, isPaused: false, isDead: false, allDone: false
         };
 
+        // Settings mouse (bisa dibalik dari menu Pause)
+        let mouseSignX = localStorage.getItem('h3d_invX') === '1' ? 1 : -1;
+        let mouseSignY = localStorage.getItem('h3d_invY') === '1' ? 1 : -1;
+
+        const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+        // Supabase funcs
         async function fetchLeaderboard() {
             const tbody = document.getElementById('leaderboardBody');
             if (!tbody) return;
@@ -271,11 +306,15 @@
         }
 
         // ============================================
-        // BABYLON WORLD - STYLIZED SUNSET
+        // BABYLON WORLD
         // ============================================
-        let engine, scene, camera, sunLight, water, skybox, fireLight, animals = [], lighthouses = [];
+        let engine, scene, camera, sunLight, water, skybox, fireLight, shadowGenerator = null;
+        let animals = [], wolves = [], lighthouses = [];
         const playerState = { yaw: 0, pitch: 0, speed: 15, isPointerLocked: false };
         const keys = { w: false, a: false, s: false, d: false };
+        const touchMove = { active: false, id: null, x: 0, y: 0, ox: 0, oy: 0 };
+        const lookTouch = { id: null, lx: 0, ly: 0 };
+        let lastBite = 0;
 
         function noise2D(x, z) {
             const X = Math.floor(x) & 255, Z = Math.floor(z) & 255;
@@ -303,60 +342,70 @@
             m.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
             return m;
         }
+        function addCasters(root) {
+            if (shadowGenerator) root.getChildMeshes().forEach(m => shadowGenerator.addShadowCaster(m));
+        }
 
         function initBabylonJS() {
-            console.log('🎮 Initializing BabylonJS (stylized sunset)...');
+            console.log('🎮 Initializing BabylonJS...');
             const canvas = document.getElementById('gameCanvas');
             try {
-                if (!window.WebGLRenderingContext) throw new Error('Browser tidak mendukung WebGL');
+                if (!window.WebGLRenderingContext) throw new Error('WebGL tidak didukung');
                 engine = new BABYLON.Engine(canvas, true);
                 scene = new BABYLON.Scene(engine);
-
-                scene.clearColor = new BABYLON.Color4(0.95, 0.6, 0.8, 1);
+                scene.clearColor = new BABYLON.Color4(0.93, 0.62, 0.75, 1);
                 scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
                 scene.fogDensity = 0.0025;
-                scene.fogColor = new BABYLON.Color3(0.9, 0.65, 0.8);
+                scene.fogColor = new BABYLON.Color3(0.88, 0.68, 0.78);
 
                 camera = new BABYLON.UniversalCamera('playerCamera', new BABYLON.Vector3(0, getTerrainHeight(0, 0) + 3, 0), scene);
                 camera.minZ = 0.1; camera.maxZ = 1200; camera.fov = 1.15; camera.inertia = 0;
                 camera.inputs.clear();
 
                 const hemi = new BABYLON.HemisphericLight('hemi', new BABYLON.Vector3(0, 1, 0), scene);
-                hemi.intensity = 0.9;
-                hemi.diffuse = new BABYLON.Color3(1, 0.85, 0.95);
-                hemi.groundColor = new BABYLON.Color3(0.4, 0.3, 0.5);
-                sunLight = new BABYLON.DirectionalLight('sun', new BABYLON.Vector3(0.3, -0.6, 1), scene);
-                sunLight.intensity = 1.1;
-                sunLight.diffuse = new BABYLON.Color3(1, 0.75, 0.6);
+                hemi.intensity = 0.85;
+                hemi.diffuse = new BABYLON.Color3(1, 0.88, 0.95);
+                hemi.groundColor = new BABYLON.Color3(0.35, 0.3, 0.45);
+                sunLight = new BABYLON.DirectionalLight('sun', new BABYLON.Vector3(0.3, -0.7, 1), scene);
+                sunLight.intensity = 1.15;
+                sunLight.diffuse = new BABYLON.Color3(1, 0.8, 0.62);
 
-                // Terrain vibrant
-                const terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 400, height: 400, subdivisions: 100, updatable: true }, scene);
+                // Shadows (realistis) - aman dengan try/catch
+                try {
+                    shadowGenerator = new BABYLON.ShadowGenerator(1024, sunLight);
+                    shadowGenerator.darkness = 0.35;
+                } catch (e) { shadowGenerator = null; }
+
+                // Terrain dengan variasi warna natural
+                const terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 400, height: 400, subdivisions: 110, updatable: true }, scene);
                 const pos = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
                 const cols = [];
                 for (let i = 0; i < pos.length; i += 3) {
                     const x = pos[i], z = pos[i + 2], h = getTerrainHeight(x, z);
                     pos[i + 1] = h;
+                    const jitter = (Math.random() - 0.5) * 0.06;
                     let r, g, b;
-                    if (h < 1) { r = 0.95; g = 0.82; b = 0.45; }
-                    else if (h < 3) { r = 0.25; g = 0.75; b = 0.30; }
-                    else if (h < 5) { r = 0.18; g = 0.6; b = 0.25; }
-                    else { r = 0.65; g = 0.5; b = 0.7; }
-                    cols.push(r, g, b, 1);
+                    if (h < 1) { r = 0.90; g = 0.78; b = 0.48; }
+                    else if (h < 3) { r = 0.22 + jitter; g = 0.62 + jitter; b = 0.25; }
+                    else if (h < 5) { r = 0.16 + jitter; g = 0.48 + jitter; b = 0.20; }
+                    else { r = 0.55; g = 0.48; b = 0.60; }
+                    cols.push(Math.max(0, r), Math.max(0, g), Math.max(0, b), 1);
                 }
                 terrain.setVerticesData(BABYLON.VertexBuffer.PositionKind, pos);
                 terrain.setVerticesData(BABYLON.VertexBuffer.ColorKind, cols);
                 terrain.createNormals(true);
                 terrain.material = stdMat('terrainMat', new BABYLON.Color3(1, 1, 1));
+                terrain.receiveShadows = true;
 
-                // Danau
+                // Danau realistis
                 water = BABYLON.MeshBuilder.CreateGround('water', { width: 220, height: 220, subdivisions: 16, updatable: true }, scene);
                 water.position = new BABYLON.Vector3(80, 0.6, 80);
                 const waterMat = new BABYLON.StandardMaterial('waterMat', scene);
-                waterMat.diffuseColor = new BABYLON.Color3(0.15, 0.45, 0.75);
-                waterMat.emissiveColor = new BABYLON.Color3(0.1, 0.25, 0.5);
-                waterMat.specularColor = new BABYLON.Color3(1, 0.8, 0.9);
-                waterMat.specularPower = 16;
-                waterMat.alpha = 0.85;
+                waterMat.diffuseColor = new BABYLON.Color3(0.12, 0.38, 0.62);
+                waterMat.emissiveColor = new BABYLON.Color3(0.05, 0.15, 0.3);
+                waterMat.specularColor = new BABYLON.Color3(0.9, 0.85, 0.9);
+                waterMat.specularPower = 32;
+                waterMat.alpha = 0.88;
                 water.material = waterMat;
                 scene.registerBeforeRender(() => {
                     try {
@@ -367,19 +416,18 @@
                     } catch (e) { }
                 });
 
-                // Skybox sunset + matahari
+                // Skybox sunset
                 skybox = BABYLON.MeshBuilder.CreateBox('skyBox', { size: 900 }, scene);
                 const skyMat = new BABYLON.StandardMaterial('skyMat', scene);
                 skyMat.backFaceCulling = false; skyMat.disableLighting = true;
                 const skyTex = new BABYLON.DynamicTexture('skyTex', { width: 256, height: 512 }, scene);
                 const ctx = skyTex.getContext();
                 const grad = ctx.createLinearGradient(0, 0, 0, 512);
-                grad.addColorStop(0, '#2a5fd4');
-                grad.addColorStop(0.35, '#7a6ae0');
-                grad.addColorStop(0.55, '#e08ad0');
-                grad.addColorStop(0.72, '#ffb0d0');
-                grad.addColorStop(0.85, '#ffd9a0');
-                grad.addColorStop(1, '#fff0c0');
+                grad.addColorStop(0, '#3568c9');
+                grad.addColorStop(0.4, '#8a7ad0');
+                grad.addColorStop(0.6, '#e09ac0');
+                grad.addColorStop(0.78, '#ffb8a0');
+                grad.addColorStop(1, '#ffe9b0');
                 ctx.fillStyle = grad; ctx.fillRect(0, 0, 256, 512);
                 skyTex.update();
                 skyMat.emissiveTexture = skyTex; skyMat.diffuseTexture = skyTex;
@@ -393,10 +441,9 @@
                 sun.parent = skybox;
                 sun.position = new BABYLON.Vector3(0, 60, 420);
 
-                // Awan
                 const cloudMat = new BABYLON.StandardMaterial('cloudMat', scene);
                 cloudMat.disableLighting = true;
-                cloudMat.emissiveColor = new BABYLON.Color3(1, 0.9, 0.95);
+                cloudMat.emissiveColor = new BABYLON.Color3(1, 0.92, 0.95);
                 cloudMat.alpha = 0.9;
                 for (let i = 0; i < 6; i++) {
                     const c = BABYLON.MeshBuilder.CreateSphere('cloud' + i, { diameter: 30, segments: 8 }, scene);
@@ -405,8 +452,7 @@
                     c.material = cloudMat;
                 }
 
-                // Gunung pink
-                const mtnColors = [new BABYLON.Color3(0.75, 0.45, 0.65), new BABYLON.Color3(0.6, 0.4, 0.7), new BABYLON.Color3(0.85, 0.55, 0.6)];
+                const mtnColors = [new BABYLON.Color3(0.72, 0.45, 0.62), new BABYLON.Color3(0.58, 0.42, 0.68), new BABYLON.Color3(0.82, 0.55, 0.58)];
                 for (let i = 0; i < 10; i++) {
                     const ang = (i / 10) * Math.PI * 2;
                     const dist = 320 + Math.random() * 80;
@@ -415,16 +461,16 @@
                     m.material = stdMat('mtnMat' + i, mtnColors[i % 3], mtnColors[i % 3].scale(0.25));
                 }
 
-                // Pohon warna-warni
-                const foliageColors = ['#ff7eb0', '#5aa7ff', '#ffc94d', '#ff9440', '#4ecb5a', '#b07de0', '#ff6a6a'];
-                const trunkMat = stdMat('trunkMat', new BABYLON.Color3(0.45, 0.28, 0.15));
+                // Pohon (palet natural + aksen)
+                const foliageColors = ['#3e8948', '#63a94f', '#8fbc5a', '#c9853f', '#b3543f', '#5d8a3f', '#ff7eb0', '#ffc94d'];
+                const trunkMat = stdMat('trunkMat', new BABYLON.Color3(0.42, 0.27, 0.15));
                 for (let i = 0; i < 60; i++) {
                     const p = randomGrassPos();
                     const tree = new BABYLON.TransformNode('tree', scene);
                     const trunk = BABYLON.MeshBuilder.CreateCylinder('trunk', { height: 4, diameterTop: 0.4, diameterBottom: 0.8, tessellation: 6 }, scene);
                     trunk.position.y = 2; trunk.parent = tree; trunk.material = trunkMat;
                     const col = BABYLON.Color3.FromHexString(foliageColors[Math.floor(Math.random() * foliageColors.length)]);
-                    const fMat = stdMat('fol' + i, col, col.scale(0.15));
+                    const fMat = stdMat('fol' + i, col, col.scale(0.08));
                     if (Math.random() < 0.5) {
                         const canopy = BABYLON.MeshBuilder.CreateSphere('canopy', { diameter: 5, segments: 10 }, scene);
                         canopy.position.y = 5.5; canopy.parent = tree; canopy.material = fMat;
@@ -440,26 +486,26 @@
                     tree.rotation.y = Math.random() * Math.PI * 2;
                     tree.metadata = { type: 'tree', hp: 3 };
                     tree.getChildMeshes().forEach(m => m.metadata = { type: 'tree', root: tree });
+                    addCasters(tree);
                 }
 
-                // Batu
                 for (let i = 0; i < 25; i++) {
                     const p = randomGrassPos();
                     const rock = BABYLON.MeshBuilder.CreatePolyhedron('rock', { type: 1, size: 1.2 }, scene);
                     rock.position = p; rock.scaling.y = 0.7;
                     rock.rotation.y = Math.random() * Math.PI;
-                    rock.material = stdMat('rockMat' + i, new BABYLON.Color3(0.6, 0.55, 0.68), new BABYLON.Color3(0.1, 0.1, 0.15));
+                    rock.material = stdMat('rockMat' + i, new BABYLON.Color3(0.55, 0.52, 0.6), new BABYLON.Color3(0.08, 0.08, 0.12));
                     rock.metadata = { type: 'rock', hp: 3, root: rock };
+                    if (shadowGenerator) shadowGenerator.addShadowCaster(rock);
                 }
 
-                // Rumput & bunga berwarna (instances ringan) - pakai createCone helper
                 const tuftColors = ['#ffe14d', '#ff5a4d', '#ff8ad4', '#7dff6a', '#ffa64d'];
                 tuftColors.forEach((hex, ci) => {
                     const col = BABYLON.Color3.FromHexString(hex);
                     const base = createCone('tuft' + ci, 0.7, 0.2, 4, scene);
-                    base.material = stdMat('tuftMat' + ci, col, col.scale(0.5));
+                    base.material = stdMat('tuftMat' + ci, col, col.scale(0.4));
                     base.position = randomGrassPos();
-                    for (let k = 0; k < 50; k++) {
+                    for (let k = 0; k < 45; k++) {
                         const inst = base.createInstance('ti' + ci + '_' + k);
                         inst.position = randomGrassPos();
                         const sc = 0.7 + Math.random() * 0.9;
@@ -473,8 +519,7 @@
                 const tent = BABYLON.MeshBuilder.CreateCylinder('tent', { height: 2.5, diameterTop: 0, diameterBottom: 4, tessellation: 4 }, scene);
                 tent.position = new BABYLON.Vector3(-5, campY + 1.2, -4);
                 tent.rotation.y = Math.PI / 4;
-                tent.material = stdMat('tentMat', new BABYLON.Color3(0.2, 0.8, 0.3), new BABYLON.Color3(0.05, 0.2, 0.05));
-
+                tent.material = stdMat('tentMat', new BABYLON.Color3(0.2, 0.75, 0.3), new BABYLON.Color3(0.05, 0.18, 0.05));
                 const firePit = BABYLON.MeshBuilder.CreateCylinder('firePit', { height: 0.3, diameter: 1.4, tessellation: 8 }, scene);
                 firePit.position = new BABYLON.Vector3(2, campY + 0.15, 1);
                 firePit.material = stdMat('pitMat', new BABYLON.Color3(0.2, 0.2, 0.2));
@@ -486,9 +531,7 @@
                 flame.material = flameMat;
                 fireLight = new BABYLON.PointLight('fireLight', new BABYLON.Vector3(2, campY + 2, 1), scene);
                 fireLight.diffuse = new BABYLON.Color3(1, 0.6, 0.2);
-                fireLight.intensity = 1.5;
-                fireLight.range = 25;
-
+                fireLight.intensity = 1.5; fireLight.range = 25;
                 const boat = BABYLON.MeshBuilder.CreateBox('boat', { width: 1.2, height: 0.5, depth: 3.5 }, scene);
                 boat.position = new BABYLON.Vector3(6, campY + 0.3, 6);
                 boat.rotation.y = 0.6;
@@ -519,25 +562,40 @@
                     const head = BABYLON.MeshBuilder.CreateBox('head', { width: 0.7, height: 0.7, depth: 0.7 }, scene);
                     head.position = new BABYLON.Vector3(0, 0.3, 1); head.parent = animal; head.material = aMat;
                     animal.position = new BABYLON.Vector3(p.x, p.y + 0.5, p.z);
-                    animal.metadata = { speed: 0.5 + Math.random() * 0.5, type: 'animal' };
+                    animal.metadata = { speed: 0.5 + Math.random() * 0.5 };
                     animal.getChildMeshes().forEach(m => m.metadata = { type: 'animal', root: animal });
+                    addCasters(animal);
                     animals.push(animal);
                 }
 
-                // Input
-                canvas.addEventListener('click', () => canvas.requestPointerLock());
+                // Post-processing sinematik (aman)
+                try {
+                    const pipeline = new BABYLON.DefaultRenderingPipeline('pp', true, scene, [camera]);
+                    pipeline.bloomEnabled = true; pipeline.bloomThreshold = 0.75; pipeline.bloomWeight = 0.25;
+                    pipeline.fxaaEnabled = true;
+                    pipeline.imageProcessing.toneMappingEnabled = true;
+                    pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+                    pipeline.imageProcessing.exposure = 1.05;
+                    pipeline.imageProcessing.contrast = 1.15;
+                    pipeline.imageProcessing.vignetteEnabled = true;
+                    pipeline.imageProcessing.vignetteWeight = 1.5;
+                } catch (e) { console.warn('Post-processing disabled:', e.message); }
+
+                // ===== INPUT =====
+                if (!isTouch) canvas.style.cursor = 'none';
+                canvas.addEventListener('click', () => { if (!isTouch) canvas.requestPointerLock(); });
                 document.addEventListener('pointerlockchange', () => {
                     playerState.isPointerLocked = document.pointerLockElement === canvas;
                     if (playerState.isPointerLocked) document.getElementById('hintBox').style.display = 'none';
                 });
                 document.addEventListener('mousemove', (e) => {
                     if (!playerState.isPointerLocked) return;
-                    playerState.yaw -= e.movementX * 0.002;
-                    playerState.pitch += e.movementY * 0.002;
+                    playerState.yaw += e.movementX * 0.002 * mouseSignX;
+                    playerState.pitch += e.movementY * 0.002 * mouseSignY;
                     playerState.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, playerState.pitch));
                 });
                 document.addEventListener('mousedown', (e) => {
-                    if (playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead && e.button === 0) useTool();
+                    if (!isTouch && playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead && e.button === 0) useTool();
                 });
                 document.addEventListener('keydown', (e) => {
                     if (e.code === 'KeyW') keys.w = true; if (e.code === 'KeyA') keys.a = true;
@@ -548,6 +606,8 @@
                     if (e.code === 'KeyS') keys.s = false; if (e.code === 'KeyD') keys.d = false;
                 });
 
+                setupTouch();
+
                 let lastTime = performance.now();
                 scene.registerBeforeRender(() => {
                     const now = performance.now();
@@ -555,33 +615,51 @@
                     lastTime = now;
 
                     const ty = getTerrainHeight(camera.position.x, camera.position.z);
-                    camera.position.y = Math.max(ty, 0.5) + 2;
+                    const controlsOn = (playerState.isPointerLocked || isTouch) && !gameState.isPaused && !gameState.isDead;
 
-                    if (fireLight) fireLight.intensity = 1.4 + Math.sin(now * 0.01) * 0.3 + Math.random() * 0.15;
-
-                    if (playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead) {
+                    if (controlsOn) {
                         camera.rotation = new BABYLON.Vector3(playerState.pitch, playerState.yaw, 0);
                         const fwd = camera.getDirection(new BABYLON.Vector3(0, 0, 1)); fwd.y = 0; fwd.normalize();
                         const rgt = camera.getDirection(new BABYLON.Vector3(1, 0, 0)); rgt.y = 0; rgt.normalize();
+                        let ix = 0, iz = 0;
+                        if (keys.w) iz += 1; if (keys.s) iz -= 1; if (keys.d) ix += 1; if (keys.a) ix -= 1;
+                        if (touchMove.active) { ix += touchMove.x; iz += -touchMove.y; }
                         const mv = new BABYLON.Vector3(0, 0, 0);
-                        if (keys.w) mv.addInPlace(fwd);
-                        if (keys.s) mv.subtractInPlace(fwd);
-                        if (keys.d) mv.addInPlace(rgt);
-                        if (keys.a) mv.subtractInPlace(rgt);
-                        if (mv.lengthSquared() > 0) { mv.normalize(); camera.position.addInPlace(mv.scale(playerState.speed * delta)); }
+                        mv.addInPlace(fwd.scale(iz)); mv.addInPlace(rgt.scale(ix));
+                        const spd = Math.min(1, mv.length());
+                        if (spd > 0.01) { mv.normalize(); camera.position.addInPlace(mv.scale(playerState.speed * delta)); }
                         camera.position.x = Math.max(-190, Math.min(190, camera.position.x));
                         camera.position.z = Math.max(-190, Math.min(190, camera.position.z));
+                        // head-bob realistis
+                        const bob = Math.sin(now * 0.012) * 0.07 * spd;
+                        camera.position.y = Math.max(ty, 0.5) + 2 + bob;
                         const deg = (Math.atan2(fwd.x, fwd.z) * 180 / Math.PI + 360) % 360;
                         let t = 'N';
                         if (deg >= 315 || deg < 45) t = 'N'; else if (deg >= 45 && deg < 135) t = 'E'; else if (deg >= 135 && deg < 225) t = 'S'; else t = 'W';
                         document.getElementById('compass').textContent = t;
+                    } else {
+                        camera.position.y = Math.max(ty, 0.5) + 2;
                     }
+
+                    if (fireLight) fireLight.intensity = 1.4 + Math.sin(now * 0.01) * 0.3 + Math.random() * 0.15;
 
                     animals.forEach(animal => {
                         const t = now * 0.001, sp = animal.metadata.speed;
                         animal.position.x += Math.sin(t * sp + animal.position.z) * 0.02;
                         animal.position.z += Math.cos(t * sp + animal.position.x) * 0.02;
                         animal.position.y = getTerrainHeight(animal.position.x, animal.position.z) + 0.5;
+                    });
+
+                    // AI Serigala: kejar & gigit pemain
+                    wolves.forEach(w => {
+                        const toP = camera.position.subtract(w.position); toP.y = 0;
+                        const d = toP.length();
+                        if (d > 1.6 && d < 90) { toP.normalize(); w.position.addInPlace(toP.scale(6.5 * delta)); w.rotation.y = Math.atan2(toP.x, toP.z); }
+                        if (d < 2.6) {
+                            gameState.health = Math.max(0, gameState.health - 12 * delta);
+                            if (now - lastBite > 3000) { lastBite = now; showNotification('🐺 Serigala menggigitmu! Tembak balik [3]!'); }
+                        }
+                        w.position.y = getTerrainHeight(w.position.x, w.position.z) + 0.5;
                     });
 
                     skybox.position.copyFrom(camera.position);
@@ -592,7 +670,7 @@
                     try { scene.render(); } catch (err) { if (!renderErr) { renderErr = true; showPersistentError('Render error: ' + err.message); } }
                 });
                 window.addEventListener('resize', () => engine.resize());
-                console.log('✅ Dunia stylized siap!');
+                console.log('✅ Dunia siap!');
                 return true;
             } catch (error) {
                 showPersistentError('Gagal memuat dunia 3D: ' + error.message);
@@ -600,9 +678,85 @@
             }
         }
 
-        // ============================================
-        // SISTEM ALAT
-        // ============================================
+        // ===== TOUCH / JOYSTICK =====
+        function setupTouch() {
+            if (!isTouch) return;
+            document.getElementById('touchControls').style.display = 'block';
+            const joyBase = document.getElementById('joyBase'), joyKnob = document.getElementById('joyKnob');
+            const lookArea = document.getElementById('lookArea');
+
+            joyBase.addEventListener('touchstart', (e) => {
+                const t = e.changedTouches[0];
+                touchMove.active = true; touchMove.id = t.identifier;
+                touchMove.ox = t.clientX; touchMove.oy = t.clientY;
+                e.preventDefault();
+            }, { passive: false });
+            window.addEventListener('touchmove', (e) => {
+                for (const t of e.changedTouches) {
+                    if (t.identifier === touchMove.id) {
+                        let dx = (t.clientX - touchMove.ox) / 50, dy = (t.clientY - touchMove.oy) / 50;
+                        const len = Math.sqrt(dx * dx + dy * dy);
+                        if (len > 1) { dx /= len; dy /= len; }
+                        touchMove.x = dx; touchMove.y = dy;
+                        joyKnob.style.transform = 'translate(' + (dx * 30) + 'px,' + (dy * 30) + 'px)';
+                    }
+                    if (t.identifier === lookTouch.id) {
+                        const dx = t.clientX - lookTouch.lx, dy = t.clientY - lookTouch.ly;
+                        lookTouch.lx = t.clientX; lookTouch.ly = t.clientY;
+                        playerState.yaw += dx * 0.005 * mouseSignX;
+                        playerState.pitch += dy * 0.005 * mouseSignY;
+                        playerState.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, playerState.pitch));
+                    }
+                }
+            }, { passive: false });
+            window.addEventListener('touchend', (e) => {
+                for (const t of e.changedTouches) {
+                    if (t.identifier === touchMove.id) {
+                        touchMove.active = false; touchMove.x = 0; touchMove.y = 0;
+                        joyKnob.style.transform = 'translate(0,0)';
+                    }
+                    if (t.identifier === lookTouch.id) lookTouch.id = null;
+                }
+            });
+            lookArea.addEventListener('touchstart', (e) => {
+                const t = e.changedTouches[0];
+                lookTouch.id = t.identifier; lookTouch.lx = t.clientX; lookTouch.ly = t.clientY;
+                e.preventDefault();
+            }, { passive: false });
+
+            document.getElementById('tbUse').addEventListener('click', () => useTool());
+            document.getElementById('tbPause').addEventListener('click', () => { gameState.isPaused = true; pauseMenu.style.display = 'flex'; });
+            document.getElementById('tbAxe').addEventListener('click', () => selectTool('axe'));
+            document.getElementById('tbHook').addEventListener('click', () => selectTool('hook'));
+            document.getElementById('tbRifle').addEventListener('click', () => selectTool('rifle'));
+            document.getElementById('tbEat').addEventListener('click', eatMeat);
+            document.getElementById('tbDrink').addEventListener('click', drinkWater);
+            document.getElementById('tbSleep').addEventListener('click', sleep);
+        }
+
+        // ===== SERIGALA =====
+        function spawnWolf() {
+            if (!scene) return;
+            const p = randomGrassPos();
+            const wolf = new BABYLON.TransformNode('wolf', scene);
+            const body = BABYLON.MeshBuilder.CreateBox('wbody', { width: 1, height: 0.7, depth: 2.2 }, scene);
+            body.parent = wolf;
+            const head = BABYLON.MeshBuilder.CreateBox('whead', { width: 0.6, height: 0.6, depth: 0.7 }, scene);
+            head.position = new BABYLON.Vector3(0, 0.25, 1.2); head.parent = wolf;
+            const wm = stdMat('wolfMat' + wolves.length, new BABYLON.Color3(0.18, 0.18, 0.24), new BABYLON.Color3(0.05, 0.05, 0.08));
+            [body, head].forEach(m => m.material = wm);
+            wolf.position = new BABYLON.Vector3(p.x, p.y + 0.5, p.z);
+            wolf.metadata = { type: 'wolf', hp: 2 };
+            wolf.getChildMeshes().forEach(m => m.metadata = { type: 'wolf', root: wolf });
+            addCasters(wolf);
+            wolves.push(wolf);
+        }
+        function clearWolves() {
+            wolves.forEach(w => { w.getChildMeshes().slice().forEach(m => m.dispose()); w.dispose(); });
+            wolves = [];
+        }
+
+        // ===== ALAT =====
         function useTool() {
             if (!scene) return;
             const pick = scene.pick(scene.getEngine().getRenderWidth() / 2, scene.getEngine().getRenderHeight() / 2);
@@ -617,10 +771,10 @@
 
             const meta = pick.pickedMesh.metadata;
             if (!meta) return;
-            if (pick.distance > 45) { showNotification('🚶 Terlalu jauh! Mendekatlah.'); return; }
+            if (pick.distance > 45) { showNotification('🚶 Terlalu jauh!'); return; }
 
             if (meta.type === 'tree') {
-                if (gameState.currentTool !== 'axe') { showNotification('🪓 Gunakan Kapak [1] untuk menebang!'); return; }
+                if (gameState.currentTool !== 'axe') { showNotification('🪓 Gunakan Kapak [1]!'); return; }
                 const root = meta.root;
                 root.metadata.hp--;
                 gainResource('wood', 1);
@@ -633,7 +787,7 @@
                     root.dispose();
                 }
             } else if (meta.type === 'rock') {
-                if (gameState.currentTool !== 'axe') { showNotification('🪓 Gunakan Kapak [1] untuk memecah batu!'); return; }
+                if (gameState.currentTool !== 'axe') { showNotification('🪓 Gunakan Kapak [1]!'); return; }
                 const rock = meta.root;
                 rock.metadata.hp--;
                 gainResource('stone', 1);
@@ -645,14 +799,31 @@
                     rock.dispose();
                 }
             } else if (meta.type === 'animal') {
-                if (gameState.currentTool !== 'rifle') { showNotification('🔫 Gunakan Senapan [3] untuk berburu!'); return; }
+                if (gameState.currentTool !== 'rifle') { showNotification('🔫 Gunakan Senapan [3]!'); return; }
                 gameState.totalHunts++;
                 gainResource('meat', 2);
-                showNotification('🎯 Buruan kena! +2 🥩 (Total: ' + gameState.totalHunts + ')');
+                showNotification('🎯 Buruan kena! +2 🥩');
                 const p = randomGrassPos();
                 meta.root.position = new BABYLON.Vector3(p.x, p.y + 0.5, p.z);
                 const q = gameState.quests[1];
                 if (!q.completed) { q.current = Math.min(q.target, gameState.totalHunts); if (q.current >= q.target) completeQuest(1); }
+                updateUI();
+            } else if (meta.type === 'wolf') {
+                if (gameState.currentTool !== 'rifle') { showNotification('🔫 Serigala butuh SENAPAN [3]!'); return; }
+                const root = meta.root;
+                root.metadata.hp--;
+                if (root.metadata.hp <= 0) {
+                    gameState.wolvesKilled++;
+                    gameState.totalHunts++;
+                    gainResource('meat', 3);
+                    gameState.score += 50;
+                    showNotification('🐺 Serigala dikalahkan! +3 🥩 +50 skor');
+                    root.getChildMeshes().slice().forEach(m => m.dispose());
+                    root.dispose();
+                    wolves = wolves.filter(w => w !== root);
+                    const q = gameState.quests[3];
+                    if (!q.completed) { q.current = gameState.wolvesKilled; if (q.current >= q.target) completeQuest(3); }
+                } else showNotification('🔫 DOR! Serigala terluka!');
                 updateUI();
             }
         }
@@ -666,21 +837,20 @@
             }
             updateUI();
         }
-
         function completeQuest(i) {
             const q = gameState.quests[i];
             if (q.completed) return;
             q.completed = true;
             gameState.score += 250;
             showNotification('✅ MISI SELESAI: ' + q.title + '! +250 skor');
-            if (i < 2) gameState.currentQuest = i + 1;
-            if (i === 2) { gameState.score += 500; showNotification('🗼 MERCUSUAR MENYALA! BANTUAN DATANG — KAMU MENANG! 🎉'); }
+            if (i === 4) { gameState.score += 500; showNotification('🗼 MERCUSUAR MENYALA! BANTUAN DATANG — KAMU MENANG! 🎉'); }
+            const idx = gameState.quests.findIndex(x => !x.completed);
+            gameState.currentQuest = idx === -1 ? gameState.quests.length - 1 : idx;
+            if (idx === -1 && !gameState.allDone) { gameState.allDone = true; showNotification('🎉 SEMUA MISI SELESAI! Legenda Pulau Vespera!'); }
             updateUI();
         }
 
-        // ============================================
-        // UI & LOGIC
-        // ============================================
+        // ===== UI & LOGIC =====
         const mainMenu = document.getElementById('mainMenu'), hud = document.getElementById('hud'),
             loadingScreen = document.getElementById('loadingScreen'), pauseMenu = document.getElementById('pauseMenu'),
             deathScreen = document.getElementById('deathScreen'), notification = document.getElementById('notification');
@@ -690,6 +860,16 @@
             document.getElementById('startGameBtn').addEventListener('click', startGame);
             document.getElementById('loadGameBtn').addEventListener('click', async () => { if (await loadGameFromSupabase()) startGame(); });
             document.getElementById('resumeBtn').addEventListener('click', () => { pauseMenu.style.display = 'none'; gameState.isPaused = false; });
+            document.getElementById('invertXBtn').addEventListener('click', () => {
+                mouseSignX *= -1;
+                localStorage.setItem('h3d_invX', mouseSignX === 1 ? '1' : '0');
+                showNotification('🔄 Mouse X dibalik!');
+            });
+            document.getElementById('invertYBtn').addEventListener('click', () => {
+                mouseSignY *= -1;
+                localStorage.setItem('h3d_invY', mouseSignY === 1 ? '1' : '0');
+                showNotification('🔄 Mouse Y dibalik!');
+            });
             document.getElementById('saveBtn').addEventListener('click', saveGameToSupabase);
             document.getElementById('quitBtn').addEventListener('click', async () => { await saveGameToSupabase(); await submitScore(); location.reload(); });
             document.getElementById('respawnBtn').addEventListener('click', () => {
@@ -698,6 +878,15 @@
             });
             document.getElementById('mainMenuBtn').addEventListener('click', () => location.reload());
             document.getElementById('refreshLeaderboardBtn').addEventListener('click', fetchLeaderboard);
+        }
+
+        function playIntro() {
+            const msgs = [
+                '📖 Tahun 1899 — Kapalmu karam di Pulau Vespera yang terkutuk...',
+                '📖 Kabut ungu turun saat senja... dan serigala berbisik dalam gelap.',
+                '📜 MISI: Lengkapi 5 misi & nyalakan Mercusuar Kuno untuk kabur!'
+            ];
+            msgs.forEach((m, i) => setTimeout(() => showNotification(m), 1500 + i * 4200));
         }
 
         function startGame() {
@@ -716,8 +905,9 @@
                         if (!babylonInitialized) babylonInitialized = initBabylonJS();
                         loadingScreen.style.display = 'none';
                         hud.style.display = 'block';
-                        document.getElementById('hintBox').style.display = 'block';
+                        if (!isTouch) document.getElementById('hintBox').style.display = 'block';
                         showNotification('🌍 Selamat datang, ' + name + '!');
+                        playIntro();
                         startGameLoop();
                     }, 300);
                 }
@@ -736,25 +926,46 @@
                     gameState.energy = Math.max(0, gameState.energy - 0.5);
                     if (gameState.energy < 30) gameState.health = Math.max(0, gameState.health - 0.5);
                 }
-                const q3 = gameState.quests[2];
-                if (!q3.completed && scene) {
+                const q5 = gameState.quests[4];
+                if (!q5.completed && scene) {
                     for (const lh of lighthouses) {
                         const d = Math.sqrt(Math.pow(camera.position.x - lh.x, 2) + Math.pow(camera.position.z - lh.z, 2));
-                        if (d < 12) { q3.current = 1; completeQuest(2); break; }
+                        if (d < 12) { q5.current = 1; completeQuest(4); break; }
                     }
                 }
                 if (gameState.health <= 0 && !gameState.isDead) triggerDeath();
                 updateUI();
             }, 2000);
 
+            // Siklus waktu
             setInterval(() => {
                 if (gameState.isPaused || gameState.isDead) return;
                 const phases = ['dawn', 'day', 'dusk', 'night'];
                 const ni = (phases.indexOf(gameState.timeOfDay) + 1) % 4;
                 gameState.timeOfDay = phases[ni];
-                if (ni === 0) { gameState.day++; gameState.score += 100; showNotification('🌅 Hari ' + gameState.day + ' dimulai!'); }
+                if (ni === 0) {
+                    gameState.day++;
+                    gameState.score += 100;
+                    showNotification('🌅 Hari ' + gameState.day + ' dimulai!');
+                    clearWolves();
+                    const q3 = gameState.quests[2];
+                    if (!q3.completed) { q3.current = gameState.day; if (gameState.day >= q3.target) completeQuest(2); }
+                }
+                if (ni === 3) showNotification('🌙 Malam turun... serigala berkeliaran!');
                 updateEnvironment(); updateUI();
             }, 30000);
+
+            // Event acak (tantangan beragam)
+            setInterval(() => {
+                if (gameState.isPaused || gameState.isDead) return;
+                const r = Math.random();
+                if (r < 0.25) { gameState.weather = 'rain'; showNotification('🌧️ Hujan deras turun...'); }
+                else if (r < 0.45) { gameState.weather = 'fog'; showNotification('🌫️ Kabut tebal menyelimuti pulau...'); }
+                else if (r < 0.65) { gameState.weather = 'clear'; showNotification('☀️ Langit kembali cerah.'); }
+                else if (wolves.length < 4) { spawnWolf(); spawnWolf(); showNotification('🐺 Kawanan serigala mendekat! Waspadalah!'); }
+                else showNotification('🌬️ Angin dingin bertiup dari pegunungan...');
+                updateEnvironment();
+            }, 45000);
 
             document.addEventListener('keydown', (e) => {
                 if (gameState.isDead) return;
@@ -776,8 +987,8 @@
         function updateEnvironment() {
             if (!scene) return;
             const S = {
-                'dawn': { sky: new BABYLON.Color4(1, 0.6, 0.5, 1), fog: new BABYLON.Color3(1, 0.7, 0.6), si: 0.9, sc: new BABYLON.Color3(1, 0.7, 0.5), fd: 0.003 },
-                'day': { sky: new BABYLON.Color4(0.55, 0.75, 0.95, 1), fog: new BABYLON.Color3(0.8, 0.8, 0.95), si: 1.1, sc: new BABYLON.Color3(1, 0.9, 0.75), fd: 0.0025 },
+                'dawn': { sky: new BABYLON.Color4(1, 0.62, 0.5, 1), fog: new BABYLON.Color3(1, 0.72, 0.6), si: 0.9, sc: new BABYLON.Color3(1, 0.72, 0.5), fd: 0.003 },
+                'day': { sky: new BABYLON.Color4(0.55, 0.75, 0.95, 1), fog: new BABYLON.Color3(0.8, 0.82, 0.95), si: 1.15, sc: new BABYLON.Color3(1, 0.9, 0.75), fd: 0.0025 },
                 'dusk': { sky: new BABYLON.Color4(0.95, 0.5, 0.6, 1), fog: new BABYLON.Color3(0.9, 0.6, 0.7), si: 0.8, sc: new BABYLON.Color3(1, 0.6, 0.45), fd: 0.0035 },
                 'night': { sky: new BABYLON.Color4(0.08, 0.06, 0.2, 1), fog: new BABYLON.Color3(0.15, 0.1, 0.25), si: 0.25, sc: new BABYLON.Color3(0.4, 0.35, 0.6), fd: 0.006 }
             }[gameState.timeOfDay];
@@ -788,8 +999,9 @@
         }
 
         async function triggerDeath() {
-            gameState.isDead = true; document.exitPointerLock();
-            const m = ['Pulau ini telah menelanmu...', 'Kegelapan malam telah menang...', 'Kelaparan merenggut nyawamu...', 'Kehausan telah mengakhiri perjalananmu...'];
+            gameState.isDead = true;
+            if (!isTouch) document.exitPointerLock();
+            const m = ['Pulau ini telah menelanmu...', 'Serigala merayakan malam ini...', 'Kelaparan merenggut nyawamu...', 'Kehausan telah mengakhiri perjalananmu...'];
             document.getElementById('deathMessage').textContent = m[Math.floor(Math.random() * m.length)];
             deathScreen.style.display = 'flex';
             await submitScore();
@@ -799,11 +1011,11 @@
             gameState.currentTool = t;
             document.querySelectorAll('.tool-slot').forEach(s => s.classList.toggle('active', s.dataset.tool === t));
             const names = { axe: '🪓 KAPAK', hook: '🪝 GANCO', rifle: '🔫 SENAPAN' };
-            showNotification('Alat: ' + names[t] + ' — Klik kiri untuk memakai!');
+            showNotification('Alat: ' + names[t]);
         }
         function eatMeat() {
             if (gameState.meat > 0) { gameState.meat--; gameState.hunger = Math.min(100, gameState.hunger + 30); showNotification('🥩 Lapar pulih!'); updateUI(); }
-            else showNotification('❌ Tidak ada daging! Berburu/memancing dulu.');
+            else showNotification('❌ Tidak ada daging!');
         }
         function drinkWater() { gameState.thirst = Math.min(100, gameState.thirst + 40); showNotification('💧 Segar!'); updateUI(); }
         function sleep() {
@@ -825,8 +1037,8 @@
             document.getElementById('dayCount').textContent = 'Hari ' + gameState.day;
             const q = gameState.quests[gameState.currentQuest];
             if (q) {
-                if (q.completed && gameState.currentQuest === 2) {
-                    document.getElementById('questObjective').textContent = '🎉 Semua misi selesai! Bertahan & nikmati pulau!';
+                if (gameState.allDone) {
+                    document.getElementById('questObjective').textContent = '🎉 Semua misi selesai! Legenda Vespera!';
                     document.getElementById('questProgress').textContent = 'Selesai ✅';
                 } else {
                     document.getElementById('questObjective').textContent = q.objective;
@@ -838,7 +1050,7 @@
         function showNotification(t) {
             if (!notification) return;
             notification.textContent = t; notification.style.display = 'block';
-            setTimeout(() => { notification.style.display = 'none'; }, 3000);
+            setTimeout(() => { notification.style.display = 'none'; }, 3500);
         }
 
         function mainInit() {
@@ -848,6 +1060,7 @@
             setTimeout(fetchLeaderboard, 500);
             updateUI();
             setInterval(fetchLeaderboard, 60000);
+            if (isTouch) document.getElementById('hintBox').innerHTML = '📱 Joystick kiri = gerak • Area kanan = lihat • Tombol = aksi';
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mainInit);
         else mainInit();
