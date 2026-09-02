@@ -180,6 +180,11 @@
 
         function lerp(a, b, t) { return a + (b - a) * t; }
 
+        // Helper kerucut yang kompatibel SEMUA versi Babylon
+        function createCone(name, height, diameterBottom, tessellation, sc) {
+            return BABYLON.MeshBuilder.CreateCylinder(name, { height: height, diameterTop: 0, diameterBottom: diameterBottom, tessellation: tessellation }, sc);
+        }
+
         const SUPABASE_URL = 'https://mlsibwihfzehqcdawrdh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sc2lid2loZnplaHFjZGF3cmRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTcwNTEsImV4cCI6MjEwMzY5MzA1MX0.faKWNZqTLE6nEH6nPw0L4uFepTy6ZvqrZDy2BaHcWxs';
         let supabaseClient = null, supabaseConnected = false;
@@ -266,7 +271,7 @@
         }
 
         // ============================================
-        // BABYLON WORLD - STYLIZED SUNSET (referensi gambar)
+        // BABYLON WORLD - STYLIZED SUNSET
         // ============================================
         let engine, scene, camera, sunLight, water, skybox, fireLight, animals = [], lighthouses = [];
         const playerState = { yaw: 0, pitch: 0, speed: 15, isPointerLocked: false };
@@ -291,11 +296,11 @@
             }
             return new BABYLON.Vector3(0, getTerrainHeight(0, 0), 0);
         }
-        function stdMat(name, color, emissive, spec) {
+        function stdMat(name, color, emissive) {
             const m = new BABYLON.StandardMaterial(name, scene);
             m.diffuseColor = color;
             m.emissiveColor = emissive || BABYLON.Color3.Black();
-            m.specularColor = spec !== undefined ? spec : new BABYLON.Color3(0.05, 0.05, 0.05);
+            m.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
             return m;
         }
 
@@ -307,7 +312,6 @@
                 engine = new BABYLON.Engine(canvas, true);
                 scene = new BABYLON.Scene(engine);
 
-                // Langit sunset pink/ungu
                 scene.clearColor = new BABYLON.Color4(0.95, 0.6, 0.8, 1);
                 scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
                 scene.fogDensity = 0.0025;
@@ -317,7 +321,6 @@
                 camera.minZ = 0.1; camera.maxZ = 1200; camera.fov = 1.15; camera.inertia = 0;
                 camera.inputs.clear();
 
-                // Cahaya hangat sunset
                 const hemi = new BABYLON.HemisphericLight('hemi', new BABYLON.Vector3(0, 1, 0), scene);
                 hemi.intensity = 0.9;
                 hemi.diffuse = new BABYLON.Color3(1, 0.85, 0.95);
@@ -326,7 +329,7 @@
                 sunLight.intensity = 1.1;
                 sunLight.diffuse = new BABYLON.Color3(1, 0.75, 0.6);
 
-                // Terrain warna vibrant
+                // Terrain vibrant
                 const terrain = BABYLON.MeshBuilder.CreateGround('terrain', { width: 400, height: 400, subdivisions: 100, updatable: true }, scene);
                 const pos = terrain.getVerticesData(BABYLON.VertexBuffer.PositionKind);
                 const cols = [];
@@ -334,10 +337,10 @@
                     const x = pos[i], z = pos[i + 2], h = getTerrainHeight(x, z);
                     pos[i + 1] = h;
                     let r, g, b;
-                    if (h < 1) { r = 0.95; g = 0.82; b = 0.45; }        // pasir keemasan
-                    else if (h < 3) { r = 0.25; g = 0.75; b = 0.30; }   // rumput hijau cerah
+                    if (h < 1) { r = 0.95; g = 0.82; b = 0.45; }
+                    else if (h < 3) { r = 0.25; g = 0.75; b = 0.30; }
                     else if (h < 5) { r = 0.18; g = 0.6; b = 0.25; }
-                    else { r = 0.65; g = 0.5; b = 0.7; }                // batu keunguan
+                    else { r = 0.65; g = 0.5; b = 0.7; }
                     cols.push(r, g, b, 1);
                 }
                 terrain.setVerticesData(BABYLON.VertexBuffer.PositionKind, pos);
@@ -345,7 +348,7 @@
                 terrain.createNormals(true);
                 terrain.material = stdMat('terrainMat', new BABYLON.Color3(1, 1, 1));
 
-                // Danau berkilau
+                // Danau
                 water = BABYLON.MeshBuilder.CreateGround('water', { width: 220, height: 220, subdivisions: 16, updatable: true }, scene);
                 water.position = new BABYLON.Vector3(80, 0.6, 80);
                 const waterMat = new BABYLON.StandardMaterial('waterMat', scene);
@@ -364,7 +367,7 @@
                     } catch (e) { }
                 });
 
-                // Skybox gradient sunset + matahari bersinar
+                // Skybox sunset + matahari
                 skybox = BABYLON.MeshBuilder.CreateBox('skyBox', { size: 900 }, scene);
                 const skyMat = new BABYLON.StandardMaterial('skyMat', scene);
                 skyMat.backFaceCulling = false; skyMat.disableLighting = true;
@@ -402,7 +405,7 @@
                     c.material = cloudMat;
                 }
 
-                // Gunung pink/ungu di cakrawala
+                // Gunung pink
                 const mtnColors = [new BABYLON.Color3(0.75, 0.45, 0.65), new BABYLON.Color3(0.6, 0.4, 0.7), new BABYLON.Color3(0.85, 0.55, 0.6)];
                 for (let i = 0; i < 10; i++) {
                     const ang = (i / 10) * Math.PI * 2;
@@ -412,7 +415,7 @@
                     m.material = stdMat('mtnMat' + i, mtnColors[i % 3], mtnColors[i % 3].scale(0.25));
                 }
 
-                // Pohon warna-warni (bulat & kerucut)
+                // Pohon warna-warni
                 const foliageColors = ['#ff7eb0', '#5aa7ff', '#ffc94d', '#ff9440', '#4ecb5a', '#b07de0', '#ff6a6a'];
                 const trunkMat = stdMat('trunkMat', new BABYLON.Color3(0.45, 0.28, 0.15));
                 for (let i = 0; i < 60; i++) {
@@ -449,11 +452,11 @@
                     rock.metadata = { type: 'rock', hp: 3, root: rock };
                 }
 
-                // Rumput & bunga berwarna (instances = ringan)
+                // Rumput & bunga berwarna (instances ringan) - pakai createCone helper
                 const tuftColors = ['#ffe14d', '#ff5a4d', '#ff8ad4', '#7dff6a', '#ffa64d'];
                 tuftColors.forEach((hex, ci) => {
                     const col = BABYLON.Color3.FromHexString(hex);
-                    const base = BABYLON.MeshBuilder.CreateCone('tuft' + ci, { height: 0.7, diameterBottom: 0.2, tessellation: 4 }, scene);
+                    const base = createCone('tuft' + ci, 0.7, 0.2, 4, scene);
                     base.material = stdMat('tuftMat' + ci, col, col.scale(0.5));
                     base.position = randomGrassPos();
                     for (let k = 0; k < 50; k++) {
@@ -465,7 +468,7 @@
                     }
                 });
 
-                // Perkemahan: tenda + api unggun + perahu
+                // Perkemahan
                 const campY = getTerrainHeight(-4, -4);
                 const tent = BABYLON.MeshBuilder.CreateCylinder('tent', { height: 2.5, diameterTop: 0, diameterBottom: 4, tessellation: 4 }, scene);
                 tent.position = new BABYLON.Vector3(-5, campY + 1.2, -4);
@@ -475,7 +478,7 @@
                 const firePit = BABYLON.MeshBuilder.CreateCylinder('firePit', { height: 0.3, diameter: 1.4, tessellation: 8 }, scene);
                 firePit.position = new BABYLON.Vector3(2, campY + 0.15, 1);
                 firePit.material = stdMat('pitMat', new BABYLON.Color3(0.2, 0.2, 0.2));
-                const flame = BABYLON.MeshBuilder.CreateCone('flame', { height: 1.4, diameterBottom: 0.8, tessellation: 6 }, scene);
+                const flame = createCone('flame', 1.4, 0.8, 6, scene);
                 flame.position = new BABYLON.Vector3(2, campY + 0.9, 1);
                 const flameMat = new BABYLON.StandardMaterial('flameMat', scene);
                 flameMat.disableLighting = true;
@@ -491,7 +494,7 @@
                 boat.rotation.y = 0.6;
                 boat.material = stdMat('boatMat', new BABYLON.Color3(0.5, 0.3, 0.15));
 
-                // Mercusuar (tujuan akhir)
+                // Mercusuar
                 [[150, 150], [-160, 80], [60, -160]].forEach((lc, i) => {
                     const y = getTerrainHeight(lc[0], lc[1]);
                     const tower = BABYLON.MeshBuilder.CreateCylinder('lh' + i, { height: 16, diameterTop: 3, diameterBottom: 4.5, tessellation: 10 }, scene);
@@ -529,8 +532,8 @@
                 });
                 document.addEventListener('mousemove', (e) => {
                     if (!playerState.isPointerLocked) return;
-                    playerState.yaw -= e.movementX * 0.002;      // mouse kanan = lihat kanan
-                    playerState.pitch += e.movementY * 0.002;    // mouse atas = lihat atas
+                    playerState.yaw -= e.movementX * 0.002;
+                    playerState.pitch += e.movementY * 0.002;
                     playerState.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, playerState.pitch));
                 });
                 document.addEventListener('mousedown', (e) => {
@@ -554,12 +557,10 @@
                     const ty = getTerrainHeight(camera.position.x, camera.position.z);
                     camera.position.y = Math.max(ty, 0.5) + 2;
 
-                    // Api unggun berkedip
                     if (fireLight) fireLight.intensity = 1.4 + Math.sin(now * 0.01) * 0.3 + Math.random() * 0.15;
 
                     if (playerState.isPointerLocked && !gameState.isPaused && !gameState.isDead) {
                         camera.rotation = new BABYLON.Vector3(playerState.pitch, playerState.yaw, 0);
-                        // Gerak mengikuti arah pandang kamera (presisi, tidak terbalik)
                         const fwd = camera.getDirection(new BABYLON.Vector3(0, 0, 1)); fwd.y = 0; fwd.normalize();
                         const rgt = camera.getDirection(new BABYLON.Vector3(1, 0, 0)); rgt.y = 0; rgt.normalize();
                         const mv = new BABYLON.Vector3(0, 0, 0);
@@ -600,14 +601,13 @@
         }
 
         // ============================================
-        // SISTEM ALAT (Kapak / Ganco / Senapan)
+        // SISTEM ALAT
         // ============================================
         function useTool() {
             if (!scene) return;
             const pick = scene.pick(scene.getEngine().getRenderWidth() / 2, scene.getEngine().getRenderHeight() / 2);
             if (!pick.hit || !pick.pickedMesh) return;
 
-            // Memancing
             if (pick.pickedMesh === water) {
                 if (gameState.currentTool !== 'hook') { showNotification('🪝 Gunakan Ganco [2] untuk memancing!'); return; }
                 if (Math.random() < 0.7) { gainResource('meat', 1); showNotification('🐟 Dapat ikan! +1 🥩'); }
@@ -617,7 +617,7 @@
 
             const meta = pick.pickedMesh.metadata;
             if (!meta) return;
-            if (pick.distance > 45) { showNotification(' Terlalu jauh! Mendekatlah.'); return; }
+            if (pick.distance > 45) { showNotification('🚶 Terlalu jauh! Mendekatlah.'); return; }
 
             if (meta.type === 'tree') {
                 if (gameState.currentTool !== 'axe') { showNotification('🪓 Gunakan Kapak [1] untuk menebang!'); return; }
@@ -736,7 +736,6 @@
                     gameState.energy = Math.max(0, gameState.energy - 0.5);
                     if (gameState.energy < 30) gameState.health = Math.max(0, gameState.health - 0.5);
                 }
-                // Cek mercusuar (misi 3)
                 const q3 = gameState.quests[2];
                 if (!q3.completed && scene) {
                     for (const lh of lighthouses) {
